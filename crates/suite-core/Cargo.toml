@@ -1,0 +1,16 @@
+[package]
+name = "suite-core"
+description = "Show engine shared by the Presenter, Lighting, Audio and Visualizer modules"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+# The core is deliberately std-only so the protocol code (Art-Net, sACN,
+# Enttec, OSC, A&H MIDI-over-TCP) and the AI command parser can be built and
+# unit-tested anywhere. Serde derives are switched on by the desktop app.
+[features]
+default = []
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { workspace = true, optional = true }

@@ -1,0 +1,31 @@
+[package]
+name = "production-suite"
+description = "Presenter + Lighting + Audio + Visualizer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "production_suite_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[features]
+default = ["usb-dmx", "audio"]
+# Enttec DMX USB Pro / Open DMX over a serial port.
+usb-dmx = ["dep:serialport"]
+# Audio device discovery (CoreAudio / WASAPI / ASIO via cpal).
+audio = ["dep:cpal"]
+
+[dependencies]
+suite-core = { path = "../../../crates/suite-core", features = ["serde"] }
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serialport = { version = "4", optional = true }
+cpal = { version = "0.15", optional = true }
+socket2 = { version = "0.5", features = ["all"] }
