@@ -60,9 +60,15 @@ fn status_of(state: &AppState) -> MixerStatus {
     }
 }
 
+/// Async + spawn_blocking: a TCP connect to an A&H desk that is off or on the
+/// wrong IP waits up to 3 s, and a sync command would freeze the window meanwhile.
 #[tauri::command]
-pub fn mixer_connect(state: State<'_, Arc<AppState>>, config: MixerConfig) -> Result<MixerStatus, String> {
-    let conn = MixerConnection::connect(&config).map_err(|e| format!("Couldn't reach {}: {e}", config.ip))?;
+pub async fn mixer_connect(state: State<'_, Arc<AppState>>, config: MixerConfig) -> Result<MixerStatus, String> {
+    let cfg = config.clone();
+    let conn = tauri::async_runtime::spawn_blocking(move || MixerConnection::connect(&cfg))
+        .await
+        .map_err(|e| e.to_string())?
+        .map_err(|e| format!("Couldn't reach {}: {e}", config.ip))?;
     *state.mixer.lock().unwrap() = Some(conn);
     // Remember it in the show so it reconnects next time.
     let mut show = state.show();

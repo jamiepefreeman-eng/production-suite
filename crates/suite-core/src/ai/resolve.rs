@@ -75,7 +75,7 @@ pub fn resolve(show: &Show, intents: &[Intent], base: &Look) -> Resolution {
                             continue;
                         }
                         let already_on = res.look.fixtures.get(id).and_then(|s| s.intensity).is_some()
-                            || base.fixtures.get(id).and_then(|s| s.intensity).map_or(false, |i| i > 0.0);
+                            || base.fixtures.get(id).and_then(|s| s.intensity).is_some_and(|i| i > 0.0);
                         let st = res.look.state_mut(*id);
                         st.color = Some(rgb);
                         if !already_on {
@@ -118,7 +118,7 @@ pub fn resolve(show: &Show, intents: &[Intent], base: &Look) -> Resolution {
                     };
                     let mut missing = 0;
                     for id in &ids {
-                        if !show.fixture_profile(*id).map_or(false, |p| p.is_moving()) {
+                        if !show.fixture_profile(*id).is_some_and(|p| p.is_moving()) {
                             continue;
                         }
                         match preset.values.iter().find(|v| v.fixture == *id) {

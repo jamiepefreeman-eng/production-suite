@@ -7,7 +7,7 @@
 //! **Open DMX USB**: a bare FTDI chip. The host has to produce the DMX signal
 //! itself: 250 kbaud, 8 data bits, 2 stop bits, no parity, then for every
 //! frame a BREAK (>= 92 µs), a MARK-AFTER-BREAK (>= 12 µs), then start code 0
-//! + 512 slots. Desktop OS scheduling makes this jittery, so treat it as
+//! and 512 slots. Desktop OS scheduling makes this jittery, so treat it as
 //! best-effort. The serial driver lives in the desktop app
 //! (`apps/desktop/src-tauri/src/usb_dmx.rs`).
 

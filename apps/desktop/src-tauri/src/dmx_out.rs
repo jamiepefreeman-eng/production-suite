@@ -52,9 +52,9 @@ pub fn rebuild_if_needed(state: &AppState) {
 }
 
 #[derive(Serialize, Clone)]
-struct VizFrame<'a> {
-    source: &'a str,
-    fixtures: Vec<FixtureVisual>,
+pub(crate) struct VizFrame<'a> {
+    pub source: &'a str,
+    pub fixtures: Vec<FixtureVisual>,
 }
 
 pub fn spawn_loop(state: Arc<AppState>, app: AppHandle) {
@@ -77,7 +77,7 @@ pub fn spawn_loop(state: Arc<AppState>, app: AppHandle) {
                     }
                 }
 
-                if n % VIZ_EVERY_N_FRAMES == 0 {
+                if n.is_multiple_of(VIZ_EVERY_N_FRAMES) {
                     let source = state.viz_source.lock().unwrap().clone();
                     let engine = state.engine.lock().unwrap();
                     let (label, visuals) = match source {

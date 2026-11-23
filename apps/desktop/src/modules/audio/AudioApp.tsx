@@ -143,6 +143,7 @@ function Strip({ ch, main }: { ch?: number; main?: boolean }) {
   return (
     <div className={`strip ${main ? "main" : ""}`}>
       <div className="strip-label">{main ? "Main" : ch}</div>
+      <div className="vfader-wrap">
       <input
         type="range"
         className="vfader"
@@ -156,6 +157,7 @@ function Strip({ ch, main }: { ch?: number; main?: boolean }) {
           void send({ type: "mixer", command: main ? { type: "main_fader", level: v } : { type: "fader", channel: ch!, level: v } });
         }}
       />
+      </div>
       {!main && (
         <button
           className={muted ? "danger on" : ""}

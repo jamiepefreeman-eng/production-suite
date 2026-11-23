@@ -5,6 +5,7 @@
 //!   but desktop scheduling causes occasional flicker. On macOS the FTDI VCP
 //!   driver must expose it as /dev/cu.usbserial-XXXX.
 
+#[cfg(not(feature = "usb-dmx"))]
 use suite_core::dmx::DmxSink;
 
 #[cfg(feature = "usb-dmx")]
@@ -38,7 +39,7 @@ mod imp {
             format!("Open DMX {}", self.name)
         }
         fn send(&mut self, _u: u16, data: &[u8]) -> io::Result<()> {
-            let e = |e: serialport::Error| io::Error::new(io::ErrorKind::Other, e);
+            let e = |e: serialport::Error| io::Error::other(e);
             self.port.set_break().map_err(e)?;
             spin(Duration::from_micros(enttec::OPEN_DMX_BREAK_US));
             self.port.clear_break().map_err(e)?;

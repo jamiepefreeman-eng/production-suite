@@ -78,7 +78,7 @@ impl MixerConnection {
     /// Call often (e.g. every 50 ms): renews keep-alives and drains feedback.
     pub fn tick(&mut self) -> io::Result<Vec<MixerFeedback>> {
         if let Some((pkt, every)) = self.profile.keepalive() {
-            if self.last_keepalive.map_or(true, |t| t.elapsed() >= every) {
+            if self.last_keepalive.is_none_or(|t| t.elapsed() >= every) {
                 self.raw(&pkt)?;
                 self.last_keepalive = Some(Instant::now());
             }

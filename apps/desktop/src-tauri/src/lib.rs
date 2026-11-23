@@ -10,6 +10,8 @@
 mod ai_client;
 mod audio;
 mod commands;
+#[cfg(test)]
+mod contract_tests;
 mod dmx_out;
 mod mixer_link;
 mod settings;

@@ -9,11 +9,16 @@ so keep changes complete, tested and explained in plain language.
 
 ```bash
 cargo test -p suite-core                 # engine tests — run after any Rust change in crates/
+cargo test -p production-suite           # regenerates src/shared/contract.generated.ts (Rust JSON samples)
 cd apps/desktop && npm install
 npm run tauri dev                        # run the app
-npm run typecheck                        # TS check
-cargo clippy --workspace                 # lint
+npm run typecheck                        # TS check — also proves types.ts matches the Rust JSON
+cargo clippy --workspace --all-targets   # lint (currently zero warnings — keep it that way)
 ```
+
+Linux (CI / cloud sessions) needs: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
+librsvg2-dev libudev-dev libasound2-dev libssl-dev libxdo-dev`. Headless smoke test: `Xvfb :99 &` then
+`DISPLAY=:99 npm run tauri dev`, drive with `xdotool`, screenshot with `import -window root`.
 
 ## Architecture rules
 
@@ -28,12 +33,19 @@ cargo clippy --workspace                 # lint
 4. **Types are mirrored by hand** in `src/shared/types.ts`. Serde uses `tag = "type"` +
    `rename_all = "snake_case"` (e.g. `XAir` → `"x_air"`, `ArtNet` → `"art_net"`). Update both sides together.
    Tauri converts Rust snake_case command args to camelCase in JS (`force_llm` → `forceLlm`).
+   When you add or change a type that crosses the bridge, add a sample to
+   `src-tauri/src/contract_tests.rs`, run `cargo test -p production-suite`, then `npm run typecheck`.
+   Never hand-edit `contract.generated.ts`.
 5. **The AI never writes DMX.** LLM output is `ParseOutput { intents, unknown }`, validated by
    `ai::resolve` against the patch. Keep the offline parser (`ai/parser.rs`) working for every phrase
    type the LLM prompt advertises — services must work with no internet.
 6. **Real-time threads** (`dmx` 40 Hz, `mixer` 20 Hz, `viz-in`) must never block on the UI. Hold the
    engine mutex briefly; never across I/O or `.await`.
-7. Window-creating Tauri commands must be `async` (sync ones can deadlock on Windows).
+7. Window-creating Tauri commands must be `async` (sync ones can deadlock on Windows). Sync commands run
+   on the UI thread, so anything that can wait on the network or hardware (mixer connect, audio device
+   scan) is `async` + `tauri::async_runtime::spawn_blocking`.
+8. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
+   (use the rotated `.vfader-wrap` pattern), check caniuse for newer features.
 
 ## Hardware / protocol facts used
 
@@ -52,9 +64,13 @@ cargo clippy --workspace                 # lint
 
 ## Roadmap (suggested order)
 
-1. **First real build on Mac + Windows**: `npm install`, `tauri dev`, fix any compile errors in
-   `src-tauri` (it was written without network access, so it hasn't been compiled yet; `suite-core` has).
-   Generate a `Cargo.lock` and `package-lock.json`.
+1. **First real build on Mac + Windows** — *Linux done; waiting on the owner's Mac + PC run (FIRST-RUN.md).*
+   Done: whole workspace compiles with zero warnings, `Cargo.lock` + `package-lock.json` committed,
+   Rust↔TS contract test added, app launched and clicked through on Linux (all four modules, slide →
+   cue → Visualizer, offline scene builder, mixer connect failure). Fixed: faders rendered flat,
+   mixer connect / audio scan froze the window. Remaining: owner reports results from macOS and
+   Windows (macOS-only / Windows-only code paths are not compiled on Linux: CoreAudio/WASAPI in cpal,
+   serial port enumeration, window placement on second displays).
 2. **Fixture library**: import Lightkey/QLC+/Open Fixture Library (OFL JSON) profiles; profile editor UI;
    patch "add fixture" dialog; import the Lightkey patch TSV.
 3. **Lighting engine**: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),

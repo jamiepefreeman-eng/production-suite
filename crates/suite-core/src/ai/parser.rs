@@ -59,7 +59,7 @@ fn best_match(tokens: &[String], used: &[bool], candidates: &[(String, Vec<Strin
     let mut best: Option<(String, usize, usize)> = None;
     for (canonical, phrase) in candidates {
         if let Some(start) = find_phrase(tokens, used, phrase) {
-            if best.as_ref().map_or(true, |b| phrase.len() > b.2) {
+            if best.as_ref().is_none_or(|b| phrase.len() > b.2) {
                 best = Some((canonical.clone(), start, phrase.len()));
             }
         }
@@ -113,7 +113,7 @@ fn split_clauses(text: &str) -> Vec<String> {
     // Sentence breaks act like commas; decimals ("0.5") are left alone.
     let norm = normalize(text).replace(". ", ", ");
     let norm = norm.trim_end_matches('.');
-    norm.split(|c| c == ',' || c == ';')
+    norm.split([',', ';'])
         .flat_map(|part| part.split(" and ").map(|s| s.to_string()).collect::<Vec<_>>())
         .flat_map(|part| part.split(" then ").map(|s| s.to_string()).collect::<Vec<_>>())
         .map(|s| s.trim().to_string())

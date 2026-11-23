@@ -73,7 +73,9 @@ fn enumerate() -> Result<Vec<AudioDevice>, String> {
     Err("built without the audio feature".into())
 }
 
+/// Async + spawn_blocking: probing every device (CoreAudio / WASAPI / ASIO) can
+/// take a second or more, which would freeze the window in a sync command.
 #[tauri::command]
-pub fn list_audio_devices() -> Result<Vec<AudioDevice>, String> {
-    enumerate()
+pub async fn list_audio_devices() -> Result<Vec<AudioDevice>, String> {
+    tauri::async_runtime::spawn_blocking(enumerate).await.map_err(|e| e.to_string())?
 }

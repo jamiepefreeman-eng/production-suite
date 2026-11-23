@@ -3,6 +3,7 @@
 //! 1. Try the offline parser. If it understood everything, done — no network.
 //! 2. Otherwise (or when `force_llm`), ask Claude with the show's vocabulary
 //!    and deserialize the JSON reply into the same intents.
+//!
 //! Either way the engine validates against the patch before anything moves.
 
 use crate::state::AppState;
@@ -13,7 +14,7 @@ use suite_core::ai::{self, prompt};
 use suite_core::engine::Command;
 use tauri::{AppHandle, State};
 
-const DEFAULT_MODEL: &str = "claude-sonnet-5-5";
+pub(crate) const DEFAULT_MODEL: &str = "claude-sonnet-5-5";
 const API_URL: &str = "https://api.anthropic.com/v1/messages";
 
 #[derive(Serialize, Clone)]
