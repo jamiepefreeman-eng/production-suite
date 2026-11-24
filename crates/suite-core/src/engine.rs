@@ -14,7 +14,34 @@ use crate::lighting::{render_look, Cue, FixtureState, Look, PanTilt, PositionPre
 use crate::mixer::MixerCommand;
 use crate::presenter::SlideTrigger;
 use crate::show::Show;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+
+/// Presenter layers besides the slide text, ProPresenter-style: each can be
+/// cleared on its own.
+#[derive(Debug, Clone, PartialEq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Layers {
+    /// Image / video from the media bin, shown behind the slide text
+    /// (replaces the theme background while set).
+    pub media: Option<u32>,
+    /// Audio from the media bin; the main window plays it.
+    pub audio: Option<u32>,
+    pub audio_loop: bool,
+    pub countdown: Option<Countdown>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Countdown {
+    pub label: String,
+    /// Wall-clock end time, so every window counts down to the same moment.
+    pub ends_at_unix_ms: u64,
+    pub show_on_audience: bool,
+}
+
+fn unix_ms() -> u64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0)
+}
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23,6 +50,14 @@ pub enum Command {
     // ── Presenter
     GoSlide { presentation: u32, slide: u32 },
     ClearSlide,
+    /// Background media layer (`None` clears it).
+    SetMedia { media: Option<u32> },
+    /// Audio layer (`None` stops it).
+    PlayAudio { audio: Option<u32>, looped: bool },
+    StartCountdown { label: String, seconds: u32, show_on_audience: bool },
+    ClearCountdown,
+    /// Slide, media, audio and countdown (not lighting).
+    ClearAll,
     // ── Lighting
     GoCue { cue: u32 },
     ReleaseCue,
@@ -54,6 +89,7 @@ pub enum Command {
 #[cfg_attr(feature = "serde", serde(tag = "type", rename_all = "snake_case"))]
 pub enum Event {
     ShowChanged,
+    LayersChanged { layers: Layers },
     SlideLive { presentation: u32, slide: u32, title: String, label: String, text: String },
     SlideCleared,
     CueFired { cue: u32, name: String },
@@ -93,6 +129,7 @@ pub struct Engine {
     playback: Look,
     active_cue: Option<u32>,
     live_slide: Option<(u32, u32)>,
+    layers: Layers,
     grand_master: f32,
     blackout: bool,
     fade: Option<Fade>,
@@ -107,6 +144,7 @@ impl Engine {
             playback: Look::default(),
             active_cue: None,
             live_slide: None,
+            layers: Layers::default(),
             grand_master: 1.0,
             blackout: false,
             fade: None,
@@ -122,6 +160,20 @@ impl Engine {
         self.live_slide
     }
 
+    pub fn layers(&self) -> &Layers {
+        &self.layers
+    }
+
+    fn media_ok(&self, id: Option<u32>, ev: &mut Vec<Event>) -> bool {
+        match id {
+            Some(id) if !self.show.media.iter().any(|m| m.id == id) => {
+                ev.push(warn(format!("No media #{id} in the bin")));
+                false
+            }
+            _ => true,
+        }
+    }
+
     pub fn last_output(&self) -> &DmxFrame {
         &self.last_output
     }
@@ -133,6 +185,34 @@ impl Engine {
             Command::ClearSlide => {
                 self.live_slide = None;
                 ev.push(Event::SlideCleared);
+            }
+            Command::SetMedia { media } => {
+                if self.media_ok(media, &mut ev) {
+                    self.layers.media = media;
+                    ev.push(Event::LayersChanged { layers: self.layers.clone() });
+                }
+            }
+            Command::PlayAudio { audio, looped } => {
+                if self.media_ok(audio, &mut ev) {
+                    self.layers.audio = audio;
+                    self.layers.audio_loop = looped;
+                    ev.push(Event::LayersChanged { layers: self.layers.clone() });
+                }
+            }
+            Command::StartCountdown { label, seconds, show_on_audience } => {
+                self.layers.countdown =
+                    Some(Countdown { label, ends_at_unix_ms: unix_ms() + seconds as u64 * 1000, show_on_audience });
+                ev.push(Event::LayersChanged { layers: self.layers.clone() });
+            }
+            Command::ClearCountdown => {
+                self.layers.countdown = None;
+                ev.push(Event::LayersChanged { layers: self.layers.clone() });
+            }
+            Command::ClearAll => {
+                self.live_slide = None;
+                self.layers = Layers::default();
+                ev.push(Event::SlideCleared);
+                ev.push(Event::LayersChanged { layers: self.layers.clone() });
             }
             Command::GoCue { cue } => self.go_cue(cue, now, &mut ev),
             Command::ReleaseCue => {
@@ -333,6 +413,33 @@ impl Engine {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn layers_set_and_clear_all() {
+        let mut show = crate::demo::demo_show();
+        show.media.push(crate::presenter::MediaItem {
+            id: 7,
+            name: "Loop".into(),
+            path: "/x/loop.mp4".into(),
+            kind: crate::presenter::MediaKind::Video,
+        });
+        let mut e = super::Engine::new(show);
+        let now = std::time::Instant::now();
+        e.handle(super::Command::SetMedia { media: Some(7) }, now);
+        assert_eq!(e.layers().media, Some(7));
+        // Unknown media is refused with a warning, not applied.
+        let ev = e.handle(super::Command::SetMedia { media: Some(99) }, now);
+        assert_eq!(e.layers().media, Some(7));
+        assert!(ev.iter().any(|x| matches!(x, super::Event::Log { .. })));
+        e.handle(super::Command::StartCountdown { label: "Service".into(), seconds: 300, show_on_audience: true }, now);
+        let c = e.layers().countdown.clone().unwrap();
+        assert!(c.ends_at_unix_ms > super::unix_ms() + 299_000);
+        e.handle(super::Command::GoSlide { presentation: 1, slide: 1 }, now);
+        let ev = e.handle(super::Command::ClearAll, now);
+        assert!(ev.iter().any(|x| matches!(x, super::Event::SlideCleared)));
+        assert_eq!(e.layers(), &super::Layers::default());
+        assert_eq!(e.live_slide(), None);
+    }
+
     use super::*;
     use crate::demo::demo_show;
 

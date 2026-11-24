@@ -21,7 +21,8 @@ audio = ["dep:cpal"]
 
 [dependencies]
 suite-core = { path = "../../../crates/suite-core", features = ["serde"] }
-tauri = { version = "2", features = [] }
+# protocol-asset: lets slides show image/video files from the media bin.
+tauri = { version = "2", features = ["protocol-asset"] }
 tauri-plugin-dialog = "2"
 serde = { workspace = true }
 serde_json = { workspace = true }

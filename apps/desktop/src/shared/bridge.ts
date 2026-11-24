@@ -2,7 +2,7 @@
 // never `@tauri-apps/api` directly — keeps them portable (e.g. a future web
 // remote that speaks the same commands over WebSocket).
 
-import { invoke } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { ask, open as openDialog, save as saveDialog } from "@tauri-apps/plugin-dialog";
 import type * as T from "./types";
@@ -45,6 +45,23 @@ export const api = {
 export async function confirmDialog(message: string): Promise<boolean> {
   if (!inTauri) return window.confirm(message);
   return ask(message, { kind: "warning" });
+}
+
+/** URL a webview can load for a local media file (Tauri asset protocol). */
+export function mediaUrl(path: string): string {
+  return inTauri ? convertFileSrc(path) : path;
+}
+
+/** Pick media files for the bin. Returns absolute paths. */
+export async function pickMediaFiles(): Promise<string[]> {
+  const r = await openDialog({
+    multiple: true,
+    filters: [
+      { name: "Media", extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "mp4", "mov", "m4v", "webm", "mp3", "wav", "m4a", "aac", "ogg", "flac"] },
+    ],
+  });
+  if (!r) return [];
+  return Array.isArray(r) ? r : [r];
 }
 
 /** Native open/save pickers for show files (".json"; macOS rejects dotted extensions like "show.json"). */

@@ -45,6 +45,8 @@ pub struct ChannelDef {
 pub enum FixtureKind {
     Wash,
     Par,
+    /// Small floor/wall uplighter (LED puck).
+    Puck,
     Strip,
     MovingSpot,
     MovingWash,

@@ -3,7 +3,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { api, on } from "./bridge";
-import type { EngineEvent, Look, Show } from "./types";
+import type { EngineEvent, Layers, Look, Show } from "./types";
 
 export interface LiveSlide { presentation: number; slide: number; title: string; label: string; text: string }
 export interface LogEntry { t: number; level: "info" | "warn"; message: string }
@@ -14,6 +14,7 @@ export interface EngineView {
   activeCue: number | null;
   programmer: Look;
   blackout: boolean;
+  layers: Layers;
   lastScene: { applied: string[]; issues: string[]; unknown: string[] } | null;
   log: LogEntry[];
   error: string | null;
@@ -25,6 +26,7 @@ let state: EngineView = {
   activeCue: null,
   programmer: { fixtures: {} },
   blackout: false,
+  layers: { media: null, audio: null, audio_loop: false, countdown: null },
   lastScene: null,
   log: [],
   error: null,
@@ -69,6 +71,9 @@ function handle(ev: EngineEvent) {
     case "show_changed":
       // Our own edits echo back here; other windows' edits are picked up once we're idle.
       if (Date.now() - lastLocalEdit > QUIET_MS) void refreshShow();
+      break;
+    case "layers_changed":
+      set({ layers: ev.layers });
       break;
     case "slide_live":
       set({ live: ev });
@@ -116,7 +121,7 @@ function start() {
         const sl = p?.slides.find((x) => x.id === sid);
         if (p && sl) live = { presentation: pid, slide: sid, title: p.title, label: sl.label, text: sl.text };
       }
-      set({ activeCue: s.active_cue, programmer: s.programmer, live });
+      set({ activeCue: s.active_cue, programmer: s.programmer, layers: s.layers, live });
     })
     .catch(() => {});
   on("engine-event", handle);

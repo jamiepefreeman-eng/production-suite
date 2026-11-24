@@ -47,7 +47,7 @@ export const show: T.Show = {
       "manufacturer": "MDAC",
       "model": "Curtain",
       "mode": "Mode 1 (8ch)",
-      "kind": "strip",
+      "kind": "puck",
       "channels": [
         {
           "attr": "dimmer",
@@ -86,7 +86,7 @@ export const show: T.Show = {
       "color_wheel": [],
       "pan_range": 0.0,
       "tilt_range": 0.0,
-      "beam_angle": 120.0,
+      "beam_angle": 40.0,
       "needs_verification": false
     },
     {
@@ -343,11 +343,11 @@ export const show: T.Show = {
       "address": 17,
       "position": [
         -6.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -360,11 +360,11 @@ export const show: T.Show = {
       "address": 25,
       "position": [
         -5.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -377,11 +377,11 @@ export const show: T.Show = {
       "address": 33,
       "position": [
         -4.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -394,11 +394,11 @@ export const show: T.Show = {
       "address": 41,
       "position": [
         -3.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -411,11 +411,11 @@ export const show: T.Show = {
       "address": 49,
       "position": [
         -2.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -428,11 +428,11 @@ export const show: T.Show = {
       "address": 57,
       "position": [
         -1.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -445,11 +445,11 @@ export const show: T.Show = {
       "address": 65,
       "position": [
         0.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -462,11 +462,11 @@ export const show: T.Show = {
       "address": 73,
       "position": [
         1.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -479,11 +479,11 @@ export const show: T.Show = {
       "address": 81,
       "position": [
         2.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -496,11 +496,11 @@ export const show: T.Show = {
       "address": 89,
       "position": [
         3.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -513,11 +513,11 @@ export const show: T.Show = {
       "address": 97,
       "position": [
         4.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -530,11 +530,11 @@ export const show: T.Show = {
       "address": 105,
       "position": [
         5.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -547,11 +547,11 @@ export const show: T.Show = {
       "address": 113,
       "position": [
         6.0,
-        2.5,
-        -4.0
+        0.05,
+        -3.6
       ],
       "rotation": [
-        0.0,
+        -12.0,
         0.0,
         0.0
       ]
@@ -1624,7 +1624,7 @@ export const show: T.Show = {
           "triggers": []
         }
       ],
-      "theme": "Default"
+      "theme": "Worship"
     },
     {
       "id": 3,
@@ -1652,6 +1652,171 @@ export const show: T.Show = {
     2,
     3
   ],
+  "themes": [
+    {
+      "name": "Default",
+      "font": "Inter",
+      "size": 1.0,
+      "color": "#ffffff",
+      "bold": true,
+      "uppercase": false,
+      "shadow": true,
+      "position": "center",
+      "background_color": "#0b1020",
+      "background_media": null,
+      "dim": 0.0
+    },
+    {
+      "name": "Worship",
+      "font": "Helvetica Neue",
+      "size": 1.0,
+      "color": "#ffffff",
+      "bold": true,
+      "uppercase": true,
+      "shadow": true,
+      "position": "center",
+      "background_color": "#1a0b2e",
+      "background_media": null,
+      "dim": 0.0
+    },
+    {
+      "name": "Scripture",
+      "font": "Georgia",
+      "size": 0.85,
+      "color": "#ffffff",
+      "bold": false,
+      "uppercase": false,
+      "shadow": true,
+      "position": "center",
+      "background_color": "#14110d",
+      "background_media": null,
+      "dim": 0.0
+    },
+    {
+      "name": "Lower third",
+      "font": "Inter",
+      "size": 0.8,
+      "color": "#ffffff",
+      "bold": true,
+      "uppercase": false,
+      "shadow": true,
+      "position": "lower_third",
+      "background_color": "#00000000",
+      "background_media": null,
+      "dim": 0.0
+    },
+    {
+      "name": "t0",
+      "font": "Inter",
+      "size": 1.0,
+      "color": "#ffffff",
+      "bold": true,
+      "uppercase": false,
+      "shadow": true,
+      "position": "top",
+      "background_color": "#0b1020",
+      "background_media": 1,
+      "dim": 0.0
+    },
+    {
+      "name": "t1",
+      "font": "Inter",
+      "size": 1.0,
+      "color": "#ffffff",
+      "bold": true,
+      "uppercase": false,
+      "shadow": true,
+      "position": "bottom",
+      "background_color": "#0b1020",
+      "background_media": 1,
+      "dim": 0.0
+    }
+  ],
+  "media": [
+    {
+      "id": 1,
+      "name": "/m/bg.jpg",
+      "path": "/m/bg.jpg",
+      "kind": "image"
+    },
+    {
+      "id": 2,
+      "name": "/m/loop.mp4",
+      "path": "/m/loop.mp4",
+      "kind": "video"
+    },
+    {
+      "id": 3,
+      "name": "/m/walkin.mp3",
+      "path": "/m/walkin.mp3",
+      "kind": "audio"
+    }
+  ],
+  "scenery": [
+    {
+      "id": 1,
+      "name": "Back wall",
+      "kind": "wall",
+      "position": [
+        0.0,
+        0.0,
+        -4.0
+      ],
+      "size": [
+        13.5,
+        5.0,
+        0.15
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 10,
+      "name": "Wall",
+      "kind": "drape",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 11,
+      "name": "Wall",
+      "kind": "riser",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    }
+  ],
   "mixer": null
 };
 
@@ -1663,6 +1828,31 @@ export const commands: T.Command[] = [
   },
   {
     "type": "clear_slide"
+  },
+  {
+    "type": "set_media",
+    "media": 2
+  },
+  {
+    "type": "set_media",
+    "media": null
+  },
+  {
+    "type": "play_audio",
+    "audio": 3,
+    "looped": true
+  },
+  {
+    "type": "start_countdown",
+    "label": "Service",
+    "seconds": 300,
+    "show_on_audience": true
+  },
+  {
+    "type": "clear_countdown"
+  },
+  {
+    "type": "clear_all"
   },
   {
     "type": "go_cue",
@@ -1818,7 +2008,7 @@ export const commands: T.Command[] = [
           "manufacturer": "MDAC",
           "model": "Curtain",
           "mode": "Mode 1 (8ch)",
-          "kind": "strip",
+          "kind": "puck",
           "channels": [
             {
               "attr": "dimmer",
@@ -1857,7 +2047,7 @@ export const commands: T.Command[] = [
           "color_wheel": [],
           "pan_range": 0.0,
           "tilt_range": 0.0,
-          "beam_angle": 120.0,
+          "beam_angle": 40.0,
           "needs_verification": false
         },
         {
@@ -2114,11 +2304,11 @@ export const commands: T.Command[] = [
           "address": 17,
           "position": [
             -6.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2131,11 +2321,11 @@ export const commands: T.Command[] = [
           "address": 25,
           "position": [
             -5.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2148,11 +2338,11 @@ export const commands: T.Command[] = [
           "address": 33,
           "position": [
             -4.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2165,11 +2355,11 @@ export const commands: T.Command[] = [
           "address": 41,
           "position": [
             -3.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2182,11 +2372,11 @@ export const commands: T.Command[] = [
           "address": 49,
           "position": [
             -2.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2199,11 +2389,11 @@ export const commands: T.Command[] = [
           "address": 57,
           "position": [
             -1.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2216,11 +2406,11 @@ export const commands: T.Command[] = [
           "address": 65,
           "position": [
             0.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2233,11 +2423,11 @@ export const commands: T.Command[] = [
           "address": 73,
           "position": [
             1.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2250,11 +2440,11 @@ export const commands: T.Command[] = [
           "address": 81,
           "position": [
             2.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2267,11 +2457,11 @@ export const commands: T.Command[] = [
           "address": 89,
           "position": [
             3.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2284,11 +2474,11 @@ export const commands: T.Command[] = [
           "address": 97,
           "position": [
             4.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2301,11 +2491,11 @@ export const commands: T.Command[] = [
           "address": 105,
           "position": [
             5.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -2318,11 +2508,11 @@ export const commands: T.Command[] = [
           "address": 113,
           "position": [
             6.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3395,7 +3585,7 @@ export const commands: T.Command[] = [
               "triggers": []
             }
           ],
-          "theme": "Default"
+          "theme": "Worship"
         },
         {
           "id": 3,
@@ -3422,6 +3612,171 @@ export const commands: T.Command[] = [
         1,
         2,
         3
+      ],
+      "themes": [
+        {
+          "name": "Default",
+          "font": "Inter",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "center",
+          "background_color": "#0b1020",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "Worship",
+          "font": "Helvetica Neue",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": true,
+          "shadow": true,
+          "position": "center",
+          "background_color": "#1a0b2e",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "Scripture",
+          "font": "Georgia",
+          "size": 0.85,
+          "color": "#ffffff",
+          "bold": false,
+          "uppercase": false,
+          "shadow": true,
+          "position": "center",
+          "background_color": "#14110d",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "Lower third",
+          "font": "Inter",
+          "size": 0.8,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "lower_third",
+          "background_color": "#00000000",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "t0",
+          "font": "Inter",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "top",
+          "background_color": "#0b1020",
+          "background_media": 1,
+          "dim": 0.0
+        },
+        {
+          "name": "t1",
+          "font": "Inter",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "bottom",
+          "background_color": "#0b1020",
+          "background_media": 1,
+          "dim": 0.0
+        }
+      ],
+      "media": [
+        {
+          "id": 1,
+          "name": "/m/bg.jpg",
+          "path": "/m/bg.jpg",
+          "kind": "image"
+        },
+        {
+          "id": 2,
+          "name": "/m/loop.mp4",
+          "path": "/m/loop.mp4",
+          "kind": "video"
+        },
+        {
+          "id": 3,
+          "name": "/m/walkin.mp3",
+          "path": "/m/walkin.mp3",
+          "kind": "audio"
+        }
+      ],
+      "scenery": [
+        {
+          "id": 1,
+          "name": "Back wall",
+          "kind": "wall",
+          "position": [
+            0.0,
+            0.0,
+            -4.0
+          ],
+          "size": [
+            13.5,
+            5.0,
+            0.15
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 10,
+          "name": "Wall",
+          "kind": "drape",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 11,
+          "name": "Wall",
+          "kind": "riser",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        }
       ],
       "mixer": null
     }
@@ -3472,7 +3827,7 @@ export const commands: T.Command[] = [
           "manufacturer": "MDAC",
           "model": "Curtain",
           "mode": "Mode 1 (8ch)",
-          "kind": "strip",
+          "kind": "puck",
           "channels": [
             {
               "attr": "dimmer",
@@ -3511,7 +3866,7 @@ export const commands: T.Command[] = [
           "color_wheel": [],
           "pan_range": 0.0,
           "tilt_range": 0.0,
-          "beam_angle": 120.0,
+          "beam_angle": 40.0,
           "needs_verification": false
         },
         {
@@ -3768,11 +4123,11 @@ export const commands: T.Command[] = [
           "address": 17,
           "position": [
             -6.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3785,11 +4140,11 @@ export const commands: T.Command[] = [
           "address": 25,
           "position": [
             -5.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3802,11 +4157,11 @@ export const commands: T.Command[] = [
           "address": 33,
           "position": [
             -4.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3819,11 +4174,11 @@ export const commands: T.Command[] = [
           "address": 41,
           "position": [
             -3.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3836,11 +4191,11 @@ export const commands: T.Command[] = [
           "address": 49,
           "position": [
             -2.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3853,11 +4208,11 @@ export const commands: T.Command[] = [
           "address": 57,
           "position": [
             -1.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3870,11 +4225,11 @@ export const commands: T.Command[] = [
           "address": 65,
           "position": [
             0.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3887,11 +4242,11 @@ export const commands: T.Command[] = [
           "address": 73,
           "position": [
             1.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3904,11 +4259,11 @@ export const commands: T.Command[] = [
           "address": 81,
           "position": [
             2.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3921,11 +4276,11 @@ export const commands: T.Command[] = [
           "address": 89,
           "position": [
             3.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3938,11 +4293,11 @@ export const commands: T.Command[] = [
           "address": 97,
           "position": [
             4.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3955,11 +4310,11 @@ export const commands: T.Command[] = [
           "address": 105,
           "position": [
             5.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -3972,11 +4327,11 @@ export const commands: T.Command[] = [
           "address": 113,
           "position": [
             6.0,
-            2.5,
-            -4.0
+            0.05,
+            -3.6
           ],
           "rotation": [
-            0.0,
+            -12.0,
             0.0,
             0.0
           ]
@@ -5049,7 +5404,7 @@ export const commands: T.Command[] = [
               "triggers": []
             }
           ],
-          "theme": "Default"
+          "theme": "Worship"
         },
         {
           "id": 3,
@@ -5077,6 +5432,171 @@ export const commands: T.Command[] = [
         2,
         3
       ],
+      "themes": [
+        {
+          "name": "Default",
+          "font": "Inter",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "center",
+          "background_color": "#0b1020",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "Worship",
+          "font": "Helvetica Neue",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": true,
+          "shadow": true,
+          "position": "center",
+          "background_color": "#1a0b2e",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "Scripture",
+          "font": "Georgia",
+          "size": 0.85,
+          "color": "#ffffff",
+          "bold": false,
+          "uppercase": false,
+          "shadow": true,
+          "position": "center",
+          "background_color": "#14110d",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "Lower third",
+          "font": "Inter",
+          "size": 0.8,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "lower_third",
+          "background_color": "#00000000",
+          "background_media": null,
+          "dim": 0.0
+        },
+        {
+          "name": "t0",
+          "font": "Inter",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "top",
+          "background_color": "#0b1020",
+          "background_media": 1,
+          "dim": 0.0
+        },
+        {
+          "name": "t1",
+          "font": "Inter",
+          "size": 1.0,
+          "color": "#ffffff",
+          "bold": true,
+          "uppercase": false,
+          "shadow": true,
+          "position": "bottom",
+          "background_color": "#0b1020",
+          "background_media": 1,
+          "dim": 0.0
+        }
+      ],
+      "media": [
+        {
+          "id": 1,
+          "name": "/m/bg.jpg",
+          "path": "/m/bg.jpg",
+          "kind": "image"
+        },
+        {
+          "id": 2,
+          "name": "/m/loop.mp4",
+          "path": "/m/loop.mp4",
+          "kind": "video"
+        },
+        {
+          "id": 3,
+          "name": "/m/walkin.mp3",
+          "path": "/m/walkin.mp3",
+          "kind": "audio"
+        }
+      ],
+      "scenery": [
+        {
+          "id": 1,
+          "name": "Back wall",
+          "kind": "wall",
+          "position": [
+            0.0,
+            0.0,
+            -4.0
+          ],
+          "size": [
+            13.5,
+            5.0,
+            0.15
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 10,
+          "name": "Wall",
+          "kind": "drape",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 11,
+          "name": "Wall",
+          "kind": "riser",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        }
+      ],
       "mixer": null
     }
   }
@@ -5085,6 +5605,28 @@ export const commands: T.Command[] = [
 export const events: T.EngineEvent[] = [
   {
     "type": "show_changed"
+  },
+  {
+    "type": "layers_changed",
+    "layers": {
+      "media": 2,
+      "audio": 3,
+      "audio_loop": true,
+      "countdown": {
+        "label": "Service starts",
+        "ends_at_unix_ms": 1800000000000,
+        "show_on_audience": true
+      }
+    }
+  },
+  {
+    "type": "layers_changed",
+    "layers": {
+      "media": null,
+      "audio": null,
+      "audio_loop": false,
+      "countdown": null
+    }
   },
   {
     "type": "slide_live",
@@ -5617,6 +6159,16 @@ export const engineStatus: T.EngineStatus = {
         "pan": 0.5,
         "tilt": 0.25
       }
+    }
+  },
+  "layers": {
+    "media": 2,
+    "audio": 3,
+    "audio_loop": true,
+    "countdown": {
+      "label": "Service starts",
+      "ends_at_unix_ms": 1800000000000,
+      "show_on_audience": true
     }
   },
   "show_path": "/tmp/show.json"

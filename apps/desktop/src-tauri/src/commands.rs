@@ -29,6 +29,7 @@ pub struct EngineStatus {
     pub active_cue: Option<u32>,
     pub live_slide: Option<(u32, u32)>,
     pub programmer: Look,
+    pub layers: suite_core::engine::Layers,
     pub show_path: Option<PathBuf>,
 }
 
@@ -39,6 +40,7 @@ pub fn engine_status(state: S<'_>) -> EngineStatus {
         active_cue: e.active_cue(),
         live_slide: e.live_slide(),
         programmer: e.programmer.clone(),
+        layers: e.layers().clone(),
         show_path: state.show_path.lock().unwrap().clone(),
     }
 }

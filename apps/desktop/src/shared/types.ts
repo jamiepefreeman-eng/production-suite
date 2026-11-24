@@ -8,7 +8,7 @@ export type Attr =
   | "pan" | "pan_fine" | "tilt" | "tilt_fine" | "color_wheel" | "gobo" | "gobo_rotation"
   | "prism" | "focus" | "shutter" | "strobe" | "speed" | "control" | "unused";
 
-export type FixtureKind = "wash" | "par" | "strip" | "moving_spot" | "moving_wash" | "generic";
+export type FixtureKind = "wash" | "par" | "puck" | "strip" | "moving_spot" | "moving_wash" | "generic";
 
 export interface FixtureProfile {
   id: string;
@@ -111,6 +111,37 @@ export interface Presentation {
   theme: string;
 }
 
+export type MediaKind = "image" | "video" | "audio";
+export interface MediaItem { id: number; name: string; path: string; kind: MediaKind }
+export type TextPosition = "top" | "center" | "bottom" | "lower_third";
+export interface Theme {
+  name: string;
+  font: string;
+  size: number;
+  color: string;
+  bold: boolean;
+  uppercase: boolean;
+  shadow: boolean;
+  position: TextPosition;
+  background_color: string;
+  background_media: number | null;
+  dim: number;
+}
+export type SceneryKind = "wall" | "drape" | "riser";
+export interface Scenery {
+  id: number;
+  name: string;
+  kind: SceneryKind;
+  /** Centre of the bottom face, metres. */
+  position: [number, number, number];
+  /** Width, height, thickness (m). */
+  size: [number, number, number];
+  rotation: [number, number, number];
+  color: string;
+}
+export interface Countdown { label: string; ends_at_unix_ms: number; show_on_audience: boolean }
+export interface Layers { media: number | null; audio: number | null; audio_loop: boolean; countdown: Countdown | null }
+
 export interface Show {
   name: string;
   stage: { width: number; depth: number; trim_height: number };
@@ -122,6 +153,9 @@ export interface Show {
   dmx_outputs: DmxOutputConfig[];
   presentations: Presentation[];
   playlist: number[];
+  themes: Theme[];
+  media: MediaItem[];
+  scenery: Scenery[];
   mixer: MixerConfig | null;
 }
 
@@ -137,6 +171,11 @@ export interface ParseOutput { intents: Intent[]; unknown: string[] }
 export type Command =
   | { type: "go_slide"; presentation: number; slide: number }
   | { type: "clear_slide" }
+  | { type: "set_media"; media: number | null }
+  | { type: "play_audio"; audio: number | null; looped: boolean }
+  | { type: "start_countdown"; label: string; seconds: number; show_on_audience: boolean }
+  | { type: "clear_countdown" }
+  | { type: "clear_all" }
   | { type: "go_cue"; cue: number }
   | { type: "release_cue" }
   | { type: "blackout"; on: boolean }
@@ -155,6 +194,7 @@ export type Command =
 
 export type EngineEvent =
   | { type: "show_changed" }
+  | { type: "layers_changed"; layers: Layers }
   | { type: "slide_live"; presentation: number; slide: number; title: string; label: string; text: string }
   | { type: "slide_cleared" }
   | { type: "cue_fired"; cue: number; name: string }
@@ -169,6 +209,7 @@ export interface EngineStatus {
   active_cue: number | null;
   live_slide: [number, number] | null;
   programmer: Look;
+  layers: Layers;
   show_path: string | null;
 }
 

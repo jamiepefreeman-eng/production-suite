@@ -189,8 +189,8 @@ function StagePlan({
 }) {
   const { width, depth } = show.stage;
   // Front-of-house fixtures can sit beyond the stage edge: fit everything.
-  const xs = show.fixtures.map((f) => f.position[0]);
-  const zs = show.fixtures.map((f) => f.position[2]);
+  const xs = [...show.fixtures.map((f) => f.position[0]), ...show.scenery.flatMap((s) => [s.position[0] - s.size[0] / 2, s.position[0] + s.size[0] / 2])];
+  const zs = [...show.fixtures.map((f) => f.position[2]), ...show.scenery.map((s) => s.position[2])];
   const minX = Math.min(-width / 2, ...xs) - 0.8;
   const maxX = Math.max(width / 2, ...xs) + 0.8;
   const minZ = Math.min(-depth / 2, ...zs) - 0.8;
@@ -206,6 +206,29 @@ function StagePlan({
       >
         <span>Stage</span>
       </div>
+      {show.scenery.map((s) => {
+        // Top-down footprint: width along its own X, thickness along Z, turned by its Y rotation.
+        const w = (s.size[0] / (maxX - minX)) * 100;
+        const t = Math.max(0.12, s.size[2]) / (maxZ - minZ) * 100;
+        return (
+          <div
+            key={`sc-${s.id}`}
+            className={`lk-scenery ${s.kind}`}
+            title={s.name}
+            style={{
+              left: `${px(s.position[0]) - w / 2}%`,
+              top: `${pz(s.position[2]) - t / 2}%`,
+              width: `${w}%`,
+              height: `${t}%`,
+              minHeight: 4,
+              background: s.color,
+              transform: `rotate(${-s.rotation[1]}deg)`,
+            }}
+          >
+            <span>{s.name}</span>
+          </div>
+        );
+      })}
       <div className="lk-plan-audience" style={{ top: `${pz(depth / 2)}%` }}>
         Audience
       </div>

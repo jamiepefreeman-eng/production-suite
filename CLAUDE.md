@@ -64,7 +64,15 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    letters). Don't bypass this with direct `replace_show` sends. Fixture-id map keys arrive from JS as
    strings; `Look.fixtures` uses `u32_keys` to accept them (Tauri reads args from a borrowed Value).
    Never use `window.confirm/alert` (unreliable in desktop webviews): use `confirmDialog` from bridge.
-9. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
+   Number inputs that format their value must keep the typed text while focused (see `NumField` in
+   VisualizerApp) — re-formatting on each keystroke swallows decimal points.
+9. **Presenter rendering**: every slide (thumbnail, Live/Next preview, audience/stream output) goes through
+   `modules/presenter/render.tsx` `SlideRender` with the presentation's `Theme` and the media layer, so the
+   operator sees exactly what the room sees. Sizes use container units (`cqh`) of `.render` — never pad
+   `.render` itself (cqh measures its content box). Layers (media, audio, countdown) live in the engine
+   (`engine::Layers`, `LayersChanged`); audio plays only in the main window (`shared/AudioLayer.tsx`).
+   Media files are referenced by absolute path and loaded via the Tauri asset protocol (`mediaUrl`).
+10. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
    (use the rotated `.vfader-wrap` pattern), check caniuse for newer features.
 
 ## Hardware / protocol facts used
@@ -90,6 +98,10 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 - [ ] X32 / X Air processing scalings on a real desk (tested against `tools/fake_x32.py` and the
       community OSC protocol document only); X Air HPF/EQ address map assumed identical to X32
 - [ ] Gate acts as a gate only when the desk's gate mode is GATE (mode isn't set by the app)
+- [ ] Video backgrounds (mp4/mov) via the asset protocol on macOS WKWebView and Windows WebView2 —
+      Linux WebKitGTK can't stream video from the asset protocol (media error 4), so untested here.
+      Images and audio-file playback paths are the same mechanism.
+- [ ] Media paths are absolute: a show file moved to another computer needs the media at the same paths
 
 ## Roadmap (suggested order)
 
@@ -104,6 +116,11 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    *v0.2.0:* ProPresenter-style Presenter (library + service playlist, slide editor, group colours,
    live/next), Lightkey-style Lighting (stage plan with live colours, inspector, cue tiles), Audio
    console with X32/X Air HPF, 4-band EQ, gate and compressor incl. desk read-back.
+   *v0.3.0:* Presenter: whole service in one view, themes (font/size/colour/position/background
+   colour/image/video/dim), media bin + media layer, audio layer (main window, fades), countdown timers
+   (audience + stage), layered clears (F1 all, F2 slide, F3 media, F5 audio), Reflow editor. Visualizer:
+   scenery (walls/drapes/risers) with real spotlights per fixture, puck fixture kind, "Shown as" per
+   profile; Lighting plan draws scenery.
 2. **Fixture library**: import Lightkey/QLC+/Open Fixture Library (OFL JSON) profiles; profile editor UI;
    patch "add fixture" dialog; import the Lightkey patch TSV.
 3. **Lighting engine**: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),

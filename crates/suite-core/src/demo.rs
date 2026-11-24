@@ -7,7 +7,8 @@ use crate::dmx::DmxOutputConfig;
 use crate::lighting::*;
 use crate::presenter::{parse_lyrics, Presentation, PresentationKind, Slide, SlideTrigger};
 use crate::mixer::MixerCommand;
-use crate::show::{Show, StageConfig};
+use crate::presenter::{TextPosition, Theme};
+use crate::show::{Scenery, SceneryKind, Show, StageConfig};
 
 fn ch(attr: Attr) -> ChannelDef {
     ChannelDef { attr, default: 0 }
@@ -39,7 +40,8 @@ pub fn profiles() -> Vec<FixtureProfile> {
             manufacturer: "MDAC".into(),
             model: "Curtain".into(),
             mode: "Mode 1 (8ch)".into(),
-            kind: FixtureKind::Strip,
+            // Floor puck up-lighting the back wall (no panel of its own).
+            kind: FixtureKind::Puck,
             // From the Lightkey user profile: dimmer, R, G, B, ch5-8 unassigned.
             channels: vec![
                 ch(Attr::Dimmer),
@@ -55,7 +57,7 @@ pub fn profiles() -> Vec<FixtureProfile> {
             color_wheel: vec![],
             pan_range: 0.0,
             tilt_range: 0.0,
-            beam_angle: 120.0,
+            beam_angle: 40.0,
             needs_verification: false,
         },
         FixtureProfile {
@@ -139,11 +141,11 @@ pub fn demo_show() -> Show {
             add(format!("Front {}", i + 1), "adj-cob-cannon-wash-4ch", 4, [x, 5.0, 5.0], [-135.0, 0.0, 0.0], &mut fixtures)
         })
         .collect();
-    // Upstage: 13 MDAC curtains.
+    // Upstage: 13 MDAC curtain pucks on the floor, tilted back to wash up the back wall.
     let curtains: Vec<u32> = (0..13)
         .map(|i| {
             let x = -6.0 + i as f32 * 1.0;
-            add(format!("Curtain {}", i + 1), "mdac-curtain-8ch", 8, [x, 2.5, -4.0], [0.0, 0.0, 0.0], &mut fixtures)
+            add(format!("Curtain {}", i + 1), "mdac-curtain-8ch", 8, [x, 0.05, -3.6], [-12.0, 0.0, 0.0], &mut fixtures)
         })
         .collect();
     // Side walls.
@@ -235,6 +237,7 @@ pub fn demo_show() -> Show {
         4,
     );
     grace.ccli = Some("22025".into());
+    grace.theme = "Worship".into();
     if let Some(first) = grace.slides.first_mut() {
         first.triggers.push(SlideTrigger::LightingCue { cue: 2 });
     }
@@ -263,6 +266,41 @@ pub fn demo_show() -> Show {
         dmx_outputs: vec![DmxOutputConfig::Sacn { universe: 1, sacn_universe: 1, priority: 100, unicast_ip: None }],
         presentations: vec![welcome, grace, scripture],
         playlist: vec![1, 2, 3],
+        themes: vec![
+            Theme::default(),
+            Theme {
+                name: "Worship".into(),
+                font: "Helvetica Neue".into(),
+                uppercase: true,
+                background_color: "#1a0b2e".into(),
+                ..Theme::default()
+            },
+            Theme {
+                name: "Scripture".into(),
+                font: "Georgia".into(),
+                bold: false,
+                size: 0.85,
+                background_color: "#14110d".into(),
+                ..Theme::default()
+            },
+            Theme {
+                name: "Lower third".into(),
+                position: TextPosition::LowerThird,
+                size: 0.8,
+                background_color: "#00000000".into(),
+                ..Theme::default()
+            },
+        ],
+        media: vec![],
+        scenery: vec![Scenery {
+            id: 1,
+            name: "Back wall".into(),
+            kind: SceneryKind::Wall,
+            position: [0.0, 0.0, -4.0],
+            size: [13.5, 5.0, 0.15],
+            rotation: [0.0, 0.0, 0.0],
+            color: "#b9b4aa".into(),
+        }],
         mixer: None,
     }
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, inTauri, showFiles, type ModuleId } from "./shared/bridge";
 import { pushLog, send, useEngine } from "./shared/store";
 import { MODULES } from "./modules/registry";
+import AudioLayer from "./shared/AudioLayer";
 
 export default function App() {
   const [active, setActive] = useState<ModuleId>("presenter");
@@ -17,6 +18,12 @@ export default function App() {
         setActive(hit);
       }
       if (e.key === "Escape") void send({ type: "clear_slide" });
+      // ProPresenter's clear keys.
+      if (e.key === "F1") void send({ type: "clear_all" });
+      if (e.key === "F2") void send({ type: "clear_slide" });
+      if (e.key === "F3") void send({ type: "set_media", media: null });
+      if (e.key === "F5") void send({ type: "play_audio", audio: null, looped: false });
+      if (e.key.startsWith("F") && ["F1", "F2", "F3", "F5"].includes(e.key)) e.preventDefault();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -68,6 +75,7 @@ export default function App() {
         </nav>
 
         <div className="topbar-status">
+          <AudioLayer />
           <span className={`pill ${eng.live ? "live" : ""}`}>{eng.live ? `● ${eng.live.title} · ${eng.live.label}` : "No slide"}</span>
           <span className={`pill ${cueName ? "cue" : ""}`}>{cueName ? `Cue ${eng.activeCue} · ${cueName}` : "No cue"}</span>
         </div>
@@ -81,8 +89,8 @@ export default function App() {
           <button className={eng.blackout ? "danger on" : "danger"} onClick={() => send({ type: "blackout", on: !eng.blackout })}>
             {eng.blackout ? "BLACKOUT" : "Blackout"}
           </button>
-          <button className="clear" onClick={() => send({ type: "clear_slide" })} title="Esc">
-            Clear
+          <button className="clear" onClick={() => send({ type: "clear_all" })} title="Clear slide, media, audio and timer (F1). Esc / F2 clears just the slide.">
+            Clear All
           </button>
         </div>
       </header>

@@ -16,7 +16,9 @@ use crate::viz_input::VizSource;
 use crate::windows::MonitorInfo;
 use serde::Serialize;
 use suite_core::ai::intent::{Action, Intent, ParseOutput};
-use suite_core::engine::{Command, Event, LogLevel};
+use suite_core::engine::{Command, Countdown, Event, Layers, LogLevel};
+use suite_core::presenter::{MediaItem, MediaKind, TextPosition, Theme};
+use suite_core::show::{Scenery, SceneryKind};
 use suite_core::lighting::{FixtureState, FixtureVisual, Look, Rgb};
 use suite_core::mixer::connection::MixerFeedback;
 use suite_core::mixer::{ChannelParam, ChannelUpdate, EqType, MixerCommand, MixerConfig, MixerKind};
@@ -32,7 +34,26 @@ impl Out {
 
 #[test]
 fn write_typescript_contract() {
-    let show = suite_core::demo::demo_show();
+    let mut show = suite_core::demo::demo_show();
+    // Exercise every variant the demo doesn't use.
+    for (i, (kind, path)) in [(MediaKind::Image, "/m/bg.jpg"), (MediaKind::Video, "/m/loop.mp4"), (MediaKind::Audio, "/m/walkin.mp3")]
+        .into_iter()
+        .enumerate()
+    {
+        show.media.push(MediaItem { id: i as u32 + 1, name: path.into(), path: path.into(), kind });
+    }
+    for (i, position) in [TextPosition::Top, TextPosition::Bottom].into_iter().enumerate() {
+        show.themes.push(Theme { name: format!("t{i}"), position, background_media: Some(1), ..Theme::default() });
+    }
+    for (i, kind) in [SceneryKind::Drape, SceneryKind::Riser].into_iter().enumerate() {
+        show.scenery.push(Scenery { id: 10 + i as u32, kind, ..Scenery::default() });
+    }
+    let layers = Layers {
+        media: Some(2),
+        audio: Some(3),
+        audio_loop: true,
+        countdown: Some(Countdown { label: "Service starts".into(), ends_at_unix_ms: 1_800_000_000_000, show_on_audience: true }),
+    };
     let mut look = Look::default();
     let state = FixtureState {
         intensity: Some(0.8),
@@ -95,6 +116,12 @@ fn write_typescript_contract() {
     let commands = vec![
         Command::GoSlide { presentation: 1, slide: 2 },
         Command::ClearSlide,
+        Command::SetMedia { media: Some(2) },
+        Command::SetMedia { media: None },
+        Command::PlayAudio { audio: Some(3), looped: true },
+        Command::StartCountdown { label: "Service".into(), seconds: 300, show_on_audience: true },
+        Command::ClearCountdown,
+        Command::ClearAll,
         Command::GoCue { cue: 1 },
         Command::ReleaseCue,
         Command::Blackout { on: true },
@@ -113,6 +140,8 @@ fn write_typescript_contract() {
     ];
     let events = vec![
         Event::ShowChanged,
+        Event::LayersChanged { layers: layers.clone() },
+        Event::LayersChanged { layers: Layers::default() },
         Event::SlideLive { presentation: 1, slide: 2, title: "Song".into(), label: "Verse 1".into(), text: "…".into() },
         Event::SlideCleared,
         Event::CueFired { cue: 1, name: "Walk-in".into() },
@@ -149,6 +178,7 @@ fn write_typescript_contract() {
             active_cue: Some(1),
             live_slide: Some((1, 2)),
             programmer: look,
+            layers,
             show_path: Some("/tmp/show.json".into()),
         },
     );
@@ -259,4 +289,18 @@ fn commands_round_trip_the_way_tauri_reads_them() {
     }
     let v = serde_json::to_value(&Event::ProgrammerChanged { look: look.clone() }).unwrap();
     assert_eq!(Event::deserialize(&v).unwrap(), Event::ProgrammerChanged { look });
+}
+
+/// Show files saved by older versions (no themes / media / scenery yet) must still open.
+#[test]
+fn old_show_files_still_open() {
+    let mut v = serde_json::to_value(suite_core::demo::demo_show()).unwrap();
+    let obj = v.as_object_mut().unwrap();
+    for k in ["themes", "media", "scenery"] {
+        obj.remove(k);
+    }
+    let show: suite_core::show::Show = serde_json::from_value(v).expect("v0.2 show file loads");
+    assert!(show.themes.is_empty() && show.media.is_empty() && show.scenery.is_empty());
+    // Presentations naming a theme that doesn't exist fall back to the built-in default.
+    assert_eq!(show.theme_for(&show.presentations[0]).name, "Default");
 }

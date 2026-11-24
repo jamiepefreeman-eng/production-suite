@@ -1466,6 +1466,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "http-range"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2149c4b4b83390c71fab669730347d578ec6bdf759f2160c581ad8b8819733b4"
+
+[[package]]
 name = "httparse"
 version = "1.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2859,7 +2865,7 @@ dependencies = [
 
 [[package]]
 name = "production-suite"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cpal",
  "reqwest 0.12.28",
@@ -3745,7 +3751,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "suite-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "serde",
 ]
@@ -3900,6 +3906,7 @@ dependencies = [
  "gtk",
  "heck 0.5.0",
  "http",
+ "http-range",
  "jni",
  "libc",
  "log",
