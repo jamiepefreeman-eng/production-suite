@@ -75,7 +75,8 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 
 ## Roadmap (suggested order)
 
-1. **First real build on Mac + Windows** — *Linux done; waiting on the owner's Mac + PC run (FIRST-RUN.md).*
+1. **First real build on Mac + Windows** — *Compiles on Linux, macOS (universal) and Windows; CI installers
+   published as Release v0.1.0. Waiting on the owner's hands-on check (FIRST-RUN.md §3) on real hardware.*
    Done: whole workspace compiles with zero warnings, `Cargo.lock` + `package-lock.json` committed,
    Rust↔TS contract test added, app launched and clicked through on Linux (all four modules, slide →
    cue → Visualizer, offline scene builder, mixer connect failure). Fixed: faders rendered flat,
