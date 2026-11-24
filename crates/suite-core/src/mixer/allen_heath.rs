@@ -55,7 +55,8 @@ impl MixerProfile for Sq {
         48
     }
     fn encode(&self, cmd: &MixerCommand) -> Vec<Vec<u8>> {
-        match cmd {
+        let Some(cmd) = cmd.basic() else { return vec![] };
+        match &cmd {
             MixerCommand::Mute { channel, muted } => {
                 let lsb = channel.saturating_sub(1);
                 vec![nrpn(self.ch, SQ_MUTE_INPUT_MSB, lsb, 0, if *muted { 1 } else { 0 })]
@@ -69,6 +70,7 @@ impl MixerProfile for Sq {
                 vec![nrpn(self.ch, SQ_LEVEL_LR_MSB, 0x00, vc, vf)]
             }
             MixerCommand::RecallScene { scene } => vec![scene_recall(self.ch, *scene)],
+            MixerCommand::Channel { .. } | MixerCommand::QueryChannel { .. } => vec![],
         }
     }
 }
@@ -103,7 +105,8 @@ impl MixerProfile for Avantis {
     }
     fn encode(&self, cmd: &MixerCommand) -> Vec<Vec<u8>> {
         let n = self.base & 0x0F;
-        match cmd {
+        let Some(cmd) = cmd.basic() else { return vec![] };
+        match &cmd {
             MixerCommand::Mute { channel, muted } => {
                 let c = channel.saturating_sub(1) & 0x7F;
                 vec![vec![0x90 | n, c, if *muted { 0x7F } else { 0x3F }, 0x90 | n, c, 0x00]]
@@ -116,6 +119,7 @@ impl MixerProfile for Avantis {
             }
             MixerCommand::MainFader { .. } => vec![], // TODO: main LR channel-type offset
             MixerCommand::RecallScene { scene } => vec![scene_recall(n, *scene)],
+            MixerCommand::Channel { .. } | MixerCommand::QueryChannel { .. } => vec![],
         }
     }
 }
@@ -123,6 +127,21 @@ impl MixerProfile for Avantis {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn channel_view_fader_and_mute_reach_ah_desks() {
+        use crate::mixer::ChannelParam;
+        let sq = Sq::new(1);
+        let a = sq.encode(&MixerCommand::Channel { channel: 2, param: ChannelParam::Mute { muted: true } });
+        assert_eq!(a, sq.encode(&MixerCommand::Mute { channel: 2, muted: true }));
+        assert!(!a.is_empty());
+        let av = Avantis::new(1);
+        let f = av.encode(&MixerCommand::Channel { channel: 3, param: ChannelParam::Fader { level: 0.5 } });
+        assert_eq!(f, av.encode(&MixerCommand::Fader { channel: 3, level: 0.5 }));
+        // EQ isn't in A&H's public MIDI protocol: nothing is sent.
+        assert!(av.encode(&MixerCommand::Channel { channel: 3, param: ChannelParam::EqOn { on: true } }).is_empty());
+        assert!(av.encode(&MixerCommand::QueryChannel { channel: 3 }).is_empty());
+    }
 
     #[test]
     fn sq_scene_recall_bank_and_program() {

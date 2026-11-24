@@ -15,6 +15,9 @@ pub mod allen_heath;
 pub mod behringer;
 pub mod connection;
 pub mod osc;
+pub mod processing;
+
+pub use processing::{ChannelParam, ChannelUpdate, EqType};
 
 use std::time::Duration;
 
@@ -60,6 +63,27 @@ pub enum MixerCommand {
     MainFader { level: f32 },
     /// Scene / snapshot number as shown on the desk (1-based).
     RecallScene { scene: u16 },
+    /// Any per-channel setting (EQ, gate, compressor, pan, name, fader, mute).
+    Channel { channel: u8, param: ChannelParam },
+    /// Ask the desk for every setting of one channel; answers arrive as feedback.
+    QueryChannel { channel: u8 },
+}
+
+impl MixerCommand {
+    /// The fader/mute subset every desk understands, for profiles without
+    /// processing control (`Channel { Fader | Mute }` -> `Fader` / `Mute`).
+    pub fn basic(&self) -> Option<MixerCommand> {
+        match self {
+            MixerCommand::Channel { channel, param: ChannelParam::Fader { level } } => {
+                Some(MixerCommand::Fader { channel: *channel, level: *level })
+            }
+            MixerCommand::Channel { channel, param: ChannelParam::Mute { muted } } => {
+                Some(MixerCommand::Mute { channel: *channel, muted: *muted })
+            }
+            MixerCommand::Channel { .. } | MixerCommand::QueryChannel { .. } => None,
+            other => Some(other.clone()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -76,6 +100,14 @@ pub trait MixerProfile: Send {
     fn encode(&self, cmd: &MixerCommand) -> Vec<Vec<u8>>;
     /// Packet to send periodically to keep feedback/connection alive.
     fn keepalive(&self) -> Option<(Vec<u8>, Duration)> {
+        None
+    }
+    /// EQ / gate / compressor control and read-back available.
+    fn supports_processing(&self) -> bool {
+        false
+    }
+    /// Turn an OSC message from the desk into a typed channel setting.
+    fn decode(&self, _address: &str, _args: &[osc::OscArg]) -> Option<ChannelUpdate> {
         None
     }
 }

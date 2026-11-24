@@ -19,7 +19,7 @@ use suite_core::ai::intent::{Action, Intent, ParseOutput};
 use suite_core::engine::{Command, Event, LogLevel};
 use suite_core::lighting::{FixtureState, FixtureVisual, Look, Rgb};
 use suite_core::mixer::connection::MixerFeedback;
-use suite_core::mixer::{MixerCommand, MixerConfig, MixerKind};
+use suite_core::mixer::{ChannelParam, ChannelUpdate, EqType, MixerCommand, MixerConfig, MixerKind};
 
 struct Out(String);
 
@@ -57,6 +57,39 @@ fn write_typescript_contract() {
         MixerCommand::Mute { channel: 2, muted: true },
         MixerCommand::MainFader { level: 0.5 },
         MixerCommand::RecallScene { scene: 3 },
+        MixerCommand::QueryChannel { channel: 4 },
+    ];
+    let channel_params = vec![
+        ChannelParam::Fader { level: 0.75 },
+        ChannelParam::Mute { muted: true },
+        ChannelParam::Pan { pan: -0.25 },
+        ChannelParam::Name { name: "Pastor".into() },
+        ChannelParam::HpfOn { on: true },
+        ChannelParam::HpfFreq { hz: 80.0 },
+        ChannelParam::EqOn { on: true },
+        ChannelParam::EqType { band: 1, kind: EqType::LowShelf },
+        ChannelParam::EqType { band: 2, kind: EqType::Peq },
+        ChannelParam::EqType { band: 2, kind: EqType::Veq },
+        ChannelParam::EqType { band: 2, kind: EqType::LowCut },
+        ChannelParam::EqType { band: 4, kind: EqType::HighShelf },
+        ChannelParam::EqType { band: 4, kind: EqType::HighCut },
+        ChannelParam::EqFreq { band: 2, hz: 400.0 },
+        ChannelParam::EqGain { band: 2, db: -3.0 },
+        ChannelParam::EqQ { band: 2, q: 2.0 },
+        ChannelParam::GateOn { on: true },
+        ChannelParam::GateThreshold { db: -50.0 },
+        ChannelParam::GateRange { db: 40.0 },
+        ChannelParam::GateAttack { ms: 1.0 },
+        ChannelParam::GateHold { ms: 50.0 },
+        ChannelParam::GateRelease { ms: 200.0 },
+        ChannelParam::CompOn { on: true },
+        ChannelParam::CompThreshold { db: -20.0 },
+        ChannelParam::CompRatio { ratio: 3.0 },
+        ChannelParam::CompKnee { db: 2.0 },
+        ChannelParam::CompMakeup { db: 4.0 },
+        ChannelParam::CompAttack { ms: 10.0 },
+        ChannelParam::CompHold { ms: 1.0 },
+        ChannelParam::CompRelease { ms: 150.0 },
     ];
 
     let commands = vec![
@@ -102,6 +135,12 @@ fn write_typescript_contract() {
     o.add("commands", "T.Command[]", &commands);
     o.add("events", "T.EngineEvent[]", &events);
     o.add("mixerCommands", "T.MixerCommand[]", &mixer_cmds);
+    o.add("channelParams", "T.ChannelParam[]", &channel_params);
+    o.add(
+        "channelCommands",
+        "T.MixerCommand[]",
+        &channel_params.iter().map(|p| MixerCommand::Channel { channel: 1, param: p.clone() }).collect::<Vec<_>>(),
+    );
     o.add("parseOutput", "T.ParseOutput", &ParseOutput { intents, unknown: vec![] });
     o.add(
         "engineStatus",
@@ -134,10 +173,18 @@ fn write_typescript_contract() {
             connected: true,
             config: Some(cfg),
             input_channels: 16,
+            supports_processing: true,
             kinds: MixerKind::ALL.iter().map(|k| (*k, k.label().to_string())).collect(),
         },
     );
-    o.add("mixerFeedback", "T.MixerFeedback[]", &vec![MixerFeedback { address: "/ch/01/mix/on".into(), value: Some(1.0) }]);
+    o.add("mixerFeedback", "T.MixerFeedback[]", &vec![
+            MixerFeedback {
+                address: "/ch/01/mix/on".into(),
+                value: Some(1.0),
+                update: Some(ChannelUpdate { channel: 1, param: ChannelParam::Mute { muted: false } }),
+            },
+            MixerFeedback { address: "/xinfo".into(), value: None, update: None },
+        ]);
     o.add(
         "audioDevices",
         "T.AudioDevice[]",
@@ -199,6 +246,9 @@ fn commands_round_trip_the_way_tauri_reads_them() {
         Command::ReplaceShow { show: show.clone() },
         Command::LoadShow { show },
         Command::SetFixtureState { fixtures: vec![7], state: look.fixtures[&7].clone() },
+        Command::Mixer { command: MixerCommand::Channel { channel: 3, param: ChannelParam::EqType { band: 2, kind: EqType::Veq } } },
+        Command::Mixer { command: MixerCommand::Channel { channel: 3, param: ChannelParam::Name { name: "Pastor".into() } } },
+        Command::Mixer { command: MixerCommand::QueryChannel { channel: 3 } },
     ];
     for cmd in commands {
         let value = serde_json::to_value(&cmd).unwrap();

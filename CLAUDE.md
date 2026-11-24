@@ -17,6 +17,9 @@ npm run typecheck                        # TS check — also proves types.ts mat
 cargo clippy --workspace --all-targets   # lint (currently zero warnings — keep it that way)
 ```
 
+Test the Audio module without a desk: `python3 tools/fake_x32.py` (pretend X32 on 127.0.0.1:10023 that
+answers queries, stores sets and prints every SET), then connect the app to 127.0.0.1 as an X32.
+
 Linux (CI / cloud sessions) needs: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
 librsvg2-dev libudev-dev libasound2-dev libssl-dev libxdo-dev`. Headless smoke test: `Xvfb :99 &` then
 `DISPLAY=:99 npm run tauri dev`, drive with `xdotool`, screenshot with `import -window root`.
@@ -55,7 +58,13 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 7. Window-creating Tauri commands must be `async` (sync ones can deadlock on Windows). Sync commands run
    on the UI thread, so anything that can wait on the network or hardware (mixer connect, audio device
    scan) is `async` + `tauri::async_runtime::spawn_blocking`.
-8. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
+8. **Editing the show from the UI** goes through `updateShow` in `shared/store.ts`, which sends the whole
+   show (`replace_show`). While the user types, the local copy wins: `show_changed` echoes inside
+   `QUIET_MS` are ignored and the store re-syncs after a pause (re-reading mid-typing used to drop
+   letters). Don't bypass this with direct `replace_show` sends. Fixture-id map keys arrive from JS as
+   strings; `Look.fixtures` uses `u32_keys` to accept them (Tauri reads args from a borrowed Value).
+   Never use `window.confirm/alert` (unreliable in desktop webviews): use `confirmDialog` from bridge.
+9. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
    (use the rotated `.vfader-wrap` pattern), check caniuse for newer features.
 
 ## Hardware / protocol facts used
@@ -64,7 +73,13 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 * Enttec DMX USB Pro: `7E 06 lenLSB lenMSB 00 <512> E7`. Open DMX: FTDI, 250 kbaud 8N2, host does BREAK/MAB.
 * X32/M32 OSC UDP 10023, X Air UDP 10024, `/xremote` renew < 10 s; `/ch/NN/mix/on` 1 = unmuted.
 * A&H SQ and Avantis: MIDI over TCP 51325 (Avantis protocol requires firmware 2.0+). NRPN tables in
-  `mixer/allen_heath.rs` are marked VERIFY.
+  `mixer/allen_heath.rs` are marked VERIFY. Their public MIDI protocols have **no EQ / gate / compressor**;
+  `MixerCommand::basic()` reduces channel commands to fader/mute for them and the UI explains the limit.
+* X32 / X Air channel processing (`mixer/processing.rs`): `/ch/NN/` + `preamp/hpon|hpf`, `eq/on`,
+  `eq/B/type|f|g|q` (B=1..4), `gate/on|thr|range|attack|hold|release`, `dyn/on|thr|ratio|knee|mgain|attack|hold|release`,
+  `mix/fader|on|pan`, `config/name`. Values are normalised 0..1 (lin or log over the documented range;
+  EQ Q runs backwards 10→0.3) or int enums (EQ type 0..5, ratio index 0..11). Sending an address with no
+  args queries it; replies come back through `MixerProfile::decode` as `MixerFeedback.update`.
 
 ## Must verify on real gear (tell the owner before relying on it)
 
@@ -72,6 +87,9 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 - [ ] SQ NRPN numbers + level law; Avantis mute/fader/scene messages; Avantis main fader (not implemented)
 - [ ] Real patch addresses from the owner's Lightkey export (all universe 1)
 - [ ] Open DMX timing on macOS (FTDI VCP driver) and Windows
+- [ ] X32 / X Air processing scalings on a real desk (tested against `tools/fake_x32.py` and the
+      community OSC protocol document only); X Air HPF/EQ address map assumed identical to X32
+- [ ] Gate acts as a gate only when the desk's gate mode is GATE (mode isn't set by the app)
 
 ## Roadmap (suggested order)
 
@@ -83,6 +101,9 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    mixer connect / audio scan froze the window. Remaining: owner reports results from macOS and
    Windows (macOS-only / Windows-only code paths are not compiled on Linux: CoreAudio/WASAPI in cpal,
    serial port enumeration, window placement on second displays).
+   *v0.2.0:* ProPresenter-style Presenter (library + service playlist, slide editor, group colours,
+   live/next), Lightkey-style Lighting (stage plan with live colours, inspector, cue tiles), Audio
+   console with X32/X Air HPF, 4-band EQ, gate and compressor incl. desk read-back.
 2. **Fixture library**: import Lightkey/QLC+/Open Fixture Library (OFL JSON) profiles; profile editor UI;
    patch "add fixture" dialog; import the Lightkey patch TSV.
 3. **Lighting engine**: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),

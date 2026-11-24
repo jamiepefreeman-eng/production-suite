@@ -5177,6 +5177,394 @@ export const mixerCommands: T.MixerCommand[] = [
   {
     "type": "recall_scene",
     "scene": 3
+  },
+  {
+    "type": "query_channel",
+    "channel": 4
+  }
+];
+
+export const channelParams: T.ChannelParam[] = [
+  {
+    "param": "fader",
+    "level": 0.75
+  },
+  {
+    "param": "mute",
+    "muted": true
+  },
+  {
+    "param": "pan",
+    "pan": -0.25
+  },
+  {
+    "param": "name",
+    "name": "Pastor"
+  },
+  {
+    "param": "hpf_on",
+    "on": true
+  },
+  {
+    "param": "hpf_freq",
+    "hz": 80.0
+  },
+  {
+    "param": "eq_on",
+    "on": true
+  },
+  {
+    "param": "eq_type",
+    "band": 1,
+    "kind": "low_shelf"
+  },
+  {
+    "param": "eq_type",
+    "band": 2,
+    "kind": "peq"
+  },
+  {
+    "param": "eq_type",
+    "band": 2,
+    "kind": "veq"
+  },
+  {
+    "param": "eq_type",
+    "band": 2,
+    "kind": "low_cut"
+  },
+  {
+    "param": "eq_type",
+    "band": 4,
+    "kind": "high_shelf"
+  },
+  {
+    "param": "eq_type",
+    "band": 4,
+    "kind": "high_cut"
+  },
+  {
+    "param": "eq_freq",
+    "band": 2,
+    "hz": 400.0
+  },
+  {
+    "param": "eq_gain",
+    "band": 2,
+    "db": -3.0
+  },
+  {
+    "param": "eq_q",
+    "band": 2,
+    "q": 2.0
+  },
+  {
+    "param": "gate_on",
+    "on": true
+  },
+  {
+    "param": "gate_threshold",
+    "db": -50.0
+  },
+  {
+    "param": "gate_range",
+    "db": 40.0
+  },
+  {
+    "param": "gate_attack",
+    "ms": 1.0
+  },
+  {
+    "param": "gate_hold",
+    "ms": 50.0
+  },
+  {
+    "param": "gate_release",
+    "ms": 200.0
+  },
+  {
+    "param": "comp_on",
+    "on": true
+  },
+  {
+    "param": "comp_threshold",
+    "db": -20.0
+  },
+  {
+    "param": "comp_ratio",
+    "ratio": 3.0
+  },
+  {
+    "param": "comp_knee",
+    "db": 2.0
+  },
+  {
+    "param": "comp_makeup",
+    "db": 4.0
+  },
+  {
+    "param": "comp_attack",
+    "ms": 10.0
+  },
+  {
+    "param": "comp_hold",
+    "ms": 1.0
+  },
+  {
+    "param": "comp_release",
+    "ms": 150.0
+  }
+];
+
+export const channelCommands: T.MixerCommand[] = [
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "fader",
+      "level": 0.75
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "mute",
+      "muted": true
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "pan",
+      "pan": -0.25
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "name",
+      "name": "Pastor"
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "hpf_on",
+      "on": true
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "hpf_freq",
+      "hz": 80.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_on",
+      "on": true
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_type",
+      "band": 1,
+      "kind": "low_shelf"
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_type",
+      "band": 2,
+      "kind": "peq"
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_type",
+      "band": 2,
+      "kind": "veq"
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_type",
+      "band": 2,
+      "kind": "low_cut"
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_type",
+      "band": 4,
+      "kind": "high_shelf"
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_type",
+      "band": 4,
+      "kind": "high_cut"
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_freq",
+      "band": 2,
+      "hz": 400.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_gain",
+      "band": 2,
+      "db": -3.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "eq_q",
+      "band": 2,
+      "q": 2.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "gate_on",
+      "on": true
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "gate_threshold",
+      "db": -50.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "gate_range",
+      "db": 40.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "gate_attack",
+      "ms": 1.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "gate_hold",
+      "ms": 50.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "gate_release",
+      "ms": 200.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_on",
+      "on": true
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_threshold",
+      "db": -20.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_ratio",
+      "ratio": 3.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_knee",
+      "db": 2.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_makeup",
+      "db": 4.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_attack",
+      "ms": 10.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_hold",
+      "ms": 1.0
+    }
+  },
+  {
+    "type": "channel",
+    "channel": 1,
+    "param": {
+      "param": "comp_release",
+      "ms": 150.0
+    }
   }
 ];
 
@@ -5273,6 +5661,7 @@ export const mixerStatus: T.MixerStatus = {
     "midi_channel": 1
   },
   "input_channels": 16,
+  "supports_processing": true,
   "kinds": [
     [
       "x32",
@@ -5296,7 +5685,19 @@ export const mixerStatus: T.MixerStatus = {
 export const mixerFeedback: T.MixerFeedback[] = [
   {
     "address": "/ch/01/mix/on",
-    "value": 1.0
+    "value": 1.0,
+    "update": {
+      "channel": 1,
+      "param": {
+        "param": "mute",
+        "muted": false
+      }
+    }
+  },
+  {
+    "address": "/xinfo",
+    "value": null,
+    "update": null
   }
 ];
 

@@ -5,7 +5,7 @@
 //! `/…/mix/on` is 1 = unmuted, 0 = muted. Faders are float 0..1.
 
 use super::osc::{encode, OscArg};
-use super::{MixerCommand, MixerKind, MixerProfile, Transport};
+use super::{processing, ChannelUpdate, MixerCommand, MixerKind, MixerProfile, Transport};
 use std::time::Duration;
 
 fn ch(n: u8) -> String {
@@ -39,10 +39,18 @@ impl MixerProfile for X32 {
             MixerCommand::RecallScene { scene } => {
                 vec![encode("/-action/goscene", &[OscArg::Int(scene.saturating_sub(1) as i32)])]
             }
+            MixerCommand::Channel { channel, param } => processing::osc_set(*channel, param),
+            MixerCommand::QueryChannel { channel } => processing::osc_query(*channel),
         }
     }
     fn keepalive(&self) -> Option<(Vec<u8>, Duration)> {
         Some((encode("/xremote", &[]), Duration::from_secs(8)))
+    }
+    fn supports_processing(&self) -> bool {
+        true
+    }
+    fn decode(&self, address: &str, args: &[OscArg]) -> Option<ChannelUpdate> {
+        processing::osc_decode(address, args)
     }
 }
 
@@ -73,10 +81,18 @@ impl MixerProfile for XAir {
             MixerCommand::RecallScene { scene } => {
                 vec![encode("/-snap/load", &[OscArg::Int((*scene).max(1) as i32)])]
             }
+            MixerCommand::Channel { channel, param } => processing::osc_set(*channel, param),
+            MixerCommand::QueryChannel { channel } => processing::osc_query(*channel),
         }
     }
     fn keepalive(&self) -> Option<(Vec<u8>, Duration)> {
         Some((encode("/xremote", &[]), Duration::from_secs(8)))
+    }
+    fn supports_processing(&self) -> bool {
+        true
+    }
+    fn decode(&self, address: &str, args: &[OscArg]) -> Option<ChannelUpdate> {
+        processing::osc_decode(address, args)
     }
 }
 

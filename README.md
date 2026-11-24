@@ -4,9 +4,9 @@ One desktop app (macOS + Windows) made of four modules that share one show engin
 
 | Module | What it does today |
 |---|---|
-| **Presenter** | Service list, song import from pasted lyrics, slide grid, live/next, audience + stage display + stream lower-third outputs on any screen, per-slide triggers |
-| **Lighting** | Plain-language scene builder (offline parser + optional Claude), cue list with fades, group quick-buttons, patch editor, focus positions, DMX outputs (sACN, Art-Net, Enttec DMX USB Pro, Enttec Open DMX) |
-| **Audio** | Lists every audio device the OS sees, mixer profiles for Midas M32 / Behringer X32, Behringer X Air (XR18), Allen & Heath SQ and Avantis: faders, mutes, scene recall, desk feedback |
+| **Presenter** | ProPresenter-style: Library + drag-to-reorder Service playlist, song import from pasted lyrics, big slide grid with coloured section labels, Edit mode (change words, add / move / duplicate / delete slides), Live + Next previews, audience + stage display + stream lower-third outputs on any screen, per-slide lighting/mixer actions |
+| **Lighting** | Lightkey-style: plain-language scene builder (offline parser + optional Claude), top-down stage plan showing every light in its live colour, inspector (intensity, colour, pan/tilt pad, position presets, gobos), cue tiles with fades, grand master, patch editor, focus positions, DMX outputs (sACN, Art-Net, Enttec DMX USB Pro, Enttec Open DMX) |
+| **Audio** | Console view for Midas M32 / Behringer X32, Behringer X Air (XR18), Allen & Heath SQ and Avantis: channel names, faders (dB), pan, mutes, scene recall. On X32 / X Air also high-pass filter, 4-band EQ with response curve, gate and compressor, read back from the desk. Lists every audio device the OS sees |
 | **Visualizer** | 3D stage with your patched fixtures lit by live DMX — from this app, or from an external console (Lightkey) over sACN/Art-Net. Click a fixture to move/rotate it |
 
 Each module can run inside the main window or **pop out into its own window** (⧉), so on show day Presenter can be on one screen and Lighting on another — still one engine.

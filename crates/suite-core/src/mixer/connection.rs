@@ -1,7 +1,7 @@
 //! Network transport shared by every mixer profile.
 
 use super::osc;
-use super::{profile_for, MixerCommand, MixerConfig, MixerProfile, Transport};
+use super::{profile_for, ChannelUpdate, MixerCommand, MixerConfig, MixerProfile, Transport};
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpStream, ToSocketAddrs, UdpSocket};
 use std::time::{Duration, Instant};
@@ -24,6 +24,8 @@ pub struct MixerConnection {
 pub struct MixerFeedback {
     pub address: String,
     pub value: Option<f32>,
+    /// The same message as a typed channel setting, when it is one.
+    pub update: Option<ChannelUpdate>,
 }
 
 impl MixerConnection {
@@ -105,7 +107,8 @@ impl MixerConnection {
                     osc::OscArg::Int(i) => Some(*i as f32),
                     _ => None,
                 });
-                out.push(MixerFeedback { address, value });
+                let update = self.profile.decode(&address, &args);
+                out.push(MixerFeedback { address, value, update });
             }
             // TODO: parse A&H MIDI feedback (NRPN echoes) for SQ/Avantis.
             if out.len() > 256 {
@@ -117,5 +120,9 @@ impl MixerConnection {
 
     pub fn input_channels(&self) -> u8 {
         self.profile.input_channels()
+    }
+
+    pub fn supports_processing(&self) -> bool {
+        self.profile.supports_processing()
     }
 }

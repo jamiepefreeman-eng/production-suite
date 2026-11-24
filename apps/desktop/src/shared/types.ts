@@ -60,7 +60,39 @@ export type MixerCommand =
   | { type: "fader"; channel: number; level: number }
   | { type: "mute"; channel: number; muted: boolean }
   | { type: "main_fader"; level: number }
-  | { type: "recall_scene"; scene: number };
+  | { type: "recall_scene"; scene: number }
+  | { type: "channel"; channel: number; param: ChannelParam }
+  | { type: "query_channel"; channel: number };
+
+export type EqType = "low_cut" | "low_shelf" | "peq" | "veq" | "high_shelf" | "high_cut";
+/** One channel setting in real units (see crates/suite-core/src/mixer/processing.rs for ranges). */
+export type ChannelParam =
+  | { param: "fader"; level: number }
+  | { param: "mute"; muted: boolean }
+  | { param: "pan"; pan: number }
+  | { param: "name"; name: string }
+  | { param: "hpf_on"; on: boolean }
+  | { param: "hpf_freq"; hz: number }
+  | { param: "eq_on"; on: boolean }
+  | { param: "eq_type"; band: number; kind: EqType }
+  | { param: "eq_freq"; band: number; hz: number }
+  | { param: "eq_gain"; band: number; db: number }
+  | { param: "eq_q"; band: number; q: number }
+  | { param: "gate_on"; on: boolean }
+  | { param: "gate_threshold"; db: number }
+  | { param: "gate_range"; db: number }
+  | { param: "gate_attack"; ms: number }
+  | { param: "gate_hold"; ms: number }
+  | { param: "gate_release"; ms: number }
+  | { param: "comp_on"; on: boolean }
+  | { param: "comp_threshold"; db: number }
+  | { param: "comp_ratio"; ratio: number }
+  | { param: "comp_knee"; db: number }
+  | { param: "comp_makeup"; db: number }
+  | { param: "comp_attack"; ms: number }
+  | { param: "comp_hold"; ms: number }
+  | { param: "comp_release"; ms: number };
+export interface ChannelUpdate { channel: number; param: ChannelParam }
 
 export type SlideTrigger =
   | { type: "lighting_cue"; cue: number }
@@ -148,9 +180,10 @@ export interface MixerStatus {
   connected: boolean;
   config: MixerConfig | null;
   input_channels: number;
+  supports_processing: boolean;
   kinds: [MixerKind, string][];
 }
-export interface MixerFeedback { address: string; value: number | null }
+export interface MixerFeedback { address: string; value: number | null; update: ChannelUpdate | null }
 
 export interface AudioDevice {
   host: string;

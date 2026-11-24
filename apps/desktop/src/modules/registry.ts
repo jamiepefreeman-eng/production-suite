@@ -7,9 +7,9 @@ import LightingApp from "./lighting/LightingApp";
 import AudioApp from "./audio/AudioApp";
 import VisualizerApp from "./visualizer/VisualizerApp";
 
-export const MODULES: Record<ModuleId, { label: string; key: string; component: ComponentType }> = {
-  presenter: { label: "Presenter", key: "1", component: PresenterApp },
-  lighting: { label: "Lighting", key: "2", component: LightingApp },
-  audio: { label: "Audio", key: "3", component: AudioApp },
-  visualizer: { label: "Visualizer", key: "4", component: VisualizerApp },
+export const MODULES: Record<ModuleId, { label: string; key: string; icon: string; component: ComponentType }> = {
+  presenter: { label: "Presenter", key: "1", icon: "▤", component: PresenterApp },
+  lighting: { label: "Lighting", key: "2", icon: "✦", component: LightingApp },
+  audio: { label: "Audio", key: "3", icon: "≡", component: AudioApp },
+  visualizer: { label: "Visualizer", key: "4", icon: "◭", component: VisualizerApp },
 };

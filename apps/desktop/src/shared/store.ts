@@ -32,14 +32,33 @@ let state: EngineView = {
 const listeners = new Set<() => void>();
 const set = (patch: Partial<EngineView>) => {
   state = { ...state, ...patch };
+  // Editing the slide that's on screen updates the screen (like ProPresenter).
+  if (patch.show && state.live) {
+    const p = state.show?.presentations.find((x) => x.id === state.live!.presentation);
+    const sl = p?.slides.find((x) => x.id === state.live!.slide);
+    if (p && sl && (sl.text !== state.live.text || sl.label !== state.live.label || p.title !== state.live.title))
+      state = { ...state, live: { ...state.live, text: sl.text, label: sl.label, title: p.title } };
+  }
   listeners.forEach((l) => l());
 };
 const log = (level: LogEntry["level"], message: string) =>
   set({ log: [{ t: Date.now(), level, message }, ...state.log].slice(0, 200) });
 
+// While someone is typing (slide text, fixture names…) this window's copy of the
+// show is the truth. Each keystroke sends the whole show to the engine, and the
+// engine answers "show changed"; re-reading the show at that moment can return
+// a copy from a keystroke or two ago and wipe out letters just typed. So: skip
+// re-reads that overlap a local edit, and re-sync once typing pauses.
+const QUIET_MS = 600;
+let lastLocalEdit = 0;
+let resyncTimer: ReturnType<typeof setTimeout> | undefined;
+
 async function refreshShow() {
+  const started = Date.now();
   try {
-    set({ show: await api.getShow(), error: null });
+    const show = await api.getShow();
+    if (lastLocalEdit >= started) return; // edited meanwhile: this copy is stale
+    set({ show, error: null });
   } catch (e) {
     set({ error: String(e) });
   }
@@ -48,7 +67,8 @@ async function refreshShow() {
 function handle(ev: EngineEvent) {
   switch (ev.type) {
     case "show_changed":
-      void refreshShow();
+      // Our own edits echo back here; other windows' edits are picked up once we're idle.
+      if (Date.now() - lastLocalEdit > QUIET_MS) void refreshShow();
       break;
     case "slide_live":
       set({ live: ev });
@@ -73,7 +93,8 @@ function handle(ev: EngineEvent) {
       set({ blackout: ev.on });
       break;
     case "mixer_out":
-      log("info", `Mixer: ${JSON.stringify(ev.command)}`);
+      // Fader moves and EQ tweaks are too chatty for the status line; only show cue-like actions.
+      if (ev.command.type === "recall_scene") log("info", `Mixer: recall scene ${ev.command.scene}`);
       break;
     case "log":
       log(ev.level, ev.message);
@@ -118,8 +139,15 @@ export async function updateShow(mutate: (draft: Show) => void) {
   if (!state.show) return;
   const draft: Show = structuredClone(state.show);
   mutate(draft);
+  lastLocalEdit = Date.now();
   set({ show: draft });
-  await api.send({ type: "replace_show", show: draft });
+  clearTimeout(resyncTimer);
+  resyncTimer = setTimeout(() => void refreshShow(), QUIET_MS + 50);
+  try {
+    await api.send({ type: "replace_show", show: draft });
+  } catch (e) {
+    log("warn", `Change not saved: ${e}`);
+  }
 }
 
 export const send = (c: Parameters<typeof api.send>[0]) =>

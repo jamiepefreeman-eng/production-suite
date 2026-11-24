@@ -14,6 +14,8 @@ pub struct MixerStatus {
     pub connected: bool,
     pub config: Option<MixerConfig>,
     pub input_channels: u8,
+    /// EQ / gate / compressor control (X32, X Air). False for A&H desks.
+    pub supports_processing: bool,
     pub kinds: Vec<(MixerKind, String)>,
 }
 
@@ -56,6 +58,7 @@ fn status_of(state: &AppState) -> MixerStatus {
         connected: guard.is_some(),
         config: guard.as_ref().map(|c| c.config.clone()),
         input_channels: guard.as_ref().map(|c| c.input_channels()).unwrap_or(0),
+        supports_processing: guard.as_ref().is_some_and(|c| c.supports_processing()),
         kinds: MixerKind::ALL.iter().map(|k| (*k, k.label().to_string())).collect(),
     }
 }

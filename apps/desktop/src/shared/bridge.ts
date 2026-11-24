@@ -4,6 +4,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { ask, open as openDialog, save as saveDialog } from "@tauri-apps/plugin-dialog";
 import type * as T from "./types";
 
 export const inTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -38,6 +39,21 @@ export const api = {
   openOutput: (kind: "audience" | "stage" | "stream", monitor?: number) =>
     call<void>("open_output_window", { kind, monitor: monitor ?? null }),
   openModule: (module: ModuleId) => call<void>("open_module_window", { module }),
+};
+
+/** Native yes/no dialog. window.confirm() is unreliable inside desktop webviews. */
+export async function confirmDialog(message: string): Promise<boolean> {
+  if (!inTauri) return window.confirm(message);
+  return ask(message, { kind: "warning" });
+}
+
+/** Native open/save pickers for show files (".json"; macOS rejects dotted extensions like "show.json"). */
+export const showFiles = {
+  open: async () => {
+    const p = await openDialog({ filters: [{ name: "Show", extensions: ["json"] }] });
+    return typeof p === "string" ? p : null;
+  },
+  save: (defaultName: string) => saveDialog({ defaultPath: defaultName, filters: [{ name: "Show", extensions: ["json"] }] }),
 };
 
 export type ModuleId = "presenter" | "lighting" | "audio" | "visualizer";
