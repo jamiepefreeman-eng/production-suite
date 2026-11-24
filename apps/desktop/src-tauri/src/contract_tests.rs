@@ -183,3 +183,30 @@ fn write_typescript_contract() {
     let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../src/shared/contract.generated.ts");
     std::fs::write(&path, o.0).expect("write contract.generated.ts");
 }
+
+/// Everything the UI sends must make it back into Rust. Tauri reads command
+/// arguments from a borrowed `serde_json::Value`, which — unlike `from_str` —
+/// does not turn the string map keys `"1"` back into numbers by itself. That
+/// once made every `replace_show` (adding a song, editing triggers) fail.
+#[test]
+fn commands_round_trip_the_way_tauri_reads_them() {
+    use serde::Deserialize;
+    let show = suite_core::demo::demo_show();
+    assert!(show.cues.iter().any(|c| !c.look.fixtures.is_empty()), "demo needs cue looks to exercise map keys");
+    let mut look = Look::default();
+    look.fixtures.insert(7, FixtureState { intensity: Some(0.5), ..Default::default() });
+    let commands = vec![
+        Command::ReplaceShow { show: show.clone() },
+        Command::LoadShow { show },
+        Command::SetFixtureState { fixtures: vec![7], state: look.fixtures[&7].clone() },
+    ];
+    for cmd in commands {
+        let value = serde_json::to_value(&cmd).unwrap();
+        let back = Command::deserialize(&value).unwrap_or_else(|e| panic!("{e}"));
+        assert_eq!(back, cmd);
+        let back2: Command = serde_json::from_value(value).unwrap();
+        assert_eq!(back2, cmd);
+    }
+    let v = serde_json::to_value(&Event::ProgrammerChanged { look: look.clone() }).unwrap();
+    assert_eq!(Event::deserialize(&v).unwrap(), Event::ProgrammerChanged { look });
+}

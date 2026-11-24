@@ -24,11 +24,15 @@ export default function App() {
   }, []);
 
   const openFile = async () => {
-    const path = await open({ filters: [{ name: "Show", extensions: ["show.json", "json"] }] });
+    // Extensions must not contain a dot: macOS rejects "show.json" and then greys out every file.
+    const path = await open({ filters: [{ name: "Show", extensions: ["json"] }] });
     if (typeof path === "string") await api.openShow(path).catch((e) => pushLog("warn", String(e)));
   };
   const saveFile = async () => {
-    const path = await save({ defaultPath: `${eng.show?.name ?? "show"}.show.json` });
+    const path = await save({
+      defaultPath: `${eng.show?.name ?? "show"}.show.json`,
+      filters: [{ name: "Show", extensions: ["json"] }],
+    });
     if (path) await api.saveShow(path).then((p) => pushLog("info", `Saved ${p}`)).catch((e) => pushLog("warn", String(e)));
   };
 
