@@ -1,8 +1,10 @@
 # Builds the Mac and Windows installers on GitHub's own Mac and Windows machines
 # and attaches them to a GitHub Release, so nobody has to install Rust or Node.
 #
-# How to run it: GitHub > Actions > "Build installers" > "Run workflow".
-# It also runs automatically when a tag like v0.2.0 is pushed.
+# Runs automatically on every change pushed to main (except documentation-only
+# changes), or by hand: GitHub > Actions > "Build installers" > "Run workflow".
+# The Release is named after the version in tauri.conf.json; rebuilding the same
+# version replaces its installers with the newest build.
 # Takes about 15-25 minutes. Results: GitHub > Releases > "Production Suite v<version>".
 
 name: Build installers
@@ -10,7 +12,14 @@ name: Build installers
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     tags: ["v*"]
+    paths-ignore: ["**.md"]
+
+# A newer push cancels a build still running for an older one.
+concurrency:
+  group: installers-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write # needed to create the Release and upload the installers

@@ -25,7 +25,8 @@ librsvg2-dev libudev-dev libasound2-dev libssl-dev libxdo-dev`. Headless smoke t
 
 `.github/workflows/build-installers.yml` builds a universal macOS `.dmg` and Windows `.exe`/`.msi` on
 GitHub's runners and publishes them as a Release named after the version in `tauri.conf.json`.
-Run it with Actions → "Build installers" → Run workflow, or push a `v*` tag. Bump the version in
+Runs on every push to `main` (not docs-only), or Actions → "Build installers" → Run workflow.
+Pushing tags is blocked from cloud sessions, so don't rely on `v*` tags; same version = installers replaced. Bump the version in
 `tauri.conf.json` (and `Cargo.toml` workspace version) for each new release. Installers are unsigned
 (macOS ad-hoc `signingIdentity: "-"`); INSTALL.md tells users how to get past Gatekeeper/SmartScreen.
 Signing needs the owner's Apple Developer account / Windows certificate as repo secrets.
