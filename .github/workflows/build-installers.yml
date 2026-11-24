@@ -1,0 +1,69 @@
+# Builds the Mac and Windows installers on GitHub's own Mac and Windows machines
+# and attaches them to a GitHub Release, so nobody has to install Rust or Node.
+#
+# How to run it: GitHub > Actions > "Build installers" > "Run workflow".
+# It also runs automatically when a tag like v0.2.0 is pushed.
+# Takes about 15-25 minutes. Results: GitHub > Releases > "Production Suite v<version>".
+
+name: Build installers
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # needed to create the Release and upload the installers
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # One Mac app that runs natively on both Apple Silicon (M1-M4) and Intel Macs.
+          - platform: macos-latest
+            args: --target universal-apple-darwin
+            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - platform: windows-latest
+            args: ""
+            rust_targets: ""
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+
+      - uses: swatinem/rust-cache@v2
+
+      - name: Install JavaScript packages
+        working-directory: apps/desktop
+        run: npm ci
+
+      - name: Engine tests
+        run: cargo test -p suite-core
+
+      - name: Build installers and publish the Release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/desktop
+          tagName: v__VERSION__
+          releaseName: Production Suite v__VERSION__
+          releaseBody: |
+            Download the installer for your computer below (under "Assets"):
+            * Mac: the file ending in .dmg
+            * Windows: the file ending in -setup.exe (or the .msi)
+            First-time opening steps are in INSTALL.md in the project.
+          releaseDraft: false
+          prerelease: true
+          args: ${{ matrix.args }}

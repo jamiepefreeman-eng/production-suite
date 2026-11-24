@@ -12,6 +12,7 @@ cargo test -p suite-core                 # engine tests — run after any Rust c
 cargo test -p production-suite           # regenerates src/shared/contract.generated.ts (Rust JSON samples)
 cd apps/desktop && npm install
 npm run tauri dev                        # run the app
+npx tauri build --bundles deb            # release build check on Linux (Mac/Win installers come from CI)
 npm run typecheck                        # TS check — also proves types.ts matches the Rust JSON
 cargo clippy --workspace --all-targets   # lint (currently zero warnings — keep it that way)
 ```
@@ -19,6 +20,15 @@ cargo clippy --workspace --all-targets   # lint (currently zero warnings — kee
 Linux (CI / cloud sessions) needs: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
 librsvg2-dev libudev-dev libasound2-dev libssl-dev libxdo-dev`. Headless smoke test: `Xvfb :99 &` then
 `DISPLAY=:99 npm run tauri dev`, drive with `xdotool`, screenshot with `import -window root`.
+
+## Releases
+
+`.github/workflows/build-installers.yml` builds a universal macOS `.dmg` and Windows `.exe`/`.msi` on
+GitHub's runners and publishes them as a Release named after the version in `tauri.conf.json`.
+Run it with Actions → "Build installers" → Run workflow, or push a `v*` tag. Bump the version in
+`tauri.conf.json` (and `Cargo.toml` workspace version) for each new release. Installers are unsigned
+(macOS ad-hoc `signingIdentity: "-"`); INSTALL.md tells users how to get past Gatekeeper/SmartScreen.
+Signing needs the owner's Apple Developer account / Windows certificate as repo secrets.
 
 ## Architecture rules
 
