@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { api, on } from "../../shared/bridge";
+import { useEffect, useRef, useState } from "react";
+import { api, confirmDialog, on } from "../../shared/bridge";
 import PatchView from "./PatchView";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type { AiStatus, DmxOutputConfig, FixtureProfile, FixtureState, FixtureVisual, Rgb, SerialPortInfo, Show } from "../../shared/types";
@@ -70,18 +70,7 @@ function Live({ show }: { show: Show }) {
       <SceneBuilder show={show} />
 
       <aside className="lk-fixtures">
-        <h3>Groups</h3>
-        <ul className="lk-list">
-          {show.groups.map((g) => {
-            const all = g.fixtures.length > 0 && g.fixtures.every((f) => sel.includes(f));
-            return (
-              <li key={g.name} className={all ? "sel" : ""} onClick={(e) => (e.shiftKey ? setSel([...new Set([...sel, ...g.fixtures])]) : setSel(g.fixtures))}>
-                <span className="grow">{g.name}</span>
-                <small>{g.fixtures.length}</small>
-              </li>
-            );
-          })}
-        </ul>
+        <GroupsPanel show={show} sel={sel} setSel={setSel} />
         <h3>
           Fixtures
           <span className="grow" />
@@ -110,6 +99,86 @@ function Live({ show }: { show: Show }) {
 
       <CueStrip show={show} activeCue={activeCue} programmed={Object.keys(programmer.fixtures).length} />
     </div>
+  );
+}
+
+/** Groups: click to select, ✎ to edit (rename, other names, add / remove the selected lights). */
+function GroupsPanel({ show, sel, setSel }: { show: Show; sel: number[]; setSel: (s: number[]) => void }) {
+  const [editing, setEditing] = useState<number | null>(null);
+  const edit = (gi: number, fn: (g: Show["groups"][number]) => void) => updateShow((d) => void (d.groups[gi] && fn(d.groups[gi])));
+  const newGroup = () => {
+    let n = 1;
+    while (show.groups.some((g) => g.name === `Group ${n}`)) n++;
+    void updateShow((d) => void d.groups.push({ name: `Group ${n}`, aliases: [], fixtures: [...sel] }));
+    setEditing(show.groups.length);
+  };
+  return (
+    <>
+      <h3>
+        Groups
+        <span className="grow" />
+        <button className="link" onClick={newGroup} title={sel.length ? `New group from the ${sel.length} selected light(s)` : "New empty group"}>
+          + new{sel.length ? ` (${sel.length})` : ""}
+        </button>
+      </h3>
+      <ul className="lk-list">
+        {show.groups.map((g, gi) => {
+          const all = g.fixtures.length > 0 && g.fixtures.every((f) => sel.includes(f));
+          return (
+            <li key={gi} className={`lk-group ${all ? "sel" : ""} ${editing === gi ? "editing" : ""}`}>
+              <div className="lk-group-row" onClick={(e) => (e.shiftKey ? setSel([...new Set([...sel, ...g.fixtures])]) : setSel(g.fixtures))}>
+                <span className="grow ellipsis">{g.name}</span>
+                <small>{g.fixtures.length}</small>
+                <button
+                  className="icon"
+                  title="Edit group"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditing(editing === gi ? null : gi);
+                  }}
+                >
+                  ✎
+                </button>
+              </div>
+              {editing === gi && (
+                <div className="lk-group-edit" onClick={(e) => e.stopPropagation()}>
+                  <input value={g.name} onChange={(e) => void edit(gi, (x) => void (x.name = e.target.value))} placeholder="Group name" />
+                  <input
+                    value={g.aliases.join(", ")}
+                    onChange={(e) => void edit(gi, (x) => void (x.aliases = e.target.value.split(",").map((s) => s.trim()).filter(Boolean)))}
+                    placeholder="Other names, e.g. drums, kit lights"
+                    title="The scene builder understands these names too"
+                  />
+                  <div className="lk-group-btns">
+                    <button disabled={!sel.length} onClick={() => edit(gi, (x) => void (x.fixtures = [...new Set([...x.fixtures, ...sel])]))}>
+                      + Add selected
+                    </button>
+                    <button disabled={!sel.some((id) => g.fixtures.includes(id))} onClick={() => edit(gi, (x) => void (x.fixtures = x.fixtures.filter((id) => !sel.includes(id))))}>
+                      − Remove selected
+                    </button>
+                    <button disabled={!sel.length} onClick={() => edit(gi, (x) => void (x.fixtures = [...sel]))} title="Make the group exactly the selected lights">
+                      = Selection
+                    </button>
+                    <button
+                      onClick={() =>
+                        void confirmDialog(`Delete group “${g.name}”? The lights stay patched.`).then((yes) => {
+                          if (!yes) return;
+                          setEditing(null);
+                          void updateShow((d) => void d.groups.splice(gi, 1));
+                        })
+                      }
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
+        {show.groups.length === 0 && <li className="muted">Select lights, then “+ new”.</li>}
+      </ul>
+    </>
   );
 }
 
@@ -174,6 +243,8 @@ function SceneBuilder({ show }: { show: Show }) {
   );
 }
 
+let planJustDragged = false;
+
 /** Top-down plan of the stage: each fixture drawn where it hangs, in its live colour. */
 function StagePlan({
   show,
@@ -188,19 +259,61 @@ function StagePlan({
   onClick: (id: number, e: React.MouseEvent) => void;
   onClear: () => void;
 }) {
+  const plan = useRef<HTMLDivElement>(null);
+  // While dragging: which lights, how far (metres), and the scale frozen at the start.
+  const [drag, setDrag] = useState<{ ids: number[]; dx: number; dz: number; b: [number, number, number, number] } | null>(null);
   const { width, depth } = show.stage;
   // Front-of-house fixtures can sit beyond the stage edge: fit everything.
   const xs = [...show.fixtures.map((f) => f.position[0]), ...show.scenery.flatMap((s) => [s.position[0] - s.size[0] / 2, s.position[0] + s.size[0] / 2])];
   const zs = [...show.fixtures.map((f) => f.position[2]), ...show.scenery.map((s) => s.position[2])];
-  const minX = Math.min(-width / 2, ...xs) - 0.8;
-  const maxX = Math.max(width / 2, ...xs) + 0.8;
-  const minZ = Math.min(-depth / 2, ...zs) - 0.8;
-  const maxZ = Math.max(depth / 2, ...zs) + 0.8;
+  const [minX, maxX, minZ, maxZ] = drag?.b ?? [
+    Math.min(-width / 2, ...xs) - 0.8,
+    Math.max(width / 2, ...xs) + 0.8,
+    Math.min(-depth / 2, ...zs) - 0.8,
+    Math.max(depth / 2, ...zs) + 0.8,
+  ];
+  const posOf = (f: Show["fixtures"][number]) =>
+    drag?.ids.includes(f.id) ? ([f.position[0] + drag.dx, f.position[2] + drag.dz] as const) : ([f.position[0], f.position[2]] as const);
+
+  /** Drag a light (or all selected lights) around the plan; the Visualizer moves with it. */
+  const startMove = (e: React.PointerEvent, f: Show["fixtures"][number]) => {
+    if (e.button !== 0 || !plan.current) return;
+    const ids = sel.includes(f.id) && sel.length > 1 ? sel : [f.id];
+    const r = plan.current.getBoundingClientRect();
+    const b: [number, number, number, number] = [minX, maxX, minZ, maxZ];
+    const mx = (b[1] - b[0]) / r.width;
+    const mz = (b[3] - b[2]) / r.height;
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    let moved = false;
+    const snap = (v: number) => Math.round(v * 20) / 20; // 5 cm
+    const move = (ev: PointerEvent) => {
+      if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 4) return;
+      moved = true;
+      setDrag({ ids, dx: snap((ev.clientX - x0) * mx), dz: snap((ev.clientY - y0) * mz), b });
+    };
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      setDrag(null);
+      if (!moved) return;
+      planJustDragged = true;
+      setTimeout(() => (planJustDragged = false), 0);
+      const dx = snap((ev.clientX - x0) * mx);
+      const dz = snap((ev.clientY - y0) * mz);
+      for (const id of ids) {
+        const fx = show.fixtures.find((x) => x.id === id);
+        if (fx) void send({ type: "move_fixture", fixture: id, position: [fx.position[0] + dx, fx.position[1], fx.position[2] + dz], rotation: fx.rotation });
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
   const px = (x: number) => ((x - minX) / (maxX - minX)) * 100;
   const pz = (z: number) => ((z - minZ) / (maxZ - minZ)) * 100;
 
   return (
-    <div className="lk-plan" onClick={(e) => e.target === e.currentTarget && onClear()}>
+    <div className="lk-plan" ref={plan} onClick={(e) => e.target === e.currentTarget && onClear()}>
       <div
         className="lk-plan-stage"
         style={{ left: `${px(-width / 2)}%`, width: `${px(width / 2) - px(-width / 2)}%`, top: `${pz(-depth / 2)}%`, height: `${pz(depth / 2) - pz(-depth / 2)}%` }}
@@ -241,16 +354,17 @@ function StagePlan({
           <button
             key={f.id}
             className={`lk-fixture ${sel.includes(f.id) ? "sel" : ""} ${on ? "on" : ""}`}
+            onPointerDown={(e) => startMove(e, f)}
             style={{
-              left: `${px(f.position[0])}%`,
-              top: `${pz(f.position[2])}%`,
+              left: `${px(posOf(f)[0])}%`,
+              top: `${pz(posOf(f)[1])}%`,
               ["--c" as string]: hex,
               ["--i" as string]: v ? v.intensity : 0,
             }}
             title={`${f.name} — ${v ? Math.round(v.intensity * 100) : 0}%`}
             onClick={(e) => {
               e.stopPropagation();
-              onClick(f.id, e);
+              if (!planJustDragged) onClick(f.id, e);
             }}
           >
             <span className="lk-fixture-glow" />
@@ -258,7 +372,7 @@ function StagePlan({
           </button>
         );
       })}
-      <small className="lk-plan-hint">Click a light to select it · Shift-click to add · click empty space to clear</small>
+      <small className="lk-plan-hint">Click to select · Shift-click to add · drag to move (moves in the Visualizer too)</small>
     </div>
   );
 }

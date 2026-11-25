@@ -102,6 +102,17 @@ export default function PatchView({ show }: { show: Show }) {
   );
   const sel = show.fixtures.find((f) => f.id === selected) ?? null;
 
+  // Delete / Backspace removes the selected fixture (with a confirmation).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!sel || !["Delete", "Backspace"].includes(e.key) || (e.target as HTMLElement)?.closest("input, textarea, select")) return;
+      e.preventDefault();
+      void removeFixture(sel).then((gone) => gone && setSelected(null));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sel]);
+
   return (
     <div className="patch-view">
       <LibraryBrowser show={show} universe={universe} />
@@ -128,8 +139,12 @@ export default function PatchView({ show }: { show: Show }) {
             +
           </button>
         </div>
+        {sel ? (
+          <FixtureDetails key={sel.id} show={show} fixture={sel} universes={universes} onClose={() => setSelected(null)} />
+        ) : (
+          <div className="pv-hintbar muted">Click a fixture to rename, re-address or delete it (or press Delete). Drag it to move it.</div>
+        )}
         <UniverseGrid show={show} universe={universe} selected={selected} onSelect={setSelected} />
-        {sel && <FixtureDetails key={sel.id} show={show} fixture={sel} universes={universes} onClose={() => setSelected(null)} />}
         <GroupsEditor show={show} />
       </section>
     </div>
@@ -273,6 +288,18 @@ function UniverseGrid({ show, universe, selected, onSelect }: { show: Show; univ
 
 const ROW_H = 34;
 
+/** Ask, then remove a fixture everywhere it's used (groups, cues, positions). Resolves true if removed. */
+async function removeFixture(fixture: Fixture): Promise<boolean> {
+  if (!(await confirmDialog(`Delete “${fixture.name}” from the patch? It's also removed from groups, cues and positions.`))) return false;
+  await updateShow((d) => {
+    d.fixtures = d.fixtures.filter((f) => f.id !== fixture.id);
+    for (const g of d.groups) g.fixtures = g.fixtures.filter((x) => x !== fixture.id);
+    for (const c of d.cues) delete c.look.fixtures[String(fixture.id)];
+    for (const pos of d.positions) pos.values = pos.values.filter((v) => v.fixture !== fixture.id);
+  });
+  return true;
+}
+
 function FixtureDetails({ show, fixture, universes, onClose }: { show: Show; fixture: Fixture; universes: number[]; onClose: () => void }) {
   const p = show.profiles.find((x) => x.id === fixture.profile_id);
   const set = (patch: Partial<Fixture>) =>
@@ -326,21 +353,8 @@ function FixtureDetails({ show, fixture, universes, onClose }: { show: Show; fix
         >
           Duplicate
         </button>
-        <button
-          onClick={() =>
-            void confirmDialog(`Remove “${fixture.name}” from the patch?`).then((yes) => {
-              if (!yes) return;
-              onClose();
-              void updateShow((d) => {
-                d.fixtures = d.fixtures.filter((f) => f.id !== fixture.id);
-                for (const g of d.groups) g.fixtures = g.fixtures.filter((x) => x !== fixture.id);
-                for (const c of d.cues) delete c.look.fixtures[String(fixture.id)];
-                for (const pos of d.positions) pos.values = pos.values.filter((v) => v.fixture !== fixture.id);
-              });
-            })
-          }
-        >
-          Remove
+        <button className="danger-btn" onClick={() => void removeFixture(fixture).then((gone) => gone && onClose())}>
+          🗑 Delete fixture
         </button>
       </div>
       <div className="pv-channels">
