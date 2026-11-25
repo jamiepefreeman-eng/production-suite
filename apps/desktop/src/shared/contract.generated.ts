@@ -1912,25 +1912,45 @@ export const show: T.Show = {
       "id": 1,
       "name": "/m/bg.jpg",
       "path": "/m/bg.jpg",
-      "kind": "image"
+      "kind": "image",
+      "analysis": {
+        "colors": [
+          "#ff8800",
+          "#221100"
+        ],
+        "color_names": [
+          "orange"
+        ],
+        "brightness": 0.6,
+        "saturation": 0.8,
+        "motion": 0.3,
+        "duration": 12.5,
+        "tags": [
+          "warm",
+          "fast"
+        ]
+      }
     },
     {
       "id": 2,
       "name": "/m/loop.mp4",
       "path": "/m/loop.mp4",
-      "kind": "video"
+      "kind": "video",
+      "analysis": null
     },
     {
       "id": 3,
       "name": "/m/walkin.mp3",
       "path": "/m/walkin.mp3",
-      "kind": "audio"
+      "kind": "audio",
+      "analysis": null
     },
     {
       "id": 4,
       "name": "Camera",
       "path": "Blackmagic UltraStudio",
-      "kind": "input"
+      "kind": "input",
+      "analysis": null
     }
   ],
   "media_playlists": [
@@ -4517,25 +4537,45 @@ export const commands: T.Command[] = [
           "id": 1,
           "name": "/m/bg.jpg",
           "path": "/m/bg.jpg",
-          "kind": "image"
+          "kind": "image",
+          "analysis": {
+            "colors": [
+              "#ff8800",
+              "#221100"
+            ],
+            "color_names": [
+              "orange"
+            ],
+            "brightness": 0.6,
+            "saturation": 0.8,
+            "motion": 0.3,
+            "duration": 12.5,
+            "tags": [
+              "warm",
+              "fast"
+            ]
+          }
         },
         {
           "id": 2,
           "name": "/m/loop.mp4",
           "path": "/m/loop.mp4",
-          "kind": "video"
+          "kind": "video",
+          "analysis": null
         },
         {
           "id": 3,
           "name": "/m/walkin.mp3",
           "path": "/m/walkin.mp3",
-          "kind": "audio"
+          "kind": "audio",
+          "analysis": null
         },
         {
           "id": 4,
           "name": "Camera",
           "path": "Blackmagic UltraStudio",
-          "kind": "input"
+          "kind": "input",
+          "analysis": null
         }
       ],
       "media_playlists": [
@@ -6950,25 +6990,45 @@ export const commands: T.Command[] = [
           "id": 1,
           "name": "/m/bg.jpg",
           "path": "/m/bg.jpg",
-          "kind": "image"
+          "kind": "image",
+          "analysis": {
+            "colors": [
+              "#ff8800",
+              "#221100"
+            ],
+            "color_names": [
+              "orange"
+            ],
+            "brightness": 0.6,
+            "saturation": 0.8,
+            "motion": 0.3,
+            "duration": 12.5,
+            "tags": [
+              "warm",
+              "fast"
+            ]
+          }
         },
         {
           "id": 2,
           "name": "/m/loop.mp4",
           "path": "/m/loop.mp4",
-          "kind": "video"
+          "kind": "video",
+          "analysis": null
         },
         {
           "id": 3,
           "name": "/m/walkin.mp3",
           "path": "/m/walkin.mp3",
-          "kind": "audio"
+          "kind": "audio",
+          "analysis": null
         },
         {
           "id": 4,
           "name": "Camera",
           "path": "Blackmagic UltraStudio",
-          "kind": "input"
+          "kind": "input",
+          "analysis": null
         }
       ],
       "media_playlists": [
@@ -8177,6 +8237,30 @@ export const sceneResult: T.SceneResult = {
     "unknown": []
   }
 };
+
+export const mediaRanking: T.MediaRanking = {
+  "picks": [
+    {
+      "id": 1,
+      "reason": "warm orange with movement"
+    }
+  ],
+  "target": "Amazing Grace"
+};
+
+export const mediaRankingNoTarget: T.MediaRanking = {
+  "picks": [],
+  "target": null
+};
+
+export const mediaSummaries: T.MediaSummary[] = [
+  {
+    "id": 1,
+    "name": "Sunset",
+    "kind": "video",
+    "description": "orange"
+  }
+];
 
 export const aiStatus: T.AiStatus = {
   "has_api_key": false,

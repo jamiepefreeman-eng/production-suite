@@ -18,7 +18,7 @@ use serde::Serialize;
 use suite_core::ai::intent::{Action, Intent, ParseOutput};
 use suite_core::engine::{Command, Countdown, Event, Layers, LogLevel};
 use suite_core::presenter::{
-    ClearLayer, ElementKind, MediaItem, MediaKind, MediaPlaylist, SlideElement, SlideGroup, SlideTrigger, TextAlign, TextPosition, TextStyle, Theme,
+    ClearLayer, ElementKind, MediaAnalysis, MediaItem, MediaKind, MediaPlaylist, SlideElement, SlideGroup, SlideTrigger, TextAlign, TextPosition, TextStyle, Theme,
 };
 use suite_core::show::{Scenery, SceneryKind};
 use suite_core::lighting::{FixtureState, FixtureVisual, Look, Rgb};
@@ -42,7 +42,18 @@ fn write_typescript_contract() {
         .into_iter()
         .enumerate()
     {
-        show.media.push(MediaItem { id: i as u32 + 1, name: path.into(), path: path.into(), kind });
+        show.media.push(MediaItem { id: i as u32 + 1, name: path.into(), path: path.into(), kind, analysis: None });
+        if i == 0 {
+            show.media[0].analysis = Some(MediaAnalysis {
+                colors: vec!["#ff8800".into(), "#221100".into()],
+                color_names: vec!["orange".into()],
+                brightness: 0.6,
+                saturation: 0.8,
+                motion: 0.3,
+                duration: 12.5,
+                tags: vec!["warm".into(), "fast".into()],
+            });
+        }
     }
     for (i, position) in [TextPosition::Top, TextPosition::Bottom].into_iter().enumerate() {
         show.themes.push(Theme { name: format!("t{i}"), position, background_media: Some(1), ..Theme::default() });
@@ -67,7 +78,7 @@ fn write_typescript_contract() {
     {
         show.scenery.push(Scenery { id: 10 + i as u32, kind, ..Scenery::default() });
     }
-    show.media.push(MediaItem { id: 4, name: "Camera".into(), path: "Blackmagic UltraStudio".into(), kind: MediaKind::Input });
+    show.media.push(MediaItem { id: 4, name: "Camera".into(), path: "Blackmagic UltraStudio".into(), kind: MediaKind::Input, analysis: None });
     show.media_playlists.push(MediaPlaylist { name: "Backgrounds".into(), items: vec![1, 2] });
     show.presentations[1].groups.push(SlideGroup { name: "Vamp".into(), color: "#f97316".into() });
     show.presentations[1].arrangement = Some("Sunday".into());
@@ -311,6 +322,20 @@ fn write_typescript_contract() {
         "sceneResult",
         "T.SceneResult",
         &crate::ai_client::SceneResult { engine: "offline".into(), parsed: ParseOutput::default() },
+    );
+    o.add(
+        "mediaRanking",
+        "T.MediaRanking",
+        &crate::ai_client::MediaRanking {
+            picks: vec![crate::ai_client::MediaPick { id: 1, reason: "warm orange with movement".into() }],
+            target: Some("Amazing Grace".into()),
+        },
+    );
+    o.add("mediaRankingNoTarget", "T.MediaRanking", &crate::ai_client::MediaRanking { picks: vec![], target: None });
+    o.add(
+        "mediaSummaries",
+        "T.MediaSummary[]",
+        &vec![crate::ai_client::MediaSummary { id: 1, name: "Sunset".into(), kind: "video".into(), description: "orange".into() }],
     );
     o.add(
         "aiStatus",

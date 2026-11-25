@@ -175,7 +175,16 @@ export interface Presentation {
 }
 
 export type MediaKind = "image" | "video" | "audio" | "input";
-export interface MediaItem { id: number; name: string; path: string; kind: MediaKind }
+export interface MediaAnalysis {
+  colors: string[];
+  color_names: string[];
+  brightness: number;
+  saturation: number;
+  motion: number;
+  duration: number;
+  tags: string[];
+}
+export interface MediaItem { id: number; name: string; path: string; kind: MediaKind; analysis?: MediaAnalysis | null }
 export type TextPosition = "top" | "center" | "bottom" | "lower_third";
 export interface Theme {
   name: string;
@@ -324,5 +333,7 @@ export interface SerialPortInfo {
 }
 
 export interface MonitorInfo { index: number; name: string | null; width: number; height: number; x: number; y: number; scale: number }
+export interface MediaSummary { id: number; name: string; kind: string; description: string }
+export interface MediaRanking { picks: { id: number; reason: string }[]; target: string | null }
 export interface SceneResult { engine: "offline" | "llm"; parsed: ParseOutput }
 export interface AiStatus { has_api_key: boolean; model: string }

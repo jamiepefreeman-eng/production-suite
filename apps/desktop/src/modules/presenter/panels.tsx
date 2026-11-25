@@ -1,6 +1,7 @@
 // Media folders + media bin (bottom), and the right-hand tabs:
 // Audio · Props · Timers · Macros · Slide actions.
 
+import MediaSearch from "./MediaSearch";
 import { useEffect, useRef, useState } from "react";
 import { confirmDialog, pickMediaFiles } from "../../shared/bridge";
 import { startDrag, useDropTarget, wasDragging } from "../../shared/drag";
@@ -150,6 +151,7 @@ export function Bin({ show, folder, height, onResize }: { show: Show; folder: Fo
   const [q, setQ] = useState("");
   const [inputs, setInputs] = useState<VideoInput[] | null>(null);
   const [size, setSize] = useState(150);
+  const [finding, setFinding] = useState(false);
 
   const items = show.media.filter((m) => {
     if (q && !m.name.toLowerCase().includes(q.toLowerCase())) return false;
@@ -202,6 +204,9 @@ export function Bin({ show, folder, height, onResize }: { show: Show; folder: Fo
         <small className="muted">{items.length}</small>
         <span className="grow" />
         <input className="pp-bin-filter" placeholder="Filter" value={q} onChange={(e) => setQ(e.target.value)} />
+        <button className={`small ${finding ? "on" : ""}`} onClick={() => setFinding(!finding)} title="Describe a background and let AI find it in the bin">
+          ✦ Find
+        </button>
         {folder.kind === "input" ? (
           <button className="small" onClick={addInput}>
             + Add video input…
@@ -213,6 +218,7 @@ export function Bin({ show, folder, height, onResize }: { show: Show; folder: Fo
         )}
         <input type="range" min={90} max={260} value={size} onChange={(e) => setSize(Number(e.target.value))} title="Thumbnail size" />
       </div>
+      {finding && <MediaSearch show={show} onClose={() => setFinding(false)} />}
       {inputs && (
         <div className="pp-inputs">
           <b>Connected video inputs</b>

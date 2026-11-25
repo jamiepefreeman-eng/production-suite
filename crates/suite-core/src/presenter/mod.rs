@@ -13,6 +13,30 @@ pub struct MediaItem {
     pub name: String,
     pub path: String,
     pub kind: MediaKind,
+    /// What the picture looks like (filled in by the app; used by the AI media search).
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub analysis: Option<MediaAnalysis>,
+}
+
+/// Colours, brightness and motion of an image / video, measured from a few frames.
+#[derive(Debug, Clone, PartialEq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(default))]
+pub struct MediaAnalysis {
+    /// Main colours, most common first ("#rrggbb").
+    pub colors: Vec<String>,
+    /// Plain-language colour names ("orange", "deep blue").
+    pub color_names: Vec<String>,
+    /// 0..1
+    pub brightness: f32,
+    /// 0..1
+    pub saturation: f32,
+    /// 0..1: how much the picture changes between frames (0 for stills).
+    pub motion: f32,
+    /// Seconds (0 for stills).
+    pub duration: f32,
+    /// Words for searching: "warm", "fast", "dark", "bokeh"…
+    pub tags: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -32,6 +32,7 @@ export const api = {
   mixerDisconnect: () => call<T.MixerStatus>("mixer_disconnect"),
   mixerStatus: () => call<T.MixerStatus>("mixer_status"),
   aiBuildScene: (text: string, forceLlm = false) => call<T.SceneResult>("ai_build_scene", { text, forceLlm }),
+  aiRankMedia: (prompt: string, songs: string[], media: T.MediaSummary[]) => call<T.MediaRanking>("ai_rank_media", { prompt, songs, media }),
   aiStatus: () => call<T.AiStatus>("ai_status"),
   setApiKey: (key: string, model?: string) => call<void>("set_api_key", { key, model: model ?? null }),
   setVisualizerSource: (source: T.VizSource) => call<void>("set_visualizer_source", { source }),

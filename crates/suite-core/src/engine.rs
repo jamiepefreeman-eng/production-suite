@@ -543,6 +543,7 @@ mod tests {
             name: "Loop".into(),
             path: "/x/loop.mp4".into(),
             kind: crate::presenter::MediaKind::Video,
+            analysis: None,
         });
         let mut e = super::Engine::new(show);
         let now = std::time::Instant::now();

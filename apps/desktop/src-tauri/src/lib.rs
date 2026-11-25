@@ -79,6 +79,7 @@ pub fn run() {
             mixer_link::mixer_disconnect,
             mixer_link::mixer_status,
             ai_client::ai_build_scene,
+            ai_client::ai_rank_media,
             ai_client::ai_status,
             ai_client::set_api_key,
             viz_input::set_visualizer_source,

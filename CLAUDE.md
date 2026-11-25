@@ -127,6 +127,9 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 - [ ] Props / video inputs aren't drawn on Visualizer screens yet (text + background + countdown are)
 - [ ] SketchUp model import: STL unit default is inches (SketchUp's default STL export) — check sizes on a real
       export; large models (>50 MB) may be slow in the webview
+- [ ] AI media search with a real API key (only the offline ranking ran in tests); video analysis seeks frames
+      through the asset protocol — check speed on a big bin on macOS/Windows
+- [ ] Slide elements (text boxes, pictures, live feeds) aren't drawn on Visualizer screens (slide text formatting is)
 - [ ] "Match background" reads pixels through the asset protocol (needs its CORS header = app origin; works in
       Chromium tests) — confirm on macOS/Windows that a video background drives the lights
 
@@ -161,7 +164,13 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    Live/layers, right tabs Audio/Props/Timers/Macros/Slide), groups + arrangements (saved versions; Reflow
    repeats become arrangement entries), props layer, macros (`SlideTrigger` lists, depth-limited), drag
    media/props/macros onto slides, video inputs (`shared/inputs.ts`, getUserMedia by device name) in
-   Presenter and on Visualizer screens. Still to do: scripture library, media transport (play/pause/scrub),
+   Presenter and on Visualizer screens. *v0.8.0:* thumbnails/Next show only the slide's own media cue
+   (checkerboard otherwise, `SlideRender transparent`); Reflow is split with live slide previews (debounced
+   `parse_lyrics`); per-slide `Slide.style` (`TextStyle`, None = theme) and `Slide.elements` (`SlideElement`:
+   text / shape / media incl. live inputs, x,y,w,h 0..1) edited in `presenter/SlideDesigner.tsx` (Edit › 🎨);
+   AI media search (`presenter/mediaAnalysis.ts` measures colours/brightness/motion into `MediaItem.analysis`,
+   `ai_rank_media` asks Claude with structured output, offline keyword ranking fallback; "Use for song" sets
+   the first slide's media cue). Still to do: scripture library, media transport (play/pause/scrub),
    stage display layouts, native NDI (now via NDI Tools "NDI Webcam"), CCLI report.
    Older notes: themes/backgrounds (images + video loops), media playback, scripture library
    (public-domain KJV/WEB bundled; others need licences), arrangements (V1 C V2 C B C), stage display
