@@ -11,6 +11,10 @@ under "Assets". You don't need any other software.
    * Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to Production Suite.
    * Enter your password, then click **Open**. After that it opens normally.
 
+**Video inputs (capture cards / cameras):** the first time you add one, macOS asks
+“Production Suite would like to access the camera” — click **Allow**. If you clicked
+Don't Allow, turn it on in **System Settings → Privacy & Security → Camera**.
+
 ## Windows 10 / 11
 1. Download the file ending in **-setup.exe** and run it.
 2. If a blue "Windows protected your PC" box appears, click **More info → Run anyway**.

@@ -586,3 +586,4 @@ body.dragging, body.dragging * { cursor: grabbing !important; user-select: none 
 .render-prop span { position: relative; font-weight: 700; font-size: calc(var(--ph) * 50cqh); padding: 0 1.2cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .media-error { font-size: 10px !important; overflow: hidden; }
 .pp-bin-empty { grid-column: 1 / -1; }
+.pp-media-dur { position: absolute; left: 4px; bottom: 3px; z-index: 2; font-size: 10px; color: #fff; background: #000a; padding: 0 4px; border-radius: 3px; font-variant-numeric: tabular-nums; pointer-events: none; }

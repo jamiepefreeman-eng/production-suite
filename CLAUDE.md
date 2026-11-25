@@ -83,7 +83,10 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    stub `window.__TAURI_INTERNALS__` (invoke → show JSON from contract.generated.ts, convertFileSrc) shows
    the real DOM/CSS — far quicker than guessing from Xvfb screenshots. Beware class-name clashes in the
    single global stylesheet (e.g. `.output` is the output-window class).
-13. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
+13. **Background video**: use `LoopVideo` (presenter/render.tsx) — React never writes the `muted` attribute and
+   WKWebView won't autoplay a video it doesn't see as muted (it freezes on the first frame). Videos drawn to a
+   canvas (visualizer/screen.ts) must stay attached to the document or WebKit pauses them.
+14. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
    (use the rotated `.vfader-wrap` pattern), check caniuse for newer features.
 
 ## Hardware / protocol facts used
@@ -116,8 +119,11 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
       Linux WebKitGTK can't stream video from the asset protocol (media error 4), so untested here.
       Images and audio-file playback paths are the same mechanism.
 - [ ] Media paths are absolute: a show file moved to another computer needs the media at the same paths
-- [ ] Video inputs (getUserMedia) in WKWebView (macOS asks via NSCameraUsageDescription in src-tauri/Info.plist)
-      and WebView2 (Windows) — not testable headlessly; some capture drivers allow only one app/window at a time
+- [ ] Video inputs (getUserMedia): macOS needs BOTH NSCameraUsageDescription (src-tauri/Info.plist) AND the
+      `com.apple.security.device.camera` entitlement (src-tauri/Entitlements.plist) because the app is built with
+      the hardened runtime — without the entitlement macOS denies silently and the app never appears in
+      Privacy › Camera (owner hit this in v0.6.0). Windows: `on_permission_request` in lib.rs allows camera.
+      Some capture drivers allow only one app/window at a time.
 - [ ] Props / video inputs aren't drawn on Visualizer screens yet (text + background + countdown are)
 
 ## Roadmap (suggested order)

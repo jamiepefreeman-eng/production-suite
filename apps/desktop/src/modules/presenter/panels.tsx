@@ -247,9 +247,7 @@ export function Bin({ show, folder, height, onResize }: { show: Show; folder: Fo
             onClick={() => !wasDragging() && activate(m)}
             title={`${m.name} — click to put on screen (or play), drag onto a slide or a playlist`}
           >
-            <div className="pp-media-thumb">
-              {m.kind === "audio" ? <div className="media-fill pp-audio-thumb">♪</div> : <MediaFill item={m} play={m.kind === "input"} />}
-            </div>
+            <BinThumb m={m} />
             <div className="pp-media-name">
               <span className="ellipsis grow">{m.name}</span>
               <button
@@ -288,6 +286,27 @@ export function Bin({ show, folder, height, onResize }: { show: Show; folder: Fo
         )}
       </div>
     </section>
+  );
+}
+
+/** Bin thumbnail: still frame with its length; motion backgrounds play while you hover. */
+function BinThumb({ m }: { m: MediaItem }) {
+  const [hover, setHover] = useState(false);
+  const [dur, setDur] = useState<number | null>(null);
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+  return (
+    <div className="pp-media-thumb" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      {m.kind === "audio" ? (
+        <div className="media-fill pp-audio-thumb">♪</div>
+      ) : (
+        <MediaFill item={m} play={m.kind === "input" || (m.kind === "video" && hover)} onDuration={setDur} />
+      )}
+      {m.kind === "video" && (
+        <span className="pp-media-dur">
+          {dur && isFinite(dur) ? fmt(dur) : ""} <span title="Loops">⟲</span>
+        </span>
+      )}
+    </div>
   );
 }
 

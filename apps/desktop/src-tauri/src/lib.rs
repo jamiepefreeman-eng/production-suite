@@ -28,6 +28,15 @@ use tauri::{Emitter, Manager};
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        // Our own pages asking for cameras / capture cards (video inputs) and video autoplay:
+        // allow without a second web-view prompt. The OS still asks once (macOS Privacy › Camera).
+        .on_permission_request(|_, kind| {
+            use tauri::webview::{PermissionKind, PermissionResponse};
+            match kind {
+                PermissionKind::Camera | PermissionKind::Microphone | PermissionKind::Autoplay => PermissionResponse::Allow,
+                _ => PermissionResponse::Default,
+            }
+        })
         .setup(|app| {
             let settings = settings::Settings::load(app.handle());
             let state = Arc::new(AppState::new(suite_core::demo::demo_show(), settings));

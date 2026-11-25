@@ -60,16 +60,44 @@ function InputFill({ item }: { item: MediaItem }) {
   return <video ref={ref} className="media-fill" autoPlay muted playsInline />;
 }
 
-export function MediaFill({ item, play }: { item: MediaItem; play: boolean }) {
+/** Looping, silent background video that really autoplays everywhere. React never writes the
+ *  `muted` attribute, and Safari/WKWebView refuses to autoplay a video it doesn't see as muted —
+ *  which leaves it frozen on the first frame. Set it ourselves and call play(). */
+function LoopVideo({ src, onError }: { src: string; onError: React.ReactEventHandler<HTMLVideoElement> }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    const go = () => void v.play().catch(() => {});
+    go();
+    v.addEventListener("canplay", go);
+    return () => v.removeEventListener("canplay", go);
+  }, [src]);
+  return <video ref={ref} className="media-fill" src={src} autoPlay loop muted playsInline preload="auto" onError={onError} />;
+}
+
+export function MediaFill({ item, play, onDuration }: { item: MediaItem; play: boolean; onDuration?: (seconds: number) => void }) {
   if (item.kind === "input") return play ? <InputFill item={item} /> : <div className="media-fill media-input-thumb">● {item.name}</div>;
   const src = mediaUrl(item.path);
   if (item.kind === "image") return <img className="media-fill" src={src} alt="" draggable={false} onError={(e) => reportBroken(item, e)} />;
   if (item.kind === "video")
     return play ? (
-      <video className="media-fill" src={src} autoPlay loop muted playsInline onError={(e) => reportBroken(item, e)} />
+      <LoopVideo src={src} onError={(e) => reportBroken(item, e)} />
     ) : (
       // #t=0.5: a frame from just after the start, as a still.
-      <video className="media-fill" src={`${src}#t=0.5`} preload="metadata" muted playsInline onError={(e) => reportBroken(item, e)} />
+      <video
+        className="media-fill"
+        src={`${src}#t=0.5`}
+        preload="metadata"
+        muted
+        playsInline
+        onLoadedMetadata={(e) => onDuration?.(e.currentTarget.duration)}
+        onError={(e) => reportBroken(item, e)}
+      />
     );
   return null;
 }

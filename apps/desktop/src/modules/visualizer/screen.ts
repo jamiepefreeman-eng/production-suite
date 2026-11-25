@@ -42,6 +42,7 @@ export class ScreenPainter {
     this.content = c;
     if (bgChanged) {
       this.video?.pause();
+      this.video?.remove();
       this.img = null;
       this.video = null;
       if (c.stream) {
@@ -63,10 +64,18 @@ export class ScreenPainter {
   private makeVideo() {
     const v = document.createElement("video");
     v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
     v.loop = true;
     v.playsInline = true;
     v.autoplay = true;
-    void v.play().catch(() => {});
+    // WebKit pauses videos that aren't in the page; keep it in, invisibly.
+    v.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.01;pointer-events:none;";
+    document.body.appendChild(v);
+    const go = () => void v.play().catch(() => {});
+    v.addEventListener("canplay", go);
+    go();
     return v;
   }
 
@@ -160,6 +169,7 @@ export class ScreenPainter {
 
   dispose() {
     this.video?.pause();
+    this.video?.remove();
     this.texture.dispose();
   }
 }
