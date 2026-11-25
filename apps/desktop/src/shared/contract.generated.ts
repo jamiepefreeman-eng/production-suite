@@ -4,7 +4,7 @@
 import type * as T from "./types";
 
 export const show: T.Show = {
-  "name": "Demo — Sunday Service",
+  "name": "COR — Sunday Service",
   "stage": {
     "width": 12.0,
     "depth": 8.0,
@@ -40,7 +40,7 @@ export const show: T.Show = {
       "pan_range": 0.0,
       "tilt_range": 0.0,
       "beam_angle": 40.0,
-      "needs_verification": true
+      "needs_verification": false
     },
     {
       "id": "mdac-curtain-8ch",
@@ -94,7 +94,7 @@ export const show: T.Show = {
       "manufacturer": "MDAC",
       "model": "Sidewall",
       "mode": "Mode 1 (3ch)",
-      "kind": "strip",
+      "kind": "puck",
       "channels": [
         {
           "attr": "red",
@@ -113,14 +113,14 @@ export const show: T.Show = {
       "color_wheel": [],
       "pan_range": 0.0,
       "tilt_range": 0.0,
-      "beam_angle": 120.0,
+      "beam_angle": 40.0,
       "needs_verification": false
     },
     {
-      "id": "chauvet-intimidator-spot-250-13ch",
-      "manufacturer": "Chauvet DJ",
+      "id": "chauvet-intimidator-spot-led-250-advanced",
+      "manufacturer": "Chauvet",
       "model": "Intimidator Spot LED 250",
-      "mode": "13ch",
+      "mode": "Advanced (13ch)",
       "kind": "moving_spot",
       "channels": [
         {
@@ -152,20 +152,20 @@ export const show: T.Show = {
           "default": 0
         },
         {
+          "attr": "gobo_rotation",
+          "default": 0
+        },
+        {
+          "attr": "prism",
+          "default": 0
+        },
+        {
           "attr": "dimmer",
           "default": 0
         },
         {
           "attr": "shutter",
-          "default": 255
-        },
-        {
-          "attr": "control",
-          "default": 0
-        },
-        {
-          "attr": "control",
-          "default": 0
+          "default": 4
         },
         {
           "attr": "control",
@@ -178,13 +178,13 @@ export const show: T.Show = {
       ],
       "gobo_slots": [
         0,
-        10,
-        20,
-        30,
+        8,
+        16,
+        24,
+        32,
         40,
-        50,
-        60,
-        70
+        48,
+        56
       ],
       "color_wheel": [
         {
@@ -197,72 +197,128 @@ export const show: T.Show = {
           }
         },
         {
-          "name": "Red",
-          "dmx": 10,
-          "rgb": {
-            "r": 1.0,
-            "g": 0.0,
-            "b": 0.0
-          }
-        },
-        {
-          "name": "Orange",
-          "dmx": 20,
-          "rgb": {
-            "r": 1.0,
-            "g": 0.45,
-            "b": 0.0
-          }
-        },
-        {
           "name": "Yellow",
-          "dmx": 30,
+          "dmx": 7,
           "rgb": {
             "r": 1.0,
-            "g": 0.9,
-            "b": 0.0
-          }
-        },
-        {
-          "name": "Green",
-          "dmx": 40,
-          "rgb": {
-            "r": 0.0,
             "g": 1.0,
             "b": 0.0
           }
         },
         {
-          "name": "Blue",
-          "dmx": 50,
+          "name": "Pink",
+          "dmx": 14,
+          "rgb": {
+            "r": 1.0,
+            "g": 0.33,
+            "b": 0.5
+          }
+        },
+        {
+          "name": "Green",
+          "dmx": 21,
           "rgb": {
             "r": 0.0,
-            "g": 0.0,
-            "b": 1.0
+            "g": 0.67,
+            "b": 0.0
           }
         },
         {
-          "name": "Light Blue",
-          "dmx": 60,
-          "rgb": {
-            "r": 0.4,
-            "g": 0.7,
-            "b": 1.0
-          }
-        },
-        {
-          "name": "Magenta",
-          "dmx": 70,
+          "name": "Red",
+          "dmx": 28,
           "rgb": {
             "r": 1.0,
             "g": 0.0,
-            "b": 1.0
+            "b": 0.0
+          }
+        },
+        {
+          "name": "Light blue",
+          "dmx": 35,
+          "rgb": {
+            "r": 0.68,
+            "g": 0.85,
+            "b": 0.9
+          }
+        },
+        {
+          "name": "Kelly green",
+          "dmx": 42,
+          "rgb": {
+            "r": 0.33,
+            "g": 1.0,
+            "b": 0.0
+          }
+        },
+        {
+          "name": "Orange",
+          "dmx": 49,
+          "rgb": {
+            "r": 1.0,
+            "g": 0.33,
+            "b": 0.0
+          }
+        },
+        {
+          "name": "Dark blue",
+          "dmx": 56,
+          "rgb": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.55
           }
         }
       ],
       "pan_range": 540.0,
       "tilt_range": 270.0,
-      "beam_angle": 13.0,
+      "beam_angle": 17.0,
+      "needs_verification": false
+    },
+    {
+      "id": "mdac-backlight-8ch",
+      "manufacturer": "MDAC",
+      "model": "Backlight",
+      "mode": "Mode 1 (8ch)",
+      "kind": "par",
+      "channels": [
+        {
+          "attr": "dimmer",
+          "default": 0
+        },
+        {
+          "attr": "red",
+          "default": 0
+        },
+        {
+          "attr": "green",
+          "default": 0
+        },
+        {
+          "attr": "blue",
+          "default": 0
+        },
+        {
+          "attr": "unused",
+          "default": 0
+        },
+        {
+          "attr": "unused",
+          "default": 0
+        },
+        {
+          "attr": "unused",
+          "default": 0
+        },
+        {
+          "attr": "unused",
+          "default": 0
+        }
+      ],
+      "gobo_slots": [],
+      "color_wheel": [],
+      "pan_range": 0.0,
+      "tilt_range": 0.0,
+      "beam_angle": 30.0,
       "needs_verification": true
     }
   ],
@@ -274,7 +330,7 @@ export const show: T.Show = {
       "universe": 1,
       "address": 1,
       "position": [
-        -4.5,
+        -2.5,
         5.0,
         5.0
       ],
@@ -291,7 +347,7 @@ export const show: T.Show = {
       "universe": 1,
       "address": 5,
       "position": [
-        -1.5,
+        2.5,
         5.0,
         5.0
       ],
@@ -303,46 +359,46 @@ export const show: T.Show = {
     },
     {
       "id": 3,
-      "name": "Front 3",
-      "profile_id": "adj-cob-cannon-wash-4ch",
+      "name": "Curtain 1",
+      "profile_id": "mdac-curtain-8ch",
       "universe": 1,
-      "address": 9,
+      "address": 241,
       "position": [
-        1.5,
-        5.0,
-        5.0
+        -5.5,
+        0.05,
+        -3.6
       ],
       "rotation": [
-        -135.0,
+        -12.0,
         0.0,
         0.0
       ]
     },
     {
       "id": 4,
-      "name": "Front 4",
-      "profile_id": "adj-cob-cannon-wash-4ch",
+      "name": "Curtain 2",
+      "profile_id": "mdac-curtain-8ch",
       "universe": 1,
-      "address": 13,
+      "address": 249,
       "position": [
-        4.5,
-        5.0,
-        5.0
+        -4.5,
+        0.05,
+        -3.6
       ],
       "rotation": [
-        -135.0,
+        -12.0,
         0.0,
         0.0
       ]
     },
     {
       "id": 5,
-      "name": "Curtain 1",
+      "name": "Curtain 3",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
-      "address": 17,
+      "address": 257,
       "position": [
-        -6.0,
+        -3.5,
         0.05,
         -3.6
       ],
@@ -354,12 +410,12 @@ export const show: T.Show = {
     },
     {
       "id": 6,
-      "name": "Curtain 2",
+      "name": "Curtain 4",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 25,
       "position": [
-        -5.0,
+        -2.5,
         0.05,
         -3.6
       ],
@@ -371,12 +427,12 @@ export const show: T.Show = {
     },
     {
       "id": 7,
-      "name": "Curtain 3",
+      "name": "Curtain 5",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 33,
       "position": [
-        -4.0,
+        -1.5,
         0.05,
         -3.6
       ],
@@ -388,12 +444,12 @@ export const show: T.Show = {
     },
     {
       "id": 8,
-      "name": "Curtain 4",
+      "name": "Curtain 6",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 41,
       "position": [
-        -3.0,
+        -0.5,
         0.05,
         -3.6
       ],
@@ -405,12 +461,12 @@ export const show: T.Show = {
     },
     {
       "id": 9,
-      "name": "Curtain 5",
+      "name": "Curtain 7",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 49,
       "position": [
-        -2.0,
+        0.5,
         0.05,
         -3.6
       ],
@@ -422,12 +478,12 @@ export const show: T.Show = {
     },
     {
       "id": 10,
-      "name": "Curtain 6",
+      "name": "Curtain 8",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 57,
       "position": [
-        -1.0,
+        1.5,
         0.05,
         -3.6
       ],
@@ -439,12 +495,12 @@ export const show: T.Show = {
     },
     {
       "id": 11,
-      "name": "Curtain 7",
+      "name": "Curtain 9",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 65,
       "position": [
-        0.0,
+        2.5,
         0.05,
         -3.6
       ],
@@ -456,12 +512,12 @@ export const show: T.Show = {
     },
     {
       "id": 12,
-      "name": "Curtain 8",
+      "name": "Curtain 10",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 73,
       "position": [
-        1.0,
+        3.5,
         0.05,
         -3.6
       ],
@@ -473,12 +529,12 @@ export const show: T.Show = {
     },
     {
       "id": 13,
-      "name": "Curtain 9",
+      "name": "Curtain 11",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 81,
       "position": [
-        2.0,
+        4.5,
         0.05,
         -3.6
       ],
@@ -490,12 +546,12 @@ export const show: T.Show = {
     },
     {
       "id": 14,
-      "name": "Curtain 10",
+      "name": "Curtain 12",
       "profile_id": "mdac-curtain-8ch",
       "universe": 1,
       "address": 89,
       "position": [
-        3.0,
+        5.5,
         0.05,
         -3.6
       ],
@@ -507,95 +563,78 @@ export const show: T.Show = {
     },
     {
       "id": 15,
-      "name": "Curtain 11",
-      "profile_id": "mdac-curtain-8ch",
+      "name": "Sidewall L",
+      "profile_id": "mdac-sidewall-3ch",
       "universe": 1,
       "address": 97,
       "position": [
-        4.0,
+        -6.2,
         0.05,
-        -3.6
+        0.0
       ],
       "rotation": [
-        -12.0,
         0.0,
-        0.0
+        0.0,
+        12.0
       ]
     },
     {
       "id": 16,
-      "name": "Curtain 12",
-      "profile_id": "mdac-curtain-8ch",
+      "name": "Sidewall R",
+      "profile_id": "mdac-sidewall-3ch",
       "universe": 1,
-      "address": 105,
+      "address": 100,
       "position": [
-        5.0,
+        6.2,
         0.05,
-        -3.6
+        0.0
       ],
       "rotation": [
-        -12.0,
         0.0,
-        0.0
+        0.0,
+        -12.0
       ]
     },
     {
       "id": 17,
-      "name": "Curtain 13",
-      "profile_id": "mdac-curtain-8ch",
+      "name": "Backlight L",
+      "profile_id": "mdac-backlight-8ch",
       "universe": 1,
-      "address": 113,
+      "address": 103,
       "position": [
-        6.0,
-        0.05,
-        -3.6
+        -3.0,
+        0.3,
+        -3.2
       ],
       "rotation": [
-        -12.0,
+        30.0,
         0.0,
         0.0
       ]
     },
     {
       "id": 18,
-      "name": "Sidewall L",
-      "profile_id": "mdac-sidewall-3ch",
+      "name": "Backlight R",
+      "profile_id": "mdac-backlight-8ch",
       "universe": 1,
-      "address": 121,
+      "address": 111,
       "position": [
-        -6.5,
-        2.0,
-        0.0
+        3.0,
+        0.3,
+        -3.2
       ],
       "rotation": [
+        30.0,
         0.0,
-        90.0,
         0.0
       ]
     },
     {
       "id": 19,
-      "name": "Sidewall R",
-      "profile_id": "mdac-sidewall-3ch",
+      "name": "MH5",
+      "profile_id": "chauvet-intimidator-spot-led-250-advanced",
       "universe": 1,
-      "address": 124,
-      "position": [
-        6.5,
-        2.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -90.0,
-        0.0
-      ]
-    },
-    {
-      "id": 20,
-      "name": "Mover 1",
-      "profile_id": "chauvet-intimidator-spot-250-13ch",
-      "universe": 1,
-      "address": 127,
+      "address": 145,
       "position": [
         -4.5,
         6.0,
@@ -608,11 +647,11 @@ export const show: T.Show = {
       ]
     },
     {
-      "id": 21,
-      "name": "Mover 2",
-      "profile_id": "chauvet-intimidator-spot-250-13ch",
+      "id": 20,
+      "name": "MH6",
+      "profile_id": "chauvet-intimidator-spot-led-250-advanced",
       "universe": 1,
-      "address": 140,
+      "address": 158,
       "position": [
         -1.5,
         6.0,
@@ -625,11 +664,11 @@ export const show: T.Show = {
       ]
     },
     {
-      "id": 22,
-      "name": "Mover 3",
-      "profile_id": "chauvet-intimidator-spot-250-13ch",
+      "id": 21,
+      "name": "MH7",
+      "profile_id": "chauvet-intimidator-spot-led-250-advanced",
       "universe": 1,
-      "address": 153,
+      "address": 184,
       "position": [
         1.5,
         6.0,
@@ -642,11 +681,11 @@ export const show: T.Show = {
       ]
     },
     {
-      "id": 23,
-      "name": "Mover 4",
-      "profile_id": "chauvet-intimidator-spot-250-13ch",
+      "id": 22,
+      "name": "MH8",
+      "profile_id": "chauvet-intimidator-spot-led-250-advanced",
       "universe": 1,
-      "address": 166,
+      "address": 171,
       "position": [
         4.5,
         6.0,
@@ -670,6 +709,8 @@ export const show: T.Show = {
         "back"
       ],
       "fixtures": [
+        3,
+        4,
         5,
         6,
         7,
@@ -679,10 +720,7 @@ export const show: T.Show = {
         11,
         12,
         13,
-        14,
-        15,
-        16,
-        17
+        14
       ]
     },
     {
@@ -696,9 +734,7 @@ export const show: T.Show = {
       ],
       "fixtures": [
         1,
-        2,
-        3,
-        4
+        2
       ]
     },
     {
@@ -710,8 +746,8 @@ export const show: T.Show = {
         "side lights"
       ],
       "fixtures": [
-        18,
-        19
+        15,
+        16
       ]
     },
     {
@@ -724,10 +760,23 @@ export const show: T.Show = {
         "heads"
       ],
       "fixtures": [
+        19,
         20,
         21,
-        22,
-        23
+        22
+      ]
+    },
+    {
+      "name": "Backlights",
+      "aliases": [
+        "backlight",
+        "back lights",
+        "backlighting",
+        "rear lights"
+      ],
+      "fixtures": [
+        17,
+        18
       ]
     }
   ],
@@ -742,22 +791,22 @@ export const show: T.Show = {
       ],
       "values": [
         {
-          "fixture": 20,
+          "fixture": 19,
           "pan": 0.53,
           "tilt": 0.42
         },
         {
-          "fixture": 21,
+          "fixture": 20,
           "pan": 0.51,
           "tilt": 0.42
         },
         {
-          "fixture": 22,
+          "fixture": 21,
           "pan": 0.49,
           "tilt": 0.42
         },
         {
-          "fixture": 23,
+          "fixture": 22,
           "pan": 0.47,
           "tilt": 0.42
         }
@@ -773,22 +822,22 @@ export const show: T.Show = {
       ],
       "values": [
         {
-          "fixture": 20,
+          "fixture": 19,
           "pan": 0.55,
           "tilt": 0.36
         },
         {
-          "fixture": 21,
+          "fixture": 20,
           "pan": 0.52,
           "tilt": 0.36
         },
         {
-          "fixture": 22,
+          "fixture": 21,
           "pan": 0.48,
           "tilt": 0.36
         },
         {
-          "fixture": 23,
+          "fixture": 22,
           "pan": 0.45,
           "tilt": 0.36
         }
@@ -803,6 +852,11 @@ export const show: T.Show = {
       ],
       "values": [
         {
+          "fixture": 19,
+          "pan": 0.5,
+          "tilt": 0.2
+        },
+        {
           "fixture": 20,
           "pan": 0.5,
           "tilt": 0.2
@@ -814,11 +868,6 @@ export const show: T.Show = {
         },
         {
           "fixture": 22,
-          "pan": 0.5,
-          "tilt": 0.2
-        },
-        {
-          "fixture": 23,
           "pan": 0.5,
           "tilt": 0.2
         }
@@ -832,6 +881,11 @@ export const show: T.Show = {
       ],
       "values": [
         {
+          "fixture": 19,
+          "pan": 0.5,
+          "tilt": 0.62
+        },
+        {
           "fixture": 20,
           "pan": 0.5,
           "tilt": 0.62
@@ -843,11 +897,6 @@ export const show: T.Show = {
         },
         {
           "fixture": 22,
-          "pan": 0.5,
-          "tilt": 0.62
-        },
-        {
-          "fixture": 23,
           "pan": 0.5,
           "tilt": 0.62
         }
@@ -883,22 +932,22 @@ export const show: T.Show = {
             "tilt": null
           },
           "3": {
-            "intensity": 0.4,
+            "intensity": 0.6,
             "color": {
-              "r": 1.0,
-              "g": 0.78,
-              "b": 0.5
+              "r": 0.0,
+              "g": 0.0,
+              "b": 1.0
             },
             "gobo": null,
             "pan": null,
             "tilt": null
           },
           "4": {
-            "intensity": 0.4,
+            "intensity": 0.6,
             "color": {
-              "r": 1.0,
-              "g": 0.78,
-              "b": 0.5
+              "r": 0.0,
+              "g": 0.0,
+              "b": 1.0
             },
             "gobo": null,
             "pan": null,
@@ -1015,39 +1064,6 @@ export const show: T.Show = {
             "tilt": null
           },
           "15": {
-            "intensity": 0.6,
-            "color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 1.0
-            },
-            "gobo": null,
-            "pan": null,
-            "tilt": null
-          },
-          "16": {
-            "intensity": 0.6,
-            "color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 1.0
-            },
-            "gobo": null,
-            "pan": null,
-            "tilt": null
-          },
-          "17": {
-            "intensity": 0.6,
-            "color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 1.0
-            },
-            "gobo": null,
-            "pan": null,
-            "tilt": null
-          },
-          "18": {
             "intensity": 0.5,
             "color": {
               "r": 0.0,
@@ -1058,7 +1074,7 @@ export const show: T.Show = {
             "pan": null,
             "tilt": null
           },
-          "19": {
+          "16": {
             "intensity": 0.5,
             "color": {
               "r": 0.0,
@@ -1102,22 +1118,22 @@ export const show: T.Show = {
             "tilt": null
           },
           "3": {
-            "intensity": 0.85,
+            "intensity": 1.0,
             "color": {
-              "r": 1.0,
-              "g": 0.78,
-              "b": 0.5
+              "r": 0.55,
+              "g": 0.0,
+              "b": 1.0
             },
             "gobo": null,
             "pan": null,
             "tilt": null
           },
           "4": {
-            "intensity": 0.85,
+            "intensity": 1.0,
             "color": {
-              "r": 1.0,
-              "g": 0.78,
-              "b": 0.5
+              "r": 0.55,
+              "g": 0.0,
+              "b": 1.0
             },
             "gobo": null,
             "pan": null,
@@ -1234,9 +1250,9 @@ export const show: T.Show = {
             "tilt": null
           },
           "15": {
-            "intensity": 1.0,
+            "intensity": 0.8,
             "color": {
-              "r": 0.55,
+              "r": 0.0,
               "g": 0.0,
               "b": 1.0
             },
@@ -1245,9 +1261,9 @@ export const show: T.Show = {
             "tilt": null
           },
           "16": {
-            "intensity": 1.0,
+            "intensity": 0.8,
             "color": {
-              "r": 0.55,
+              "r": 0.0,
               "g": 0.0,
               "b": 1.0
             },
@@ -1256,9 +1272,9 @@ export const show: T.Show = {
             "tilt": null
           },
           "17": {
-            "intensity": 1.0,
+            "intensity": 0.7,
             "color": {
-              "r": 0.55,
+              "r": 0.0,
               "g": 0.0,
               "b": 1.0
             },
@@ -1267,7 +1283,7 @@ export const show: T.Show = {
             "tilt": null
           },
           "18": {
-            "intensity": 0.8,
+            "intensity": 0.7,
             "color": {
               "r": 0.0,
               "g": 0.0,
@@ -1278,17 +1294,6 @@ export const show: T.Show = {
             "tilt": null
           },
           "19": {
-            "intensity": 0.8,
-            "color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 1.0
-            },
-            "gobo": null,
-            "pan": null,
-            "tilt": null
-          },
-          "20": {
             "intensity": 1.0,
             "color": {
               "r": 1.0,
@@ -1299,7 +1304,7 @@ export const show: T.Show = {
             "pan": 0.53,
             "tilt": 0.42
           },
-          "21": {
+          "20": {
             "intensity": 1.0,
             "color": {
               "r": 1.0,
@@ -1310,7 +1315,7 @@ export const show: T.Show = {
             "pan": 0.51,
             "tilt": 0.42
           },
-          "22": {
+          "21": {
             "intensity": 1.0,
             "color": {
               "r": 1.0,
@@ -1321,7 +1326,7 @@ export const show: T.Show = {
             "pan": 0.49,
             "tilt": 0.42
           },
-          "23": {
+          "22": {
             "intensity": 1.0,
             "color": {
               "r": 1.0,
@@ -1365,22 +1370,22 @@ export const show: T.Show = {
             "tilt": null
           },
           "3": {
-            "intensity": 0.9,
+            "intensity": 0.2,
             "color": {
-              "r": 1.0,
-              "g": 0.78,
-              "b": 0.5
+              "r": 0.0,
+              "g": 0.0,
+              "b": 1.0
             },
             "gobo": null,
             "pan": null,
             "tilt": null
           },
           "4": {
-            "intensity": 0.9,
+            "intensity": 0.2,
             "color": {
-              "r": 1.0,
-              "g": 0.78,
-              "b": 0.5
+              "r": 0.0,
+              "g": 0.0,
+              "b": 1.0
             },
             "gobo": null,
             "pan": null,
@@ -1508,39 +1513,6 @@ export const show: T.Show = {
             "tilt": null
           },
           "16": {
-            "intensity": 0.2,
-            "color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 1.0
-            },
-            "gobo": null,
-            "pan": null,
-            "tilt": null
-          },
-          "17": {
-            "intensity": 0.2,
-            "color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 1.0
-            },
-            "gobo": null,
-            "pan": null,
-            "tilt": null
-          },
-          "18": {
-            "intensity": 0.2,
-            "color": {
-              "r": 0.0,
-              "g": 0.0,
-              "b": 1.0
-            },
-            "gobo": null,
-            "pan": null,
-            "tilt": null
-          },
-          "19": {
             "intensity": 0.2,
             "color": {
               "r": 0.0,
@@ -1775,6 +1747,48 @@ export const show: T.Show = {
       "color": "#b9b4aa"
     },
     {
+      "id": 2,
+      "name": "Side wall L",
+      "kind": "wall",
+      "position": [
+        -6.6,
+        0.0,
+        0.0
+      ],
+      "size": [
+        8.0,
+        4.0,
+        0.15
+      ],
+      "rotation": [
+        0.0,
+        90.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 3,
+      "name": "Side wall R",
+      "kind": "wall",
+      "position": [
+        6.6,
+        0.0,
+        0.0
+      ],
+      "size": [
+        8.0,
+        4.0,
+        0.15
+      ],
+      "rotation": [
+        0.0,
+        90.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
       "id": 10,
       "name": "Wall",
       "kind": "drape",
@@ -1965,7 +1979,7 @@ export const commands: T.Command[] = [
   {
     "type": "load_show",
     "show": {
-      "name": "Demo — Sunday Service",
+      "name": "COR — Sunday Service",
       "stage": {
         "width": 12.0,
         "depth": 8.0,
@@ -2001,7 +2015,7 @@ export const commands: T.Command[] = [
           "pan_range": 0.0,
           "tilt_range": 0.0,
           "beam_angle": 40.0,
-          "needs_verification": true
+          "needs_verification": false
         },
         {
           "id": "mdac-curtain-8ch",
@@ -2055,7 +2069,7 @@ export const commands: T.Command[] = [
           "manufacturer": "MDAC",
           "model": "Sidewall",
           "mode": "Mode 1 (3ch)",
-          "kind": "strip",
+          "kind": "puck",
           "channels": [
             {
               "attr": "red",
@@ -2074,14 +2088,14 @@ export const commands: T.Command[] = [
           "color_wheel": [],
           "pan_range": 0.0,
           "tilt_range": 0.0,
-          "beam_angle": 120.0,
+          "beam_angle": 40.0,
           "needs_verification": false
         },
         {
-          "id": "chauvet-intimidator-spot-250-13ch",
-          "manufacturer": "Chauvet DJ",
+          "id": "chauvet-intimidator-spot-led-250-advanced",
+          "manufacturer": "Chauvet",
           "model": "Intimidator Spot LED 250",
-          "mode": "13ch",
+          "mode": "Advanced (13ch)",
           "kind": "moving_spot",
           "channels": [
             {
@@ -2113,20 +2127,20 @@ export const commands: T.Command[] = [
               "default": 0
             },
             {
+              "attr": "gobo_rotation",
+              "default": 0
+            },
+            {
+              "attr": "prism",
+              "default": 0
+            },
+            {
               "attr": "dimmer",
               "default": 0
             },
             {
               "attr": "shutter",
-              "default": 255
-            },
-            {
-              "attr": "control",
-              "default": 0
-            },
-            {
-              "attr": "control",
-              "default": 0
+              "default": 4
             },
             {
               "attr": "control",
@@ -2139,13 +2153,13 @@ export const commands: T.Command[] = [
           ],
           "gobo_slots": [
             0,
-            10,
-            20,
-            30,
+            8,
+            16,
+            24,
+            32,
             40,
-            50,
-            60,
-            70
+            48,
+            56
           ],
           "color_wheel": [
             {
@@ -2158,72 +2172,128 @@ export const commands: T.Command[] = [
               }
             },
             {
-              "name": "Red",
-              "dmx": 10,
-              "rgb": {
-                "r": 1.0,
-                "g": 0.0,
-                "b": 0.0
-              }
-            },
-            {
-              "name": "Orange",
-              "dmx": 20,
-              "rgb": {
-                "r": 1.0,
-                "g": 0.45,
-                "b": 0.0
-              }
-            },
-            {
               "name": "Yellow",
-              "dmx": 30,
+              "dmx": 7,
               "rgb": {
                 "r": 1.0,
-                "g": 0.9,
-                "b": 0.0
-              }
-            },
-            {
-              "name": "Green",
-              "dmx": 40,
-              "rgb": {
-                "r": 0.0,
                 "g": 1.0,
                 "b": 0.0
               }
             },
             {
-              "name": "Blue",
-              "dmx": 50,
+              "name": "Pink",
+              "dmx": 14,
+              "rgb": {
+                "r": 1.0,
+                "g": 0.33,
+                "b": 0.5
+              }
+            },
+            {
+              "name": "Green",
+              "dmx": 21,
               "rgb": {
                 "r": 0.0,
-                "g": 0.0,
-                "b": 1.0
+                "g": 0.67,
+                "b": 0.0
               }
             },
             {
-              "name": "Light Blue",
-              "dmx": 60,
-              "rgb": {
-                "r": 0.4,
-                "g": 0.7,
-                "b": 1.0
-              }
-            },
-            {
-              "name": "Magenta",
-              "dmx": 70,
+              "name": "Red",
+              "dmx": 28,
               "rgb": {
                 "r": 1.0,
                 "g": 0.0,
-                "b": 1.0
+                "b": 0.0
+              }
+            },
+            {
+              "name": "Light blue",
+              "dmx": 35,
+              "rgb": {
+                "r": 0.68,
+                "g": 0.85,
+                "b": 0.9
+              }
+            },
+            {
+              "name": "Kelly green",
+              "dmx": 42,
+              "rgb": {
+                "r": 0.33,
+                "g": 1.0,
+                "b": 0.0
+              }
+            },
+            {
+              "name": "Orange",
+              "dmx": 49,
+              "rgb": {
+                "r": 1.0,
+                "g": 0.33,
+                "b": 0.0
+              }
+            },
+            {
+              "name": "Dark blue",
+              "dmx": 56,
+              "rgb": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.55
               }
             }
           ],
           "pan_range": 540.0,
           "tilt_range": 270.0,
-          "beam_angle": 13.0,
+          "beam_angle": 17.0,
+          "needs_verification": false
+        },
+        {
+          "id": "mdac-backlight-8ch",
+          "manufacturer": "MDAC",
+          "model": "Backlight",
+          "mode": "Mode 1 (8ch)",
+          "kind": "par",
+          "channels": [
+            {
+              "attr": "dimmer",
+              "default": 0
+            },
+            {
+              "attr": "red",
+              "default": 0
+            },
+            {
+              "attr": "green",
+              "default": 0
+            },
+            {
+              "attr": "blue",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            }
+          ],
+          "gobo_slots": [],
+          "color_wheel": [],
+          "pan_range": 0.0,
+          "tilt_range": 0.0,
+          "beam_angle": 30.0,
           "needs_verification": true
         }
       ],
@@ -2235,7 +2305,7 @@ export const commands: T.Command[] = [
           "universe": 1,
           "address": 1,
           "position": [
-            -4.5,
+            -2.5,
             5.0,
             5.0
           ],
@@ -2252,7 +2322,7 @@ export const commands: T.Command[] = [
           "universe": 1,
           "address": 5,
           "position": [
-            -1.5,
+            2.5,
             5.0,
             5.0
           ],
@@ -2264,46 +2334,46 @@ export const commands: T.Command[] = [
         },
         {
           "id": 3,
-          "name": "Front 3",
-          "profile_id": "adj-cob-cannon-wash-4ch",
+          "name": "Curtain 1",
+          "profile_id": "mdac-curtain-8ch",
           "universe": 1,
-          "address": 9,
+          "address": 241,
           "position": [
-            1.5,
-            5.0,
-            5.0
+            -5.5,
+            0.05,
+            -3.6
           ],
           "rotation": [
-            -135.0,
+            -12.0,
             0.0,
             0.0
           ]
         },
         {
           "id": 4,
-          "name": "Front 4",
-          "profile_id": "adj-cob-cannon-wash-4ch",
+          "name": "Curtain 2",
+          "profile_id": "mdac-curtain-8ch",
           "universe": 1,
-          "address": 13,
+          "address": 249,
           "position": [
-            4.5,
-            5.0,
-            5.0
+            -4.5,
+            0.05,
+            -3.6
           ],
           "rotation": [
-            -135.0,
+            -12.0,
             0.0,
             0.0
           ]
         },
         {
           "id": 5,
-          "name": "Curtain 1",
+          "name": "Curtain 3",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
-          "address": 17,
+          "address": 257,
           "position": [
-            -6.0,
+            -3.5,
             0.05,
             -3.6
           ],
@@ -2315,12 +2385,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 6,
-          "name": "Curtain 2",
+          "name": "Curtain 4",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 25,
           "position": [
-            -5.0,
+            -2.5,
             0.05,
             -3.6
           ],
@@ -2332,12 +2402,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 7,
-          "name": "Curtain 3",
+          "name": "Curtain 5",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 33,
           "position": [
-            -4.0,
+            -1.5,
             0.05,
             -3.6
           ],
@@ -2349,12 +2419,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 8,
-          "name": "Curtain 4",
+          "name": "Curtain 6",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 41,
           "position": [
-            -3.0,
+            -0.5,
             0.05,
             -3.6
           ],
@@ -2366,12 +2436,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 9,
-          "name": "Curtain 5",
+          "name": "Curtain 7",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 49,
           "position": [
-            -2.0,
+            0.5,
             0.05,
             -3.6
           ],
@@ -2383,12 +2453,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 10,
-          "name": "Curtain 6",
+          "name": "Curtain 8",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 57,
           "position": [
-            -1.0,
+            1.5,
             0.05,
             -3.6
           ],
@@ -2400,12 +2470,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 11,
-          "name": "Curtain 7",
+          "name": "Curtain 9",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 65,
           "position": [
-            0.0,
+            2.5,
             0.05,
             -3.6
           ],
@@ -2417,12 +2487,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 12,
-          "name": "Curtain 8",
+          "name": "Curtain 10",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 73,
           "position": [
-            1.0,
+            3.5,
             0.05,
             -3.6
           ],
@@ -2434,12 +2504,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 13,
-          "name": "Curtain 9",
+          "name": "Curtain 11",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 81,
           "position": [
-            2.0,
+            4.5,
             0.05,
             -3.6
           ],
@@ -2451,12 +2521,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 14,
-          "name": "Curtain 10",
+          "name": "Curtain 12",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 89,
           "position": [
-            3.0,
+            5.5,
             0.05,
             -3.6
           ],
@@ -2468,95 +2538,78 @@ export const commands: T.Command[] = [
         },
         {
           "id": 15,
-          "name": "Curtain 11",
-          "profile_id": "mdac-curtain-8ch",
+          "name": "Sidewall L",
+          "profile_id": "mdac-sidewall-3ch",
           "universe": 1,
           "address": 97,
           "position": [
-            4.0,
+            -6.2,
             0.05,
-            -3.6
+            0.0
           ],
           "rotation": [
-            -12.0,
             0.0,
-            0.0
+            0.0,
+            12.0
           ]
         },
         {
           "id": 16,
-          "name": "Curtain 12",
-          "profile_id": "mdac-curtain-8ch",
+          "name": "Sidewall R",
+          "profile_id": "mdac-sidewall-3ch",
           "universe": 1,
-          "address": 105,
+          "address": 100,
           "position": [
-            5.0,
+            6.2,
             0.05,
-            -3.6
+            0.0
           ],
           "rotation": [
-            -12.0,
             0.0,
-            0.0
+            0.0,
+            -12.0
           ]
         },
         {
           "id": 17,
-          "name": "Curtain 13",
-          "profile_id": "mdac-curtain-8ch",
+          "name": "Backlight L",
+          "profile_id": "mdac-backlight-8ch",
           "universe": 1,
-          "address": 113,
+          "address": 103,
           "position": [
-            6.0,
-            0.05,
-            -3.6
+            -3.0,
+            0.3,
+            -3.2
           ],
           "rotation": [
-            -12.0,
+            30.0,
             0.0,
             0.0
           ]
         },
         {
           "id": 18,
-          "name": "Sidewall L",
-          "profile_id": "mdac-sidewall-3ch",
+          "name": "Backlight R",
+          "profile_id": "mdac-backlight-8ch",
           "universe": 1,
-          "address": 121,
+          "address": 111,
           "position": [
-            -6.5,
-            2.0,
-            0.0
+            3.0,
+            0.3,
+            -3.2
           ],
           "rotation": [
+            30.0,
             0.0,
-            90.0,
             0.0
           ]
         },
         {
           "id": 19,
-          "name": "Sidewall R",
-          "profile_id": "mdac-sidewall-3ch",
+          "name": "MH5",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 124,
-          "position": [
-            6.5,
-            2.0,
-            0.0
-          ],
-          "rotation": [
-            0.0,
-            -90.0,
-            0.0
-          ]
-        },
-        {
-          "id": 20,
-          "name": "Mover 1",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
-          "universe": 1,
-          "address": 127,
+          "address": 145,
           "position": [
             -4.5,
             6.0,
@@ -2569,11 +2622,11 @@ export const commands: T.Command[] = [
           ]
         },
         {
-          "id": 21,
-          "name": "Mover 2",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
+          "id": 20,
+          "name": "MH6",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 140,
+          "address": 158,
           "position": [
             -1.5,
             6.0,
@@ -2586,11 +2639,11 @@ export const commands: T.Command[] = [
           ]
         },
         {
-          "id": 22,
-          "name": "Mover 3",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
+          "id": 21,
+          "name": "MH7",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 153,
+          "address": 184,
           "position": [
             1.5,
             6.0,
@@ -2603,11 +2656,11 @@ export const commands: T.Command[] = [
           ]
         },
         {
-          "id": 23,
-          "name": "Mover 4",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
+          "id": 22,
+          "name": "MH8",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 166,
+          "address": 171,
           "position": [
             4.5,
             6.0,
@@ -2631,6 +2684,8 @@ export const commands: T.Command[] = [
             "back"
           ],
           "fixtures": [
+            3,
+            4,
             5,
             6,
             7,
@@ -2640,10 +2695,7 @@ export const commands: T.Command[] = [
             11,
             12,
             13,
-            14,
-            15,
-            16,
-            17
+            14
           ]
         },
         {
@@ -2657,9 +2709,7 @@ export const commands: T.Command[] = [
           ],
           "fixtures": [
             1,
-            2,
-            3,
-            4
+            2
           ]
         },
         {
@@ -2671,8 +2721,8 @@ export const commands: T.Command[] = [
             "side lights"
           ],
           "fixtures": [
-            18,
-            19
+            15,
+            16
           ]
         },
         {
@@ -2685,10 +2735,23 @@ export const commands: T.Command[] = [
             "heads"
           ],
           "fixtures": [
+            19,
             20,
             21,
-            22,
-            23
+            22
+          ]
+        },
+        {
+          "name": "Backlights",
+          "aliases": [
+            "backlight",
+            "back lights",
+            "backlighting",
+            "rear lights"
+          ],
+          "fixtures": [
+            17,
+            18
           ]
         }
       ],
@@ -2703,22 +2766,22 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
-              "fixture": 20,
+              "fixture": 19,
               "pan": 0.53,
               "tilt": 0.42
             },
             {
-              "fixture": 21,
+              "fixture": 20,
               "pan": 0.51,
               "tilt": 0.42
             },
             {
-              "fixture": 22,
+              "fixture": 21,
               "pan": 0.49,
               "tilt": 0.42
             },
             {
-              "fixture": 23,
+              "fixture": 22,
               "pan": 0.47,
               "tilt": 0.42
             }
@@ -2734,22 +2797,22 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
-              "fixture": 20,
+              "fixture": 19,
               "pan": 0.55,
               "tilt": 0.36
             },
             {
-              "fixture": 21,
+              "fixture": 20,
               "pan": 0.52,
               "tilt": 0.36
             },
             {
-              "fixture": 22,
+              "fixture": 21,
               "pan": 0.48,
               "tilt": 0.36
             },
             {
-              "fixture": 23,
+              "fixture": 22,
               "pan": 0.45,
               "tilt": 0.36
             }
@@ -2764,6 +2827,11 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
+              "fixture": 19,
+              "pan": 0.5,
+              "tilt": 0.2
+            },
+            {
               "fixture": 20,
               "pan": 0.5,
               "tilt": 0.2
@@ -2775,11 +2843,6 @@ export const commands: T.Command[] = [
             },
             {
               "fixture": 22,
-              "pan": 0.5,
-              "tilt": 0.2
-            },
-            {
-              "fixture": 23,
               "pan": 0.5,
               "tilt": 0.2
             }
@@ -2793,6 +2856,11 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
+              "fixture": 19,
+              "pan": 0.5,
+              "tilt": 0.62
+            },
+            {
               "fixture": 20,
               "pan": 0.5,
               "tilt": 0.62
@@ -2804,11 +2872,6 @@ export const commands: T.Command[] = [
             },
             {
               "fixture": 22,
-              "pan": 0.5,
-              "tilt": 0.62
-            },
-            {
-              "fixture": 23,
               "pan": 0.5,
               "tilt": 0.62
             }
@@ -2844,22 +2907,22 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "3": {
-                "intensity": 0.4,
+                "intensity": 0.6,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
                 "tilt": null
               },
               "4": {
-                "intensity": 0.4,
+                "intensity": 0.6,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
@@ -2976,39 +3039,6 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "15": {
-                "intensity": 0.6,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "16": {
-                "intensity": 0.6,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "17": {
-                "intensity": 0.6,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "18": {
                 "intensity": 0.5,
                 "color": {
                   "r": 0.0,
@@ -3019,7 +3049,7 @@ export const commands: T.Command[] = [
                 "pan": null,
                 "tilt": null
               },
-              "19": {
+              "16": {
                 "intensity": 0.5,
                 "color": {
                   "r": 0.0,
@@ -3063,22 +3093,22 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "3": {
-                "intensity": 0.85,
+                "intensity": 1.0,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.55,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
                 "tilt": null
               },
               "4": {
-                "intensity": 0.85,
+                "intensity": 1.0,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.55,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
@@ -3195,9 +3225,9 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "15": {
-                "intensity": 1.0,
+                "intensity": 0.8,
                 "color": {
-                  "r": 0.55,
+                  "r": 0.0,
                   "g": 0.0,
                   "b": 1.0
                 },
@@ -3206,9 +3236,9 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "16": {
-                "intensity": 1.0,
+                "intensity": 0.8,
                 "color": {
-                  "r": 0.55,
+                  "r": 0.0,
                   "g": 0.0,
                   "b": 1.0
                 },
@@ -3217,9 +3247,9 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "17": {
-                "intensity": 1.0,
+                "intensity": 0.7,
                 "color": {
-                  "r": 0.55,
+                  "r": 0.0,
                   "g": 0.0,
                   "b": 1.0
                 },
@@ -3228,7 +3258,7 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "18": {
-                "intensity": 0.8,
+                "intensity": 0.7,
                 "color": {
                   "r": 0.0,
                   "g": 0.0,
@@ -3239,17 +3269,6 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "19": {
-                "intensity": 0.8,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "20": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -3260,7 +3279,7 @@ export const commands: T.Command[] = [
                 "pan": 0.53,
                 "tilt": 0.42
               },
-              "21": {
+              "20": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -3271,7 +3290,7 @@ export const commands: T.Command[] = [
                 "pan": 0.51,
                 "tilt": 0.42
               },
-              "22": {
+              "21": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -3282,7 +3301,7 @@ export const commands: T.Command[] = [
                 "pan": 0.49,
                 "tilt": 0.42
               },
-              "23": {
+              "22": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -3326,22 +3345,22 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "3": {
-                "intensity": 0.9,
+                "intensity": 0.2,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
                 "tilt": null
               },
               "4": {
-                "intensity": 0.9,
+                "intensity": 0.2,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
@@ -3469,39 +3488,6 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "16": {
-                "intensity": 0.2,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "17": {
-                "intensity": 0.2,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "18": {
-                "intensity": 0.2,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "19": {
                 "intensity": 0.2,
                 "color": {
                   "r": 0.0,
@@ -3731,6 +3717,48 @@ export const commands: T.Command[] = [
           "rotation": [
             0.0,
             0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 2,
+          "name": "Side wall L",
+          "kind": "wall",
+          "position": [
+            -6.6,
+            0.0,
+            0.0
+          ],
+          "size": [
+            8.0,
+            4.0,
+            0.15
+          ],
+          "rotation": [
+            0.0,
+            90.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 3,
+          "name": "Side wall R",
+          "kind": "wall",
+          "position": [
+            6.6,
+            0.0,
+            0.0
+          ],
+          "size": [
+            8.0,
+            4.0,
+            0.15
+          ],
+          "rotation": [
+            0.0,
+            90.0,
             0.0
           ],
           "color": "#b9b4aa"
@@ -3784,7 +3812,7 @@ export const commands: T.Command[] = [
   {
     "type": "replace_show",
     "show": {
-      "name": "Demo — Sunday Service",
+      "name": "COR — Sunday Service",
       "stage": {
         "width": 12.0,
         "depth": 8.0,
@@ -3820,7 +3848,7 @@ export const commands: T.Command[] = [
           "pan_range": 0.0,
           "tilt_range": 0.0,
           "beam_angle": 40.0,
-          "needs_verification": true
+          "needs_verification": false
         },
         {
           "id": "mdac-curtain-8ch",
@@ -3874,7 +3902,7 @@ export const commands: T.Command[] = [
           "manufacturer": "MDAC",
           "model": "Sidewall",
           "mode": "Mode 1 (3ch)",
-          "kind": "strip",
+          "kind": "puck",
           "channels": [
             {
               "attr": "red",
@@ -3893,14 +3921,14 @@ export const commands: T.Command[] = [
           "color_wheel": [],
           "pan_range": 0.0,
           "tilt_range": 0.0,
-          "beam_angle": 120.0,
+          "beam_angle": 40.0,
           "needs_verification": false
         },
         {
-          "id": "chauvet-intimidator-spot-250-13ch",
-          "manufacturer": "Chauvet DJ",
+          "id": "chauvet-intimidator-spot-led-250-advanced",
+          "manufacturer": "Chauvet",
           "model": "Intimidator Spot LED 250",
-          "mode": "13ch",
+          "mode": "Advanced (13ch)",
           "kind": "moving_spot",
           "channels": [
             {
@@ -3932,20 +3960,20 @@ export const commands: T.Command[] = [
               "default": 0
             },
             {
+              "attr": "gobo_rotation",
+              "default": 0
+            },
+            {
+              "attr": "prism",
+              "default": 0
+            },
+            {
               "attr": "dimmer",
               "default": 0
             },
             {
               "attr": "shutter",
-              "default": 255
-            },
-            {
-              "attr": "control",
-              "default": 0
-            },
-            {
-              "attr": "control",
-              "default": 0
+              "default": 4
             },
             {
               "attr": "control",
@@ -3958,13 +3986,13 @@ export const commands: T.Command[] = [
           ],
           "gobo_slots": [
             0,
-            10,
-            20,
-            30,
+            8,
+            16,
+            24,
+            32,
             40,
-            50,
-            60,
-            70
+            48,
+            56
           ],
           "color_wheel": [
             {
@@ -3977,72 +4005,128 @@ export const commands: T.Command[] = [
               }
             },
             {
-              "name": "Red",
-              "dmx": 10,
-              "rgb": {
-                "r": 1.0,
-                "g": 0.0,
-                "b": 0.0
-              }
-            },
-            {
-              "name": "Orange",
-              "dmx": 20,
-              "rgb": {
-                "r": 1.0,
-                "g": 0.45,
-                "b": 0.0
-              }
-            },
-            {
               "name": "Yellow",
-              "dmx": 30,
+              "dmx": 7,
               "rgb": {
                 "r": 1.0,
-                "g": 0.9,
-                "b": 0.0
-              }
-            },
-            {
-              "name": "Green",
-              "dmx": 40,
-              "rgb": {
-                "r": 0.0,
                 "g": 1.0,
                 "b": 0.0
               }
             },
             {
-              "name": "Blue",
-              "dmx": 50,
+              "name": "Pink",
+              "dmx": 14,
+              "rgb": {
+                "r": 1.0,
+                "g": 0.33,
+                "b": 0.5
+              }
+            },
+            {
+              "name": "Green",
+              "dmx": 21,
               "rgb": {
                 "r": 0.0,
-                "g": 0.0,
-                "b": 1.0
+                "g": 0.67,
+                "b": 0.0
               }
             },
             {
-              "name": "Light Blue",
-              "dmx": 60,
-              "rgb": {
-                "r": 0.4,
-                "g": 0.7,
-                "b": 1.0
-              }
-            },
-            {
-              "name": "Magenta",
-              "dmx": 70,
+              "name": "Red",
+              "dmx": 28,
               "rgb": {
                 "r": 1.0,
                 "g": 0.0,
-                "b": 1.0
+                "b": 0.0
+              }
+            },
+            {
+              "name": "Light blue",
+              "dmx": 35,
+              "rgb": {
+                "r": 0.68,
+                "g": 0.85,
+                "b": 0.9
+              }
+            },
+            {
+              "name": "Kelly green",
+              "dmx": 42,
+              "rgb": {
+                "r": 0.33,
+                "g": 1.0,
+                "b": 0.0
+              }
+            },
+            {
+              "name": "Orange",
+              "dmx": 49,
+              "rgb": {
+                "r": 1.0,
+                "g": 0.33,
+                "b": 0.0
+              }
+            },
+            {
+              "name": "Dark blue",
+              "dmx": 56,
+              "rgb": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.55
               }
             }
           ],
           "pan_range": 540.0,
           "tilt_range": 270.0,
-          "beam_angle": 13.0,
+          "beam_angle": 17.0,
+          "needs_verification": false
+        },
+        {
+          "id": "mdac-backlight-8ch",
+          "manufacturer": "MDAC",
+          "model": "Backlight",
+          "mode": "Mode 1 (8ch)",
+          "kind": "par",
+          "channels": [
+            {
+              "attr": "dimmer",
+              "default": 0
+            },
+            {
+              "attr": "red",
+              "default": 0
+            },
+            {
+              "attr": "green",
+              "default": 0
+            },
+            {
+              "attr": "blue",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            },
+            {
+              "attr": "unused",
+              "default": 0
+            }
+          ],
+          "gobo_slots": [],
+          "color_wheel": [],
+          "pan_range": 0.0,
+          "tilt_range": 0.0,
+          "beam_angle": 30.0,
           "needs_verification": true
         }
       ],
@@ -4054,7 +4138,7 @@ export const commands: T.Command[] = [
           "universe": 1,
           "address": 1,
           "position": [
-            -4.5,
+            -2.5,
             5.0,
             5.0
           ],
@@ -4071,7 +4155,7 @@ export const commands: T.Command[] = [
           "universe": 1,
           "address": 5,
           "position": [
-            -1.5,
+            2.5,
             5.0,
             5.0
           ],
@@ -4083,46 +4167,46 @@ export const commands: T.Command[] = [
         },
         {
           "id": 3,
-          "name": "Front 3",
-          "profile_id": "adj-cob-cannon-wash-4ch",
+          "name": "Curtain 1",
+          "profile_id": "mdac-curtain-8ch",
           "universe": 1,
-          "address": 9,
+          "address": 241,
           "position": [
-            1.5,
-            5.0,
-            5.0
+            -5.5,
+            0.05,
+            -3.6
           ],
           "rotation": [
-            -135.0,
+            -12.0,
             0.0,
             0.0
           ]
         },
         {
           "id": 4,
-          "name": "Front 4",
-          "profile_id": "adj-cob-cannon-wash-4ch",
+          "name": "Curtain 2",
+          "profile_id": "mdac-curtain-8ch",
           "universe": 1,
-          "address": 13,
+          "address": 249,
           "position": [
-            4.5,
-            5.0,
-            5.0
+            -4.5,
+            0.05,
+            -3.6
           ],
           "rotation": [
-            -135.0,
+            -12.0,
             0.0,
             0.0
           ]
         },
         {
           "id": 5,
-          "name": "Curtain 1",
+          "name": "Curtain 3",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
-          "address": 17,
+          "address": 257,
           "position": [
-            -6.0,
+            -3.5,
             0.05,
             -3.6
           ],
@@ -4134,12 +4218,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 6,
-          "name": "Curtain 2",
+          "name": "Curtain 4",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 25,
           "position": [
-            -5.0,
+            -2.5,
             0.05,
             -3.6
           ],
@@ -4151,12 +4235,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 7,
-          "name": "Curtain 3",
+          "name": "Curtain 5",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 33,
           "position": [
-            -4.0,
+            -1.5,
             0.05,
             -3.6
           ],
@@ -4168,12 +4252,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 8,
-          "name": "Curtain 4",
+          "name": "Curtain 6",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 41,
           "position": [
-            -3.0,
+            -0.5,
             0.05,
             -3.6
           ],
@@ -4185,12 +4269,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 9,
-          "name": "Curtain 5",
+          "name": "Curtain 7",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 49,
           "position": [
-            -2.0,
+            0.5,
             0.05,
             -3.6
           ],
@@ -4202,12 +4286,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 10,
-          "name": "Curtain 6",
+          "name": "Curtain 8",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 57,
           "position": [
-            -1.0,
+            1.5,
             0.05,
             -3.6
           ],
@@ -4219,12 +4303,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 11,
-          "name": "Curtain 7",
+          "name": "Curtain 9",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 65,
           "position": [
-            0.0,
+            2.5,
             0.05,
             -3.6
           ],
@@ -4236,12 +4320,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 12,
-          "name": "Curtain 8",
+          "name": "Curtain 10",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 73,
           "position": [
-            1.0,
+            3.5,
             0.05,
             -3.6
           ],
@@ -4253,12 +4337,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 13,
-          "name": "Curtain 9",
+          "name": "Curtain 11",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 81,
           "position": [
-            2.0,
+            4.5,
             0.05,
             -3.6
           ],
@@ -4270,12 +4354,12 @@ export const commands: T.Command[] = [
         },
         {
           "id": 14,
-          "name": "Curtain 10",
+          "name": "Curtain 12",
           "profile_id": "mdac-curtain-8ch",
           "universe": 1,
           "address": 89,
           "position": [
-            3.0,
+            5.5,
             0.05,
             -3.6
           ],
@@ -4287,95 +4371,78 @@ export const commands: T.Command[] = [
         },
         {
           "id": 15,
-          "name": "Curtain 11",
-          "profile_id": "mdac-curtain-8ch",
+          "name": "Sidewall L",
+          "profile_id": "mdac-sidewall-3ch",
           "universe": 1,
           "address": 97,
           "position": [
-            4.0,
+            -6.2,
             0.05,
-            -3.6
+            0.0
           ],
           "rotation": [
-            -12.0,
             0.0,
-            0.0
+            0.0,
+            12.0
           ]
         },
         {
           "id": 16,
-          "name": "Curtain 12",
-          "profile_id": "mdac-curtain-8ch",
+          "name": "Sidewall R",
+          "profile_id": "mdac-sidewall-3ch",
           "universe": 1,
-          "address": 105,
+          "address": 100,
           "position": [
-            5.0,
+            6.2,
             0.05,
-            -3.6
+            0.0
           ],
           "rotation": [
-            -12.0,
             0.0,
-            0.0
+            0.0,
+            -12.0
           ]
         },
         {
           "id": 17,
-          "name": "Curtain 13",
-          "profile_id": "mdac-curtain-8ch",
+          "name": "Backlight L",
+          "profile_id": "mdac-backlight-8ch",
           "universe": 1,
-          "address": 113,
+          "address": 103,
           "position": [
-            6.0,
-            0.05,
-            -3.6
+            -3.0,
+            0.3,
+            -3.2
           ],
           "rotation": [
-            -12.0,
+            30.0,
             0.0,
             0.0
           ]
         },
         {
           "id": 18,
-          "name": "Sidewall L",
-          "profile_id": "mdac-sidewall-3ch",
+          "name": "Backlight R",
+          "profile_id": "mdac-backlight-8ch",
           "universe": 1,
-          "address": 121,
+          "address": 111,
           "position": [
-            -6.5,
-            2.0,
-            0.0
+            3.0,
+            0.3,
+            -3.2
           ],
           "rotation": [
+            30.0,
             0.0,
-            90.0,
             0.0
           ]
         },
         {
           "id": 19,
-          "name": "Sidewall R",
-          "profile_id": "mdac-sidewall-3ch",
+          "name": "MH5",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 124,
-          "position": [
-            6.5,
-            2.0,
-            0.0
-          ],
-          "rotation": [
-            0.0,
-            -90.0,
-            0.0
-          ]
-        },
-        {
-          "id": 20,
-          "name": "Mover 1",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
-          "universe": 1,
-          "address": 127,
+          "address": 145,
           "position": [
             -4.5,
             6.0,
@@ -4388,11 +4455,11 @@ export const commands: T.Command[] = [
           ]
         },
         {
-          "id": 21,
-          "name": "Mover 2",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
+          "id": 20,
+          "name": "MH6",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 140,
+          "address": 158,
           "position": [
             -1.5,
             6.0,
@@ -4405,11 +4472,11 @@ export const commands: T.Command[] = [
           ]
         },
         {
-          "id": 22,
-          "name": "Mover 3",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
+          "id": 21,
+          "name": "MH7",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 153,
+          "address": 184,
           "position": [
             1.5,
             6.0,
@@ -4422,11 +4489,11 @@ export const commands: T.Command[] = [
           ]
         },
         {
-          "id": 23,
-          "name": "Mover 4",
-          "profile_id": "chauvet-intimidator-spot-250-13ch",
+          "id": 22,
+          "name": "MH8",
+          "profile_id": "chauvet-intimidator-spot-led-250-advanced",
           "universe": 1,
-          "address": 166,
+          "address": 171,
           "position": [
             4.5,
             6.0,
@@ -4450,6 +4517,8 @@ export const commands: T.Command[] = [
             "back"
           ],
           "fixtures": [
+            3,
+            4,
             5,
             6,
             7,
@@ -4459,10 +4528,7 @@ export const commands: T.Command[] = [
             11,
             12,
             13,
-            14,
-            15,
-            16,
-            17
+            14
           ]
         },
         {
@@ -4476,9 +4542,7 @@ export const commands: T.Command[] = [
           ],
           "fixtures": [
             1,
-            2,
-            3,
-            4
+            2
           ]
         },
         {
@@ -4490,8 +4554,8 @@ export const commands: T.Command[] = [
             "side lights"
           ],
           "fixtures": [
-            18,
-            19
+            15,
+            16
           ]
         },
         {
@@ -4504,10 +4568,23 @@ export const commands: T.Command[] = [
             "heads"
           ],
           "fixtures": [
+            19,
             20,
             21,
-            22,
-            23
+            22
+          ]
+        },
+        {
+          "name": "Backlights",
+          "aliases": [
+            "backlight",
+            "back lights",
+            "backlighting",
+            "rear lights"
+          ],
+          "fixtures": [
+            17,
+            18
           ]
         }
       ],
@@ -4522,22 +4599,22 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
-              "fixture": 20,
+              "fixture": 19,
               "pan": 0.53,
               "tilt": 0.42
             },
             {
-              "fixture": 21,
+              "fixture": 20,
               "pan": 0.51,
               "tilt": 0.42
             },
             {
-              "fixture": 22,
+              "fixture": 21,
               "pan": 0.49,
               "tilt": 0.42
             },
             {
-              "fixture": 23,
+              "fixture": 22,
               "pan": 0.47,
               "tilt": 0.42
             }
@@ -4553,22 +4630,22 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
-              "fixture": 20,
+              "fixture": 19,
               "pan": 0.55,
               "tilt": 0.36
             },
             {
-              "fixture": 21,
+              "fixture": 20,
               "pan": 0.52,
               "tilt": 0.36
             },
             {
-              "fixture": 22,
+              "fixture": 21,
               "pan": 0.48,
               "tilt": 0.36
             },
             {
-              "fixture": 23,
+              "fixture": 22,
               "pan": 0.45,
               "tilt": 0.36
             }
@@ -4583,6 +4660,11 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
+              "fixture": 19,
+              "pan": 0.5,
+              "tilt": 0.2
+            },
+            {
               "fixture": 20,
               "pan": 0.5,
               "tilt": 0.2
@@ -4594,11 +4676,6 @@ export const commands: T.Command[] = [
             },
             {
               "fixture": 22,
-              "pan": 0.5,
-              "tilt": 0.2
-            },
-            {
-              "fixture": 23,
               "pan": 0.5,
               "tilt": 0.2
             }
@@ -4612,6 +4689,11 @@ export const commands: T.Command[] = [
           ],
           "values": [
             {
+              "fixture": 19,
+              "pan": 0.5,
+              "tilt": 0.62
+            },
+            {
               "fixture": 20,
               "pan": 0.5,
               "tilt": 0.62
@@ -4623,11 +4705,6 @@ export const commands: T.Command[] = [
             },
             {
               "fixture": 22,
-              "pan": 0.5,
-              "tilt": 0.62
-            },
-            {
-              "fixture": 23,
               "pan": 0.5,
               "tilt": 0.62
             }
@@ -4663,22 +4740,22 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "3": {
-                "intensity": 0.4,
+                "intensity": 0.6,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
                 "tilt": null
               },
               "4": {
-                "intensity": 0.4,
+                "intensity": 0.6,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
@@ -4795,39 +4872,6 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "15": {
-                "intensity": 0.6,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "16": {
-                "intensity": 0.6,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "17": {
-                "intensity": 0.6,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "18": {
                 "intensity": 0.5,
                 "color": {
                   "r": 0.0,
@@ -4838,7 +4882,7 @@ export const commands: T.Command[] = [
                 "pan": null,
                 "tilt": null
               },
-              "19": {
+              "16": {
                 "intensity": 0.5,
                 "color": {
                   "r": 0.0,
@@ -4882,22 +4926,22 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "3": {
-                "intensity": 0.85,
+                "intensity": 1.0,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.55,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
                 "tilt": null
               },
               "4": {
-                "intensity": 0.85,
+                "intensity": 1.0,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.55,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
@@ -5014,9 +5058,9 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "15": {
-                "intensity": 1.0,
+                "intensity": 0.8,
                 "color": {
-                  "r": 0.55,
+                  "r": 0.0,
                   "g": 0.0,
                   "b": 1.0
                 },
@@ -5025,9 +5069,9 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "16": {
-                "intensity": 1.0,
+                "intensity": 0.8,
                 "color": {
-                  "r": 0.55,
+                  "r": 0.0,
                   "g": 0.0,
                   "b": 1.0
                 },
@@ -5036,9 +5080,9 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "17": {
-                "intensity": 1.0,
+                "intensity": 0.7,
                 "color": {
-                  "r": 0.55,
+                  "r": 0.0,
                   "g": 0.0,
                   "b": 1.0
                 },
@@ -5047,7 +5091,7 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "18": {
-                "intensity": 0.8,
+                "intensity": 0.7,
                 "color": {
                   "r": 0.0,
                   "g": 0.0,
@@ -5058,17 +5102,6 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "19": {
-                "intensity": 0.8,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "20": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -5079,7 +5112,7 @@ export const commands: T.Command[] = [
                 "pan": 0.53,
                 "tilt": 0.42
               },
-              "21": {
+              "20": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -5090,7 +5123,7 @@ export const commands: T.Command[] = [
                 "pan": 0.51,
                 "tilt": 0.42
               },
-              "22": {
+              "21": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -5101,7 +5134,7 @@ export const commands: T.Command[] = [
                 "pan": 0.49,
                 "tilt": 0.42
               },
-              "23": {
+              "22": {
                 "intensity": 1.0,
                 "color": {
                   "r": 1.0,
@@ -5145,22 +5178,22 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "3": {
-                "intensity": 0.9,
+                "intensity": 0.2,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
                 "tilt": null
               },
               "4": {
-                "intensity": 0.9,
+                "intensity": 0.2,
                 "color": {
-                  "r": 1.0,
-                  "g": 0.78,
-                  "b": 0.5
+                  "r": 0.0,
+                  "g": 0.0,
+                  "b": 1.0
                 },
                 "gobo": null,
                 "pan": null,
@@ -5288,39 +5321,6 @@ export const commands: T.Command[] = [
                 "tilt": null
               },
               "16": {
-                "intensity": 0.2,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "17": {
-                "intensity": 0.2,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "18": {
-                "intensity": 0.2,
-                "color": {
-                  "r": 0.0,
-                  "g": 0.0,
-                  "b": 1.0
-                },
-                "gobo": null,
-                "pan": null,
-                "tilt": null
-              },
-              "19": {
                 "intensity": 0.2,
                 "color": {
                   "r": 0.0,
@@ -5550,6 +5550,48 @@ export const commands: T.Command[] = [
           "rotation": [
             0.0,
             0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 2,
+          "name": "Side wall L",
+          "kind": "wall",
+          "position": [
+            -6.6,
+            0.0,
+            0.0
+          ],
+          "size": [
+            8.0,
+            4.0,
+            0.15
+          ],
+          "rotation": [
+            0.0,
+            90.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 3,
+          "name": "Side wall R",
+          "kind": "wall",
+          "position": [
+            6.6,
+            0.0,
+            0.0
+          ],
+          "size": [
+            8.0,
+            4.0,
+            0.15
+          ],
+          "rotation": [
+            0.0,
+            90.0,
             0.0
           ],
           "color": "#b9b4aa"

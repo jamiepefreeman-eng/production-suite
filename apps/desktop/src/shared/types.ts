@@ -6,7 +6,8 @@ export type Rgb = { r: number; g: number; b: number };
 export type Attr =
   | "dimmer" | "red" | "green" | "blue" | "white" | "amber" | "uv"
   | "pan" | "pan_fine" | "tilt" | "tilt_fine" | "color_wheel" | "gobo" | "gobo_rotation"
-  | "prism" | "focus" | "shutter" | "strobe" | "speed" | "control" | "unused";
+  | "prism" | "focus" | "shutter" | "strobe" | "speed" | "control" | "unused"
+  | "dimmer_fine" | "cyan" | "magenta" | "yellow" | "lime" | "zoom" | "iris" | "frost" | "color_temp" | "effect" | "other";
 
 export type FixtureKind = "wash" | "par" | "puck" | "strip" | "moving_spot" | "moving_wash" | "generic";
 
@@ -16,7 +17,7 @@ export interface FixtureProfile {
   model: string;
   mode: string;
   kind: FixtureKind;
-  channels: { attr: Attr; default: number }[];
+  channels: { attr: Attr; default: number; name?: string }[];
   gobo_slots: number[];
   color_wheel: { name: string; dmx: number; rgb: Rgb }[];
   pan_range: number;

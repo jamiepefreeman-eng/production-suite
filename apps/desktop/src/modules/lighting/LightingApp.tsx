@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, on } from "../../shared/bridge";
+import PatchView from "./PatchView";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type { AiStatus, DmxOutputConfig, FixtureProfile, FixtureState, FixtureVisual, Rgb, SerialPortInfo, Show } from "../../shared/types";
 
@@ -19,7 +20,7 @@ export default function LightingApp() {
         ))}
       </div>
       {tab === "live" && <Live show={show} />}
-      {tab === "patch" && <Patch show={show} />}
+      {tab === "patch" && <PatchView show={show} />}
       {tab === "positions" && <Positions show={show} />}
       {tab === "outputs" && <Outputs show={show} />}
     </div>
@@ -540,73 +541,6 @@ function ApiKey({ hasKey, onSaved }: { hasKey: boolean; onSaved: () => void }) {
         </div>
       )}
     </span>
-  );
-}
-
-// ─────────────────────────────────────────────── Patch
-function Patch({ show }: { show: Show }) {
-  const [warnings, setWarnings] = useState<string[]>([]);
-  useEffect(() => {
-    api.patchWarnings().then(setWarnings).catch(() => {});
-  }, [show]);
-  const profile = (id: string) => show.profiles.find((p) => p.id === id);
-
-  return (
-    <div className="patch">
-      {warnings.length > 0 && (
-        <div className="card">
-          {warnings.map((w, i) => (
-            <div key={i} className="warn">⚠ {w}</div>
-          ))}
-        </div>
-      )}
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Name</th><th>Fixture</th><th>Mode</th><th>Univ</th><th>Address</th><th>Ch</th>
-          </tr>
-        </thead>
-        <tbody>
-          {show.fixtures.map((f) => {
-            const p = profile(f.profile_id);
-            return (
-              <tr key={f.id}>
-                <td>{f.id}</td>
-                <td>
-                  <input value={f.name} onChange={(e) => updateShow((d) => { d.fixtures.find((x) => x.id === f.id)!.name = e.target.value; })} />
-                </td>
-                <td>{p ? `${p.manufacturer} ${p.model}` : f.profile_id}</td>
-                <td>{p?.mode}</td>
-                <td>
-                  <input type="number" min={1} value={f.universe} onChange={(e) => updateShow((d) => { d.fixtures.find((x) => x.id === f.id)!.universe = Number(e.target.value); })} />
-                </td>
-                <td>
-                  <input type="number" min={1} max={512} value={f.address} onChange={(e) => updateShow((d) => { d.fixtures.find((x) => x.id === f.id)!.address = Number(e.target.value); })} />
-                </td>
-                <td>{p?.channels.length}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      <h3>Groups & what people call them</h3>
-      <p className="muted">The scene builder understands every alias listed here.</p>
-      {show.groups.map((g, gi) => (
-        <div key={g.name} className="row">
-          <strong className="group-name">{g.name}</strong>
-          <input
-            className="grow"
-            value={g.aliases.join(", ")}
-            onChange={(e) =>
-              updateShow((d) => {
-                d.groups[gi].aliases = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
-              })
-            }
-          />
-        </div>
-      ))}
-    </div>
   );
 }
 

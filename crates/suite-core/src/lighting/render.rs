@@ -56,6 +56,11 @@ pub fn render_look(show: &Show, look: &Look) -> DmxFrame {
             put(&mut frame, u, base, p, Attr::Red, to_byte(r * scale));
             put(&mut frame, u, base, p, Attr::Green, to_byte(g * scale));
             put(&mut frame, u, base, p, Attr::Blue, to_byte(b * scale));
+        } else if p.has_cmy() {
+            // Subtractive mixing: cyan filters red, etc. Brightness comes from the dimmer.
+            put(&mut frame, u, base, p, Attr::Cyan, to_byte(1.0 - color.r));
+            put(&mut frame, u, base, p, Attr::Magenta, to_byte(1.0 - color.g));
+            put(&mut frame, u, base, p, Attr::Yellow, to_byte(1.0 - color.b));
         } else if !p.color_wheel.is_empty() {
             if let Some(slot) = p
                 .color_wheel
@@ -109,6 +114,8 @@ pub fn decode_visuals(show: &Show, frame: &DmxFrame) -> Vec<FixtureVisual> {
                 f(Attr::Green).unwrap_or(0.0) + w,
                 f(Attr::Blue).unwrap_or(0.0) + w,
             )
+        } else if p.has_cmy() {
+            Rgb::new(1.0 - f(Attr::Cyan).unwrap_or(0.0), 1.0 - f(Attr::Magenta).unwrap_or(0.0), 1.0 - f(Attr::Yellow).unwrap_or(0.0))
         } else if let Some(cw) = get(frame, u, base, p, Attr::ColorWheel) {
             p.color_wheel
                 .iter()
@@ -154,4 +161,38 @@ pub fn decode_visuals(show: &Show, frame: &DmxFrame) -> Vec<FixtureVisual> {
         });
     }
     out
+}
+
+#[cfg(test)]
+mod cmy_tests {
+    use super::*;
+    use crate::lighting::{ChannelDef, Fixture, FixtureKind, FixtureState};
+
+    /// Subtractive colour: red light = no cyan, full magenta and yellow — and it decodes back.
+    #[test]
+    fn cmy_fixture_mixes_and_decodes() {
+        let ch = |attr| ChannelDef { attr, default: 0, name: String::new() };
+        let mut show = Show::default();
+        show.profiles.push(FixtureProfile {
+            id: "cmy".into(),
+            manufacturer: "T".into(),
+            model: "CMY Spot".into(),
+            mode: "4ch".into(),
+            kind: FixtureKind::MovingSpot,
+            channels: vec![ch(Attr::Dimmer), ch(Attr::Cyan), ch(Attr::Magenta), ch(Attr::Yellow)],
+            gobo_slots: vec![],
+            color_wheel: vec![],
+            pan_range: 0.0,
+            tilt_range: 0.0,
+            beam_angle: 20.0,
+            needs_verification: false,
+        });
+        show.fixtures.push(Fixture { id: 1, name: "A".into(), profile_id: "cmy".into(), universe: 1, address: 10, position: [0.0; 3], rotation: [0.0; 3] });
+        let mut look = Look::default();
+        *look.state_mut(1) = FixtureState { intensity: Some(1.0), color: Some(Rgb::new(1.0, 0.0, 0.0)), ..Default::default() };
+        let frame = render_look(&show, &look);
+        assert_eq!([frame.get(1, 10), frame.get(1, 11), frame.get(1, 12), frame.get(1, 13)], [255, 0, 255, 255]);
+        let v = &decode_visuals(&show, &frame)[0];
+        assert_eq!((v.color.r, v.color.g, v.color.b), (1.0, 0.0, 0.0));
+    }
 }

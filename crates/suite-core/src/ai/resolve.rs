@@ -170,7 +170,7 @@ mod tests {
         assert_eq!(frame.get(curtain.universe, curtain.address + 3), 255);
 
         // A mover got gobo 3 and a pan/tilt from the preset.
-        let mover = show.fixtures.iter().find(|f| f.profile_id == "chauvet-intimidator-spot-250-13ch").unwrap();
+        let mover = show.fixtures.iter().find(|f| f.profile_id == "chauvet-intimidator-spot-led-250-advanced").unwrap();
         let p = show.profile(&mover.profile_id).unwrap();
         let gobo_off = p.offset(&Attr::Gobo).unwrap();
         assert_eq!(frame.get(mover.universe, mover.address + gobo_off), p.gobo_slots[3]);

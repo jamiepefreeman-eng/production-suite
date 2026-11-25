@@ -28,12 +28,28 @@ pub enum Attr {
     Speed,
     Control,
     Unused,
+    // Added with the fixture library (v0.4):
+    DimmerFine,
+    Cyan,
+    Magenta,
+    Yellow,
+    Lime,
+    Zoom,
+    Iris,
+    Frost,
+    ColorTemp,
+    Effect,
+    /// Anything else (see the channel's `name`).
+    Other,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChannelDef {
     pub attr: Attr,
+    /// Label from the fixture library ("Pan fine", "Macro"); empty for hand-made profiles.
+    #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "String::is_empty"))]
+    pub name: String,
     /// Value sent when nothing in the look controls this channel
     /// (e.g. shutter open = 255 on many movers).
     pub default: u8,
@@ -96,6 +112,10 @@ impl FixtureProfile {
 
     pub fn has(&self, attr: &Attr) -> bool {
         self.offset(attr).is_some()
+    }
+
+    pub fn has_cmy(&self) -> bool {
+        self.has(&Attr::Cyan) && self.has(&Attr::Magenta) && self.has(&Attr::Yellow)
     }
 
     pub fn has_rgb(&self) -> bool {
