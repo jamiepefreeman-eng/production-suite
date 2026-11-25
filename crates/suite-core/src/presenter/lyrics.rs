@@ -66,7 +66,7 @@ pub fn parse_lyrics(id: u32, title: &str, text: &str, max_lines: usize) -> Prese
                 id: slides.len() as u32 + 1,
                 label: label.to_string(),
                 text: chunk.join("\n"),
-                triggers: vec![],
+                ..Default::default()
             });
         }
         buf.clear();

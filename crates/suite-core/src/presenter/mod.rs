@@ -216,7 +216,98 @@ pub struct MediaPlaylist {
     pub items: Vec<u32>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+pub enum TextAlign {
+    Left,
+    #[default]
+    Center,
+    Right,
+}
+
+/// This slide's own text formatting. Every `None` follows the presentation's theme.
+#[derive(Debug, Clone, PartialEq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(default))]
+pub struct TextStyle {
+    pub font: Option<String>,
+    pub size: Option<f32>,
+    pub color: Option<String>,
+    pub bold: Option<bool>,
+    pub italic: Option<bool>,
+    pub uppercase: Option<bool>,
+    pub shadow: Option<bool>,
+    pub position: Option<TextPosition>,
+    pub align: Option<TextAlign>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+pub enum ElementKind {
+    /// A text box.
+    #[default]
+    Text,
+    /// Image, video or live input from the media bin.
+    Media,
+    /// A coloured box (also takes text).
+    Shape,
+}
+
+/// Something placed on one slide: text box, picture, video, live feed, shape.
+/// Position and size are fractions of the frame (0..1, from the top-left).
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(default))]
+pub struct SlideElement {
+    pub id: u32,
+    pub kind: ElementKind,
+    pub x: f32,
+    pub y: f32,
+    pub w: f32,
+    pub h: f32,
+    pub text: String,
+    pub media: Option<u32>,
+    pub font: String,
+    /// Text height as % of the frame height.
+    pub size: f32,
+    pub color: String,
+    pub bold: bool,
+    pub italic: bool,
+    pub align: TextAlign,
+    /// CSS colour behind the element; "" = none.
+    pub background: String,
+    /// Corner rounding, % of the element's height.
+    pub radius: f32,
+    pub opacity: f32,
+}
+
+impl Default for SlideElement {
+    fn default() -> Self {
+        SlideElement {
+            id: 0,
+            kind: ElementKind::Text,
+            x: 0.3,
+            y: 0.4,
+            w: 0.4,
+            h: 0.2,
+            text: String::new(),
+            media: None,
+            font: "Inter".into(),
+            size: 6.0,
+            color: "#ffffff".into(),
+            bold: false,
+            italic: false,
+            align: TextAlign::Center,
+            background: String::new(),
+            radius: 0.0,
+            opacity: 1.0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Slide {
     pub id: u32,
@@ -224,6 +315,12 @@ pub struct Slide {
     pub label: String,
     pub text: String,
     pub triggers: Vec<SlideTrigger>,
+    /// Formatting for this slide's text (overrides the theme).
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub style: TextStyle,
+    /// Text boxes, pictures, videos and live feeds placed on this slide.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub elements: Vec<SlideElement>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -17,7 +17,9 @@ use crate::windows::MonitorInfo;
 use serde::Serialize;
 use suite_core::ai::intent::{Action, Intent, ParseOutput};
 use suite_core::engine::{Command, Countdown, Event, Layers, LogLevel};
-use suite_core::presenter::{ClearLayer, MediaItem, MediaKind, MediaPlaylist, SlideGroup, SlideTrigger, TextPosition, Theme};
+use suite_core::presenter::{
+    ClearLayer, ElementKind, MediaItem, MediaKind, MediaPlaylist, SlideElement, SlideGroup, SlideTrigger, TextAlign, TextPosition, TextStyle, Theme,
+};
 use suite_core::show::{Scenery, SceneryKind};
 use suite_core::lighting::{FixtureState, FixtureVisual, Look, Rgb};
 use suite_core::mixer::connection::MixerFeedback;
@@ -84,6 +86,24 @@ fn write_typescript_contract() {
         SlideTrigger::Clear { layer: ClearLayer::Lights },
     ];
     show.presentations[1].slides[0].triggers.extend(triggers.clone());
+    // Per-slide formatting and elements (every kind / alignment once).
+    show.presentations[1].slides[0].style = TextStyle {
+        font: Some("Georgia".into()),
+        size: Some(1.2),
+        color: Some("#ffcc00".into()),
+        bold: Some(false),
+        italic: Some(true),
+        uppercase: Some(true),
+        shadow: Some(false),
+        position: Some(TextPosition::Bottom),
+        align: Some(TextAlign::Left),
+    };
+    show.presentations[1].slides[1].style = TextStyle { align: Some(TextAlign::Right), ..Default::default() };
+    show.presentations[1].slides[0].elements = vec![
+        SlideElement { id: 1, kind: ElementKind::Text, text: "Welcome".into(), ..Default::default() },
+        SlideElement { id: 2, kind: ElementKind::Media, media: Some(1), ..Default::default() },
+        SlideElement { id: 3, kind: ElementKind::Shape, background: "#000000aa".into(), radius: 10.0, ..Default::default() },
+    ];
     let layers = Layers {
         media: Some(2),
         audio: Some(3),
@@ -342,6 +362,17 @@ fn old_show_files_still_open() {
     }
     let show: suite_core::show::Show = serde_json::from_value(v).expect("v0.2 show file loads");
     assert!(show.themes.is_empty() && show.media.is_empty() && show.scenery.is_empty());
+    // Slides from before per-slide formatting/elements.
+    let mut v = serde_json::to_value(suite_core::demo::demo_show()).unwrap();
+    for p in v["presentations"].as_array_mut().unwrap() {
+        for s in p["slides"].as_array_mut().unwrap() {
+            let s = s.as_object_mut().unwrap();
+            s.remove("style");
+            s.remove("elements");
+        }
+    }
+    let old: suite_core::show::Show = serde_json::from_value(v).expect("v0.7 slides load");
+    assert!(old.presentations.iter().flat_map(|p| &p.slides).all(|s| s.elements.is_empty()));
     // Presentations naming a theme that doesn't exist fall back to the built-in default.
     assert_eq!(show.theme_for(&show.presentations[0]).name, "Default");
 }

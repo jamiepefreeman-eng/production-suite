@@ -263,8 +263,9 @@ pub fn demo_show() -> Show {
                     SlideTrigger::LightingCue { cue: 1 },
                     SlideTrigger::Mixer { command: MixerCommand::RecallScene { scene: 1 } },
                 ],
+                ..Default::default()
             },
-            Slide { id: 2, label: "Connect".into(), text: "New here?\nVisit the welcome desk".into(), triggers: vec![] },
+            Slide { id: 2, label: "Connect".into(), text: "New here?\nVisit the welcome desk".into(), triggers: vec![], ..Default::default() },
         ],
     };
     let mut grace = parse_lyrics(
@@ -305,6 +306,7 @@ pub fn demo_show() -> Show {
             label: "John 3:16".into(),
             text: "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.".into(),
             triggers: vec![SlideTrigger::LightingText { text: "front spots warm white at 90, back wall blue at 30".into() }],
+            ..Default::default()
         }],
     };
 

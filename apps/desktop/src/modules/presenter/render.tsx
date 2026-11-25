@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { mediaUrl } from "../../shared/bridge";
 import { useInputStream } from "../../shared/inputs";
 import { pushLog } from "../../shared/store";
-import type { Countdown, MediaItem, Prop, Show, Slide, Theme } from "../../shared/types";
+import type { Countdown, MediaItem, Prop, Show, Slide, SlideElement, TextAlign, TextStyle, Theme } from "../../shared/types";
 
 export const DEFAULT_THEME: Theme = {
   name: "Default",
@@ -20,6 +20,74 @@ export const DEFAULT_THEME: Theme = {
   background_media: null,
   dim: 0,
 };
+
+export const EMPTY_STYLE: TextStyle = { font: null, size: null, color: null, bold: null, italic: null, uppercase: null, shadow: null, position: null, align: null };
+
+export function newSlide(id: number, label: string, text = ""): Slide {
+  return { id, label, text, triggers: [], style: { ...EMPTY_STYLE }, elements: [] };
+}
+
+/** The theme with this slide's own formatting on top. */
+export interface Look extends Theme {
+  italic: boolean;
+  align: TextAlign;
+}
+export function styledTheme(theme: Theme, style: TextStyle | null | undefined): Look {
+  const s = style ?? EMPTY_STYLE;
+  return {
+    ...theme,
+    font: s.font ?? theme.font,
+    size: s.size ?? theme.size,
+    color: s.color ?? theme.color,
+    bold: s.bold ?? theme.bold,
+    uppercase: s.uppercase ?? theme.uppercase,
+    shadow: s.shadow ?? theme.shadow,
+    position: s.position ?? theme.position,
+    italic: s.italic ?? false,
+    align: s.align ?? "center",
+  };
+}
+
+/** A slide's elements with their media resolved, for SlideRender. */
+export function slideElements(show: Show | null, slide: Slide | undefined | null) {
+  return (slide?.elements ?? []).map((el) => ({ el, media: el.kind === "media" ? mediaById(show, el.media) : null }));
+}
+export type RenderElement = ReturnType<typeof slideElements>[number];
+
+const fontStack = (f: string) => `"${f}", "Helvetica Neue", Arial, system-ui, sans-serif`;
+
+/** One element on a slide (text box, picture, video, live feed, shape). */
+export function ElementView({ el, media, play }: { el: SlideElement; media: MediaItem | null; play: boolean }) {
+  return (
+    <div
+      className={`render-el kind-${el.kind} align-${el.align}`}
+      style={{
+        left: `${el.x * 100}%`,
+        top: `${el.y * 100}%`,
+        width: `${el.w * 100}%`,
+        height: `${el.h * 100}%`,
+        background: el.background || undefined,
+        borderRadius: `${el.radius}%`,
+        opacity: el.opacity,
+        color: el.color,
+        fontFamily: fontStack(el.font),
+        fontWeight: el.bold ? 700 : 400,
+        fontStyle: el.italic ? "italic" : "normal",
+        ["--el-size" as string]: el.size,
+      }}
+    >
+      {el.kind === "media" && media && <MediaFill item={media} play={play} />}
+      {el.kind === "media" && !media && <div className="render-el-empty">Drop media here</div>}
+      {el.kind !== "media" && (
+        <div className="render-el-text">
+          {el.text.split("\n").map((l, i) => (
+            <div key={i}>{l || "\u00a0"}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Fonts present on both macOS and Windows (others fall back to Arial).
 export const FONTS = ["Inter", "Helvetica Neue", "Arial", "Arial Black", "Avenir Next", "Georgia", "Times New Roman", "Verdana", "Trebuchet MS", "Impact", "Courier New", "Segoe UI"];
@@ -111,9 +179,15 @@ export function SlideRender({
   countdown,
   props,
   transparent = false,
+  style,
+  elements,
 }: {
   text: string;
   theme?: Theme;
+  /** This slide's own formatting (font, colour…) over the theme. */
+  style?: TextStyle | null;
+  /** Text boxes, pictures, videos and live feeds on this slide. */
+  elements?: RenderElement[];
   /** Media layer; overrides the theme's background media while set. */
   background?: MediaItem | null;
   kind?: "audience" | "stream";
@@ -128,23 +202,26 @@ export function SlideRender({
 }) {
   const stream = kind === "stream";
   const bg = background ?? null;
-  const position = stream ? "lower_third" : theme.position;
+  const look = styledTheme(theme, style);
+  const position = stream ? "lower_third" : look.position;
   return (
     <div
-      className={`render pos-${position} ${stream ? "render-stream" : ""} ${transparent && !bg ? "render-transparent" : ""}`}
+      className={`render pos-${position} align-${look.align} ${stream ? "render-stream" : ""} ${transparent && !bg ? "render-transparent" : ""}`}
       style={{ background: stream || (transparent && !bg) ? undefined : theme.background_color }}
     >
       {!stream && bg && <MediaFill item={bg} play={play} />}
       {!stream && theme.dim > 0 && bg && <div className="render-dim" style={{ opacity: theme.dim }} />}
+      {!stream && elements?.map(({ el, media }) => <ElementView key={el.id} el={el} media={media} play={play} />)}
       {text && (
         <div
-          className={`render-text ${theme.shadow ? "shadow" : ""}`}
+          className={`render-text ${look.shadow ? "shadow" : ""}`}
           style={{
-            fontFamily: `"${theme.font}", "Helvetica Neue", Arial, system-ui, sans-serif`,
-            color: theme.color,
-            fontWeight: theme.bold ? 700 : 400,
-            textTransform: theme.uppercase ? "uppercase" : "none",
-            ["--size" as string]: theme.size,
+            fontFamily: fontStack(look.font),
+            color: look.color,
+            fontWeight: look.bold ? 700 : 400,
+            fontStyle: look.italic ? "italic" : "normal",
+            textTransform: look.uppercase ? "uppercase" : "none",
+            ["--size" as string]: look.size,
           }}
         >
           {text.split("\n").map((l, i) => (

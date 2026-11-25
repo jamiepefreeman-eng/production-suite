@@ -1622,13 +1622,95 @@ export const show: T.Show = {
               "type": "clear",
               "layer": "lights"
             }
+          ],
+          "style": {
+            "font": "Georgia",
+            "size": 1.2,
+            "color": "#ffcc00",
+            "bold": false,
+            "italic": true,
+            "uppercase": true,
+            "shadow": false,
+            "position": "bottom",
+            "align": "left"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "kind": "text",
+              "x": 0.3,
+              "y": 0.4,
+              "w": 0.4,
+              "h": 0.2,
+              "text": "Welcome",
+              "media": null,
+              "font": "Inter",
+              "size": 6.0,
+              "color": "#ffffff",
+              "bold": false,
+              "italic": false,
+              "align": "center",
+              "background": "",
+              "radius": 0.0,
+              "opacity": 1.0
+            },
+            {
+              "id": 2,
+              "kind": "media",
+              "x": 0.3,
+              "y": 0.4,
+              "w": 0.4,
+              "h": 0.2,
+              "text": "",
+              "media": 1,
+              "font": "Inter",
+              "size": 6.0,
+              "color": "#ffffff",
+              "bold": false,
+              "italic": false,
+              "align": "center",
+              "background": "",
+              "radius": 0.0,
+              "opacity": 1.0
+            },
+            {
+              "id": 3,
+              "kind": "shape",
+              "x": 0.3,
+              "y": 0.4,
+              "w": 0.4,
+              "h": 0.2,
+              "text": "",
+              "media": null,
+              "font": "Inter",
+              "size": 6.0,
+              "color": "#ffffff",
+              "bold": false,
+              "italic": false,
+              "align": "center",
+              "background": "#000000aa",
+              "radius": 10.0,
+              "opacity": 1.0
+            }
           ]
         },
         {
           "id": 2,
           "label": "Connect",
           "text": "New here?\nVisit the welcome desk",
-          "triggers": []
+          "triggers": [],
+          "style": {
+            "font": null,
+            "size": null,
+            "color": null,
+            "bold": null,
+            "italic": null,
+            "uppercase": null,
+            "shadow": null,
+            "position": null,
+            "align": "right"
+          },
+          "elements": []
         }
       ],
       "theme": "Default",
@@ -1656,13 +1738,37 @@ export const show: T.Show = {
               "type": "lighting_cue",
               "cue": 2
             }
-          ]
+          ],
+          "style": {
+            "font": null,
+            "size": null,
+            "color": null,
+            "bold": null,
+            "italic": null,
+            "uppercase": null,
+            "shadow": null,
+            "position": null,
+            "align": null
+          },
+          "elements": []
         },
         {
           "id": 2,
           "label": "Verse 2",
           "text": "'Twas grace that taught my heart to fear,\nAnd grace my fears relieved;\nHow precious did that grace appear\nThe hour I first believed.",
-          "triggers": []
+          "triggers": [],
+          "style": {
+            "font": null,
+            "size": null,
+            "color": null,
+            "bold": null,
+            "italic": null,
+            "uppercase": null,
+            "shadow": null,
+            "position": null,
+            "align": null
+          },
+          "elements": []
         }
       ],
       "theme": "Worship",
@@ -1694,7 +1800,19 @@ export const show: T.Show = {
               "type": "lighting_text",
               "text": "front spots warm white at 90, back wall blue at 30"
             }
-          ]
+          ],
+          "style": {
+            "font": null,
+            "size": null,
+            "color": null,
+            "bold": null,
+            "italic": null,
+            "uppercase": null,
+            "shadow": null,
+            "position": null,
+            "align": null
+          },
+          "elements": []
         }
       ],
       "theme": "Scripture",
@@ -4109,13 +4227,95 @@ export const commands: T.Command[] = [
                   "type": "clear",
                   "layer": "lights"
                 }
+              ],
+              "style": {
+                "font": "Georgia",
+                "size": 1.2,
+                "color": "#ffcc00",
+                "bold": false,
+                "italic": true,
+                "uppercase": true,
+                "shadow": false,
+                "position": "bottom",
+                "align": "left"
+              },
+              "elements": [
+                {
+                  "id": 1,
+                  "kind": "text",
+                  "x": 0.3,
+                  "y": 0.4,
+                  "w": 0.4,
+                  "h": 0.2,
+                  "text": "Welcome",
+                  "media": null,
+                  "font": "Inter",
+                  "size": 6.0,
+                  "color": "#ffffff",
+                  "bold": false,
+                  "italic": false,
+                  "align": "center",
+                  "background": "",
+                  "radius": 0.0,
+                  "opacity": 1.0
+                },
+                {
+                  "id": 2,
+                  "kind": "media",
+                  "x": 0.3,
+                  "y": 0.4,
+                  "w": 0.4,
+                  "h": 0.2,
+                  "text": "",
+                  "media": 1,
+                  "font": "Inter",
+                  "size": 6.0,
+                  "color": "#ffffff",
+                  "bold": false,
+                  "italic": false,
+                  "align": "center",
+                  "background": "",
+                  "radius": 0.0,
+                  "opacity": 1.0
+                },
+                {
+                  "id": 3,
+                  "kind": "shape",
+                  "x": 0.3,
+                  "y": 0.4,
+                  "w": 0.4,
+                  "h": 0.2,
+                  "text": "",
+                  "media": null,
+                  "font": "Inter",
+                  "size": 6.0,
+                  "color": "#ffffff",
+                  "bold": false,
+                  "italic": false,
+                  "align": "center",
+                  "background": "#000000aa",
+                  "radius": 10.0,
+                  "opacity": 1.0
+                }
               ]
             },
             {
               "id": 2,
               "label": "Connect",
               "text": "New here?\nVisit the welcome desk",
-              "triggers": []
+              "triggers": [],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": "right"
+              },
+              "elements": []
             }
           ],
           "theme": "Default",
@@ -4143,13 +4343,37 @@ export const commands: T.Command[] = [
                   "type": "lighting_cue",
                   "cue": 2
                 }
-              ]
+              ],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": null
+              },
+              "elements": []
             },
             {
               "id": 2,
               "label": "Verse 2",
               "text": "'Twas grace that taught my heart to fear,\nAnd grace my fears relieved;\nHow precious did that grace appear\nThe hour I first believed.",
-              "triggers": []
+              "triggers": [],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": null
+              },
+              "elements": []
             }
           ],
           "theme": "Worship",
@@ -4181,7 +4405,19 @@ export const commands: T.Command[] = [
                   "type": "lighting_text",
                   "text": "front spots warm white at 90, back wall blue at 30"
                 }
-              ]
+              ],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": null
+              },
+              "elements": []
             }
           ],
           "theme": "Scripture",
@@ -6424,13 +6660,95 @@ export const commands: T.Command[] = [
                   "type": "clear",
                   "layer": "lights"
                 }
+              ],
+              "style": {
+                "font": "Georgia",
+                "size": 1.2,
+                "color": "#ffcc00",
+                "bold": false,
+                "italic": true,
+                "uppercase": true,
+                "shadow": false,
+                "position": "bottom",
+                "align": "left"
+              },
+              "elements": [
+                {
+                  "id": 1,
+                  "kind": "text",
+                  "x": 0.3,
+                  "y": 0.4,
+                  "w": 0.4,
+                  "h": 0.2,
+                  "text": "Welcome",
+                  "media": null,
+                  "font": "Inter",
+                  "size": 6.0,
+                  "color": "#ffffff",
+                  "bold": false,
+                  "italic": false,
+                  "align": "center",
+                  "background": "",
+                  "radius": 0.0,
+                  "opacity": 1.0
+                },
+                {
+                  "id": 2,
+                  "kind": "media",
+                  "x": 0.3,
+                  "y": 0.4,
+                  "w": 0.4,
+                  "h": 0.2,
+                  "text": "",
+                  "media": 1,
+                  "font": "Inter",
+                  "size": 6.0,
+                  "color": "#ffffff",
+                  "bold": false,
+                  "italic": false,
+                  "align": "center",
+                  "background": "",
+                  "radius": 0.0,
+                  "opacity": 1.0
+                },
+                {
+                  "id": 3,
+                  "kind": "shape",
+                  "x": 0.3,
+                  "y": 0.4,
+                  "w": 0.4,
+                  "h": 0.2,
+                  "text": "",
+                  "media": null,
+                  "font": "Inter",
+                  "size": 6.0,
+                  "color": "#ffffff",
+                  "bold": false,
+                  "italic": false,
+                  "align": "center",
+                  "background": "#000000aa",
+                  "radius": 10.0,
+                  "opacity": 1.0
+                }
               ]
             },
             {
               "id": 2,
               "label": "Connect",
               "text": "New here?\nVisit the welcome desk",
-              "triggers": []
+              "triggers": [],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": "right"
+              },
+              "elements": []
             }
           ],
           "theme": "Default",
@@ -6458,13 +6776,37 @@ export const commands: T.Command[] = [
                   "type": "lighting_cue",
                   "cue": 2
                 }
-              ]
+              ],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": null
+              },
+              "elements": []
             },
             {
               "id": 2,
               "label": "Verse 2",
               "text": "'Twas grace that taught my heart to fear,\nAnd grace my fears relieved;\nHow precious did that grace appear\nThe hour I first believed.",
-              "triggers": []
+              "triggers": [],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": null
+              },
+              "elements": []
             }
           ],
           "theme": "Worship",
@@ -6496,7 +6838,19 @@ export const commands: T.Command[] = [
                   "type": "lighting_text",
                   "text": "front spots warm white at 90, back wall blue at 30"
                 }
-              ]
+              ],
+              "style": {
+                "font": null,
+                "size": null,
+                "color": null,
+                "bold": null,
+                "italic": null,
+                "uppercase": null,
+                "shadow": null,
+                "position": null,
+                "align": null
+              },
+              "elements": []
             }
           ],
           "theme": "Scripture",

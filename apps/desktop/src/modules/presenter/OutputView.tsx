@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useEngine } from "../../shared/store";
-import { CountdownText, DEFAULT_THEME, SlideRender, liveProps, mediaById, slideBackground, slideMedia, themeFor, useNow } from "./render";
+import { CountdownText, DEFAULT_THEME, SlideRender, liveProps, mediaById, slideBackground, slideElements, slideMedia, themeFor, useNow } from "./render";
 
 type Kind = "audience" | "stage" | "stream";
 
@@ -60,6 +60,8 @@ export default function OutputView({ kind }: { kind: Kind }) {
         play
         countdown={kind === "audience" && layers.countdown?.show_on_audience ? layers.countdown : null}
         props={liveProps(show, layers.props)}
+        style={live ? slide?.style : null}
+        elements={live ? slideElements(show, slide) : []}
       />
     </div>
   );

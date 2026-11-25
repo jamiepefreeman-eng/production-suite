@@ -169,7 +169,19 @@ export default function VisualizerApp() {
   // Screens show what the audience sees.
   useEffect(() => {
     if (!show || !scene.current) return;
-    const theme = live ? themeFor(show, live.presentation) : null;
+    const baseTheme = live ? themeFor(show, live.presentation) : null;
+    // The live slide's own formatting (font, colour…) over its theme, like the Presenter draws it.
+    const st = show.presentations.find((p) => p.id === live?.presentation)?.slides.find((s) => s.id === live?.slide)?.style;
+    const theme = baseTheme && {
+      ...baseTheme,
+      font: st?.font ?? baseTheme.font,
+      size: st?.size ?? baseTheme.size,
+      color: st?.color ?? baseTheme.color,
+      bold: st?.bold ?? baseTheme.bold,
+      uppercase: st?.uppercase ?? baseTheme.uppercase,
+      shadow: st?.shadow ?? baseTheme.shadow,
+      position: st?.position ?? baseTheme.position,
+    };
     const mediaId = layers.media ?? (live ? theme?.background_media : null);
     const media = show.media.find(
       (m) => m.id === mediaId && m.kind !== "audio",

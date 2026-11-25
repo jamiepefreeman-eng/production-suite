@@ -125,7 +125,42 @@ export interface Prop {
 export interface Macro { id: number; name: string; color: string; actions: SlideTrigger[] }
 export interface MediaPlaylist { name: string; items: number[] }
 
-export interface Slide { id: number; label: string; text: string; triggers: SlideTrigger[] }
+export type TextAlign = "left" | "center" | "right";
+/** This slide's own text formatting; null = follow the theme. */
+export interface TextStyle {
+  font: string | null;
+  size: number | null;
+  color: string | null;
+  bold: boolean | null;
+  italic: boolean | null;
+  uppercase: boolean | null;
+  shadow: boolean | null;
+  position: TextPosition | null;
+  align: TextAlign | null;
+}
+export type ElementKind = "text" | "media" | "shape";
+/** Text box / picture / video / live feed / shape on one slide; x,y,w,h are 0..1 of the frame. */
+export interface SlideElement {
+  id: number;
+  kind: ElementKind;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  text: string;
+  media: number | null;
+  font: string;
+  /** % of frame height */
+  size: number;
+  color: string;
+  bold: boolean;
+  italic: boolean;
+  align: TextAlign;
+  background: string;
+  radius: number;
+  opacity: number;
+}
+export interface Slide { id: number; label: string; text: string; triggers: SlideTrigger[]; style: TextStyle; elements: SlideElement[] }
 export type PresentationKind = "song" | "scripture" | "announcement" | "media" | "header";
 export interface Presentation {
   id: number;

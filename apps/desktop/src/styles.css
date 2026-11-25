@@ -623,3 +623,41 @@ body.dragging, body.dragging * { cursor: grabbing !important; user-select: none 
   background-size: 8cqh 8cqh;
   background-position: 0 0, 0 4cqh, 4cqh -4cqh, -4cqh 0;
 }
+/* Text alignment per slide */
+.render.align-left { justify-content: flex-start; text-align: left; }
+.render.align-right { justify-content: flex-end; text-align: right; }
+/* Slide elements: text boxes, pictures, video, live feeds, shapes (sizes in cqh of .render). */
+.render-el { position: absolute; z-index: 1; overflow: hidden; display: flex; align-items: center; }
+.render-el.align-left { justify-content: flex-start; text-align: left; }
+.render-el.align-center { justify-content: center; text-align: center; }
+.render-el.align-right { justify-content: flex-end; text-align: right; }
+.render-el-text { position: relative; width: 100%; padding: 0 1.2cqh; font-size: calc(var(--el-size) * 1cqh); line-height: 1.2; overflow-wrap: anywhere; }
+.render-el-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border: 0.3cqh dashed #ffffff55; color: #ffffff88; font-size: 4cqh; }
+/* ── Slide designer (Presenter › Edit) */
+.pd { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); margin: 0 0 12px; }
+.pd-head { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.pd-add { display: inline-flex; align-items: center; gap: 4px; color: var(--muted, #8b8f98); font-size: 12px; flex-wrap: wrap; }
+.pd-body { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 10px; padding: 10px; }
+.pd-stage { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pd-canvas { position: relative; width: 100%; max-width: 900px; aspect-ratio: 16 / 9; border-radius: 4px; overflow: hidden; outline: 1px solid var(--line); user-select: none; touch-action: none; }
+.pd-canvas.drop-over { outline: 2px solid var(--accent); }
+.pd-box { position: absolute; z-index: 5; cursor: move; outline: 1px dashed #ffffff40; }
+.pd-box:hover { outline-color: #ffffffa0; }
+.pd-box.sel { outline: 2px solid var(--accent); }
+.pd-handle { position: absolute; width: 10px; height: 10px; background: #fff; border: 2px solid var(--accent); border-radius: 2px; transform: translate(-50%, -50%); }
+.pd-handle.h-nw { left: 0; top: 0; cursor: nwse-resize; } .pd-handle.h-n { left: 50%; top: 0; cursor: ns-resize; }
+.pd-handle.h-ne { left: 100%; top: 0; cursor: nesw-resize; } .pd-handle.h-e { left: 100%; top: 50%; cursor: ew-resize; }
+.pd-handle.h-se { left: 100%; top: 100%; cursor: nwse-resize; } .pd-handle.h-s { left: 50%; top: 100%; cursor: ns-resize; }
+.pd-handle.h-sw { left: 0; top: 100%; cursor: nesw-resize; } .pd-handle.h-w { left: 0; top: 50%; cursor: ew-resize; }
+.pd-side { min-width: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.pd-panel { display: flex; flex-direction: column; gap: 6px; }
+.pd-panel h4, .pd-side h4 { margin: 4px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.pd-panel label { color: var(--muted, #8b8f98); }
+.pd-panel textarea { resize: vertical; min-height: 54px; }
+.pd-xywh { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.pd-xywh input { width: 100%; min-width: 0; }
+.pd-actions { margin-top: 4px; }
+.seg.small button.on { background: var(--accent); color: #111; }
+.pp-slide.editing .pp-thumb { cursor: pointer; }
+.pp-slide.editing.designing { outline: 2px solid var(--accent); }
+@media (max-width: 1200px) { .pd-body { grid-template-columns: 1fr; } }

@@ -15,8 +15,9 @@ import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type { Presentation, PresentationKind, Show, Slide, SlideTrigger } from "../../shared/types";
 import { groupColor, groupNames, sequence } from "./groups";
 import { Bin, MediaFolders, RightTabs, triggerLabel, type Folder } from "./panels";
-import { DEFAULT_THEME, SlideRender, liveProps, mediaById, slideBackground, slideMedia, themeFor } from "./render";
+import { DEFAULT_THEME, SlideRender, newSlide, slideElements, liveProps, mediaById, slideBackground, slideMedia, themeFor } from "./render";
 import ThemeEditor from "./themes";
+import SlideDesigner, { setEditAll } from "./SlideDesigner";
 
 const readPref = (k: string, d: number) => {
   try {
@@ -327,6 +328,8 @@ function LivePanel({ cursor }: { cursor: Cursor }) {
           play
           countdown={layers.countdown?.show_on_audience ? layers.countdown : null}
           props={liveProps(show, layers.props)}
+          style={live ? liveSlide?.style : null}
+          elements={live ? slideElements(show, liveSlide) : []}
         />
       </div>
       <div className="pp-layers">
@@ -344,7 +347,7 @@ function LivePanel({ cursor }: { cursor: Cursor }) {
       </div>
       <div className="pp-next-row">
         <div className="pp-preview tiny">
-          <SlideRender text={next?.text ?? ""} theme={theme} background={slideMedia(show, next)} transparent />
+          <SlideRender text={next?.text ?? ""} theme={theme} background={slideMedia(show, next)} transparent style={next?.style} elements={slideElements(show, next)} />
         </div>
         <div className="muted">
           <small>NEXT</small>
@@ -418,7 +421,7 @@ function Sidebar({
         groups: [],
         arrangements: [],
         arrangement: null,
-        slides: kind === "header" ? [] : [{ id: 1, label: kind === "scripture" ? "Reading" : "Welcome", text: "", triggers: [] }],
+        slides: kind === "header" ? [] : [newSlide(1, kind === "scripture" ? "Reading" : "Welcome")],
       });
       d.playlist.push(id);
     }).then(() => kind !== "header" && onSelect(id));
@@ -901,7 +904,7 @@ function SlideTile({
       }}
     >
       <div className="pp-thumb">
-        <SlideRender text={slide.text} theme={theme} background={bg} transparent />
+        <SlideRender text={slide.text} theme={theme} background={bg} transparent style={slide.style} elements={slideElements(show, slide)} />
         {slide.triggers.length > 0 && (
           <div className="pp-badges">
             {slide.triggers.slice(0, 3).map((t, k) => (
@@ -935,11 +938,15 @@ function SlideTile({
 
 const editSlides = (pid: number, fn: (slides: Slide[]) => Slide[]) => editPres(pid, (p) => void (p.slides = fn(p.slides)));
 const nextSlideId = (slides: Slide[]) => Math.max(0, ...slides.map((s) => s.id)) + 1;
+setEditAll((pid, fn) => editPres(pid, (p) => fn(p.slides)));
 
 function EditPresentation({ p, show }: { p: Presentation; show: Show }) {
   const set = (patch: Partial<Presentation>) => editPres(p.id, (x) => void Object.assign(x, patch));
   const theme = themeFor(show, p.id);
   const names = groupNames(p);
+  const [designing, setDesigning] = useState<number | null>(p.slides[0]?.id ?? null);
+  const di = p.slides.findIndex((s) => s.id === designing);
+  const dslide = di >= 0 ? p.slides[di] : undefined;
   return (
     <section className="pp-pres focused">
       <header className="pp-pres-head edit">
@@ -958,13 +965,34 @@ function EditPresentation({ p, show }: { p: Presentation; show: Show }) {
           <option key={l} value={l} />
         ))}
       </datalist>
+      {dslide && (
+        <SlideDesigner
+          p={p}
+          slide={dslide}
+          show={show}
+          theme={theme}
+          edit={(fn) =>
+            editPres(p.id, (x) => {
+              const s = x.slides.find((y) => y.id === dslide.id);
+              if (s) {
+                s.style ??= { font: null, size: null, color: null, bold: null, italic: null, uppercase: null, shadow: null, position: null, align: null };
+                s.elements ??= [];
+                fn(s);
+              }
+            })
+          }
+          onPrev={di > 0 ? () => setDesigning(p.slides[di - 1].id) : undefined}
+          onNext={di < p.slides.length - 1 ? () => setDesigning(p.slides[di + 1].id) : undefined}
+          onClose={() => setDesigning(null)}
+        />
+      )}
       <div className="pp-grid">
         {p.slides.map((s, i) => (
-          <SlideEditCard key={s.id} p={p} slide={s} index={i} theme={theme} show={show} />
+          <SlideEditCard key={s.id} p={p} slide={s} index={i} theme={theme} show={show} designing={s.id === designing} onDesign={() => setDesigning(s.id)} />
         ))}
         <button
           className="pp-add-slide"
-          onClick={() => editSlides(p.id, (ss) => [...ss, { id: nextSlideId(ss), label: ss[ss.length - 1]?.label ?? "Verse 1", text: "", triggers: [] }])}
+          onClick={() => editSlides(p.id, (ss) => [...ss, newSlide(nextSlideId(ss), ss[ss.length - 1]?.label ?? "Verse 1")])}
         >
           + Add slide
         </button>
@@ -973,7 +1001,23 @@ function EditPresentation({ p, show }: { p: Presentation; show: Show }) {
   );
 }
 
-function SlideEditCard({ p, slide, index, theme, show }: { p: Presentation; slide: Slide; index: number; theme: ReturnType<typeof themeFor>; show: Show }) {
+function SlideEditCard({
+  p,
+  slide,
+  index,
+  theme,
+  show,
+  designing,
+  onDesign,
+}: {
+  p: Presentation;
+  slide: Slide;
+  index: number;
+  theme: ReturnType<typeof themeFor>;
+  show: Show;
+  designing: boolean;
+  onDesign: () => void;
+}) {
   const set = (patch: Partial<Slide>) => editSlides(p.id, (ss) => ss.map((s) => (s.id === slide.id ? { ...s, ...patch } : s)));
   const moveBy = (d: number) =>
     editSlides(p.id, (ss) => {
@@ -984,9 +1028,9 @@ function SlideEditCard({ p, slide, index, theme, show }: { p: Presentation; slid
       return out;
     });
   return (
-    <div className="pp-slide editing">
-      <div className="pp-thumb">
-        <SlideRender text={slide.text} theme={theme} background={slideMedia(show, slide)} transparent />
+    <div className={`pp-slide editing ${designing ? "designing" : ""}`}>
+      <div className="pp-thumb" onClick={onDesign} title="Design this slide: fonts, colours, text boxes, pictures, live feeds">
+        <SlideRender text={slide.text} theme={theme} background={slideMedia(show, slide)} transparent style={slide.style} elements={slideElements(show, slide)} />
       </div>
       <div className="pp-label" style={{ ["--group" as string]: groupColor(slide.label, p) }}>
         <span className="num">{index + 1}</span>
@@ -1012,6 +1056,9 @@ function SlideEditCard({ p, slide, index, theme, show }: { p: Presentation; slid
           }
         >
           ⧉
+        </button>
+        <button className={`icon ${designing ? "on" : ""}`} title="Design: fonts, colours, text boxes, pictures, live feeds" onClick={onDesign}>
+          🎨
         </button>
         <div className="grow" />
         <button className="icon" title="Delete slide" onClick={() => editSlides(p.id, (ss) => ss.filter((s) => s.id !== slide.id))}>
@@ -1105,7 +1152,14 @@ function Reflow({ p, onDone }: { p: Presentation; onDone: () => void }) {
         return i >= firstIdx && (blockEnd < 0 || i < blockEnd);
       });
       await editPres(p.id, (x) => {
-        x.slides = kept.map((s, i) => ({ ...s, id: i + 1, triggers: x.slides[i]?.triggers ?? [] }));
+        // Media cues, formatting and elements stay with the slide in the same place.
+        x.slides = kept.map((s, i) => ({
+          ...s,
+          id: i + 1,
+          triggers: x.slides[i]?.triggers ?? [],
+          style: x.slides[i]?.style ?? s.style,
+          elements: x.slides[i]?.elements ?? [],
+        }));
         const vname = saveVersion.trim();
         if (vname || repeats) {
           const name = vname || "From Reflow";
