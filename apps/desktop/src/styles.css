@@ -489,3 +489,10 @@ body.output-stream { background: transparent; }
 .drag-ghost.can-drop { border-color: var(--ok); }
 body.dragging, body.dragging * { cursor: grabbing !important; user-select: none !important; }
 .pv-mode, .pv-fix { touch-action: none; }
+.viz-slider input { width: 90px; }
+.viz-slider b { font-weight: 600; color: var(--text); min-width: 34px; font-size: 12px; }
+.viz-add { position: relative; }
+.viz-add-menu { width: 230px; display: flex; flex-direction: column; gap: 6px; max-height: 70vh; overflow: auto; }
+.viz-add-menu h3 { margin: 4px 0 2px; }
+.viz-add-item { display: block; width: 100%; text-align: left; background: transparent; border-color: transparent; padding: 4px 8px; }
+.viz-add-item:hover { background: var(--panel-3); }

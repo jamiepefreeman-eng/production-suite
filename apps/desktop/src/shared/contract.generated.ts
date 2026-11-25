@@ -1747,6 +1747,27 @@ export const show: T.Show = {
       "color": "#b9b4aa"
     },
     {
+      "id": 4,
+      "name": "Centre screen",
+      "kind": "screen",
+      "position": [
+        0.0,
+        2.2,
+        -3.85
+      ],
+      "size": [
+        4.0,
+        2.25,
+        0.08
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#111111"
+    },
+    {
       "id": 2,
       "name": "Side wall L",
       "kind": "wall",
@@ -1829,8 +1850,222 @@ export const show: T.Show = {
         0.0
       ],
       "color": "#b9b4aa"
+    },
+    {
+      "id": 12,
+      "name": "Wall",
+      "kind": "stage_deck",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 13,
+      "name": "Wall",
+      "kind": "truss",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 14,
+      "name": "Wall",
+      "kind": "screen",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 15,
+      "name": "Wall",
+      "kind": "person",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 16,
+      "name": "Wall",
+      "kind": "drum_kit",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 17,
+      "name": "Wall",
+      "kind": "keyboard",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 18,
+      "name": "Wall",
+      "kind": "guitarist",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 19,
+      "name": "Wall",
+      "kind": "mic_stand",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 20,
+      "name": "Wall",
+      "kind": "speaker",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
+    },
+    {
+      "id": 21,
+      "name": "Wall",
+      "kind": "wedge",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa"
     }
   ],
+  "visualizer": {
+    "haze": 0.35,
+    "ambient": 0.15
+  },
   "mixer": null
 };
 
@@ -3722,6 +3957,27 @@ export const commands: T.Command[] = [
           "color": "#b9b4aa"
         },
         {
+          "id": 4,
+          "name": "Centre screen",
+          "kind": "screen",
+          "position": [
+            0.0,
+            2.2,
+            -3.85
+          ],
+          "size": [
+            4.0,
+            2.25,
+            0.08
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#111111"
+        },
+        {
           "id": 2,
           "name": "Side wall L",
           "kind": "wall",
@@ -3804,8 +4060,222 @@ export const commands: T.Command[] = [
             0.0
           ],
           "color": "#b9b4aa"
+        },
+        {
+          "id": 12,
+          "name": "Wall",
+          "kind": "stage_deck",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 13,
+          "name": "Wall",
+          "kind": "truss",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 14,
+          "name": "Wall",
+          "kind": "screen",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 15,
+          "name": "Wall",
+          "kind": "person",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 16,
+          "name": "Wall",
+          "kind": "drum_kit",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 17,
+          "name": "Wall",
+          "kind": "keyboard",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 18,
+          "name": "Wall",
+          "kind": "guitarist",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 19,
+          "name": "Wall",
+          "kind": "mic_stand",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 20,
+          "name": "Wall",
+          "kind": "speaker",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 21,
+          "name": "Wall",
+          "kind": "wedge",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
         }
       ],
+      "visualizer": {
+        "haze": 0.35,
+        "ambient": 0.15
+      },
       "mixer": null
     }
   },
@@ -5555,6 +6025,27 @@ export const commands: T.Command[] = [
           "color": "#b9b4aa"
         },
         {
+          "id": 4,
+          "name": "Centre screen",
+          "kind": "screen",
+          "position": [
+            0.0,
+            2.2,
+            -3.85
+          ],
+          "size": [
+            4.0,
+            2.25,
+            0.08
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#111111"
+        },
+        {
           "id": 2,
           "name": "Side wall L",
           "kind": "wall",
@@ -5637,8 +6128,222 @@ export const commands: T.Command[] = [
             0.0
           ],
           "color": "#b9b4aa"
+        },
+        {
+          "id": 12,
+          "name": "Wall",
+          "kind": "stage_deck",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 13,
+          "name": "Wall",
+          "kind": "truss",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 14,
+          "name": "Wall",
+          "kind": "screen",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 15,
+          "name": "Wall",
+          "kind": "person",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 16,
+          "name": "Wall",
+          "kind": "drum_kit",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 17,
+          "name": "Wall",
+          "kind": "keyboard",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 18,
+          "name": "Wall",
+          "kind": "guitarist",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 19,
+          "name": "Wall",
+          "kind": "mic_stand",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 20,
+          "name": "Wall",
+          "kind": "speaker",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
+        },
+        {
+          "id": 21,
+          "name": "Wall",
+          "kind": "wedge",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa"
         }
       ],
+      "visualizer": {
+        "haze": 0.35,
+        "ambient": 0.15
+      },
       "mixer": null
     }
   }

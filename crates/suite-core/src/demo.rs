@@ -8,7 +8,7 @@ use crate::lighting::*;
 use crate::presenter::{parse_lyrics, Presentation, PresentationKind, Slide, SlideTrigger};
 use crate::mixer::MixerCommand;
 use crate::presenter::{TextPosition, Theme};
-use crate::show::{Scenery, SceneryKind, Show, StageConfig};
+use crate::show::{Scenery, SceneryKind, Show, StageConfig, VisualizerSettings};
 
 fn ch(attr: Attr) -> ChannelDef {
     ChannelDef { attr, default: 0, name: String::new() }
@@ -337,6 +337,15 @@ pub fn demo_show() -> Show {
             color: "#b9b4aa".into(),
         },
         Scenery {
+            id: 4,
+            name: "Centre screen".into(),
+            kind: SceneryKind::Screen,
+            position: [0.0, 2.2, -3.85],
+            size: [4.0, 2.25, 0.08],
+            rotation: [0.0, 0.0, 0.0],
+            color: "#111111".into(),
+        },
+        Scenery {
             id: 2,
             name: "Side wall L".into(),
             kind: SceneryKind::Wall,
@@ -354,6 +363,7 @@ pub fn demo_show() -> Show {
             rotation: [0.0, 90.0, 0.0],
             color: "#b9b4aa".into(),
         }],
+        visualizer: VisualizerSettings::default(),
         mixer: None,
     }
 }

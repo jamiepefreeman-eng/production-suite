@@ -141,7 +141,9 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    layouts, NDI output, CCLI usage report export. SongSelect import needs a CCLI agreement.
 5. **Audio**: playback engine (cpal) for walk-in music / tracks / click to chosen outputs; desk feedback
    → UI fader state; meters (X32 `/meters`); A&H MIDI feedback parsing; scene name lists.
-6. **Visualizer**: floor pools/gobo projection, haze, truss models, import a stage model (glTF),
-   fixture drag that snaps to truss.
+6. **Visualizer** — *v0.5.0:* screens showing the live audience output (`visualizer/screen.ts` paints a
+   canvas texture; mirrors presenter/render.tsx), haze + ambient (saved in `Show.visualizer`), stage items
+   (deck, truss, people, drums, keys, guitarist, mic, speaker, wedge; built at a nominal size and scaled
+   to `Scenery.size`). Still to do: gobo projection, import a stage model (glTF), snap fixtures to truss.
 7. **Remote**: phone/tablet remote over WebSocket speaking the same `Command`/`Event` JSON.
 8. **Safety**: autosave + crash recovery of the show file, API key in OS keychain, undo.

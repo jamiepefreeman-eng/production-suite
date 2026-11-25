@@ -45,7 +45,23 @@ fn write_typescript_contract() {
     for (i, position) in [TextPosition::Top, TextPosition::Bottom].into_iter().enumerate() {
         show.themes.push(Theme { name: format!("t{i}"), position, background_media: Some(1), ..Theme::default() });
     }
-    for (i, kind) in [SceneryKind::Drape, SceneryKind::Riser].into_iter().enumerate() {
+    for (i, kind) in [
+        SceneryKind::Drape,
+        SceneryKind::Riser,
+        SceneryKind::StageDeck,
+        SceneryKind::Truss,
+        SceneryKind::Screen,
+        SceneryKind::Person,
+        SceneryKind::DrumKit,
+        SceneryKind::Keyboard,
+        SceneryKind::Guitarist,
+        SceneryKind::MicStand,
+        SceneryKind::Speaker,
+        SceneryKind::Wedge,
+    ]
+    .into_iter()
+    .enumerate()
+    {
         show.scenery.push(Scenery { id: 10 + i as u32, kind, ..Scenery::default() });
     }
     let layers = Layers {

@@ -1,14 +1,44 @@
 import { useEffect, useRef, useState } from "react";
-import { api, confirmDialog, on } from "../../shared/bridge";
+import { api, confirmDialog, mediaUrl, on } from "../../shared/bridge";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
-import type { Fixture, FixtureKind, Scenery, SceneryKind, Show, VizSource } from "../../shared/types";
+import type { Fixture, FixtureKind, Scenery, SceneryKind, Show, Theme, VizSource } from "../../shared/types";
 import { StageScene, type Selection } from "./scene";
 
-const SCENERY_DEFAULTS: Record<SceneryKind, Omit<Scenery, "id" | "name">> = {
-  wall: { kind: "wall", position: [0, 0, -3], size: [4, 3, 0.12], rotation: [0, 0, 0], color: "#b9b4aa" },
-  drape: { kind: "drape", position: [0, 0, -3.5], size: [6, 4, 0.05], rotation: [0, 0, 0], color: "#2b2d3a" },
-  riser: { kind: "riser", position: [0, 0, -1.5], size: [2.4, 0.4, 1.2], rotation: [0, 0, 0], color: "#3a3a3f" },
-};
+type Defaults = Omit<Scenery, "id" | "name" | "kind">;
+const D = (position: [number, number, number], size: [number, number, number], color: string): Defaults => ({ position, size, rotation: [0, 0, 0], color });
+/** Menu of things you can put on stage, grouped, with a sensible starting size (m) and colour. */
+const CATALOG: { group: string; items: [SceneryKind, string, Defaults][] }[] = [
+  {
+    group: "Structure",
+    items: [
+      ["wall", "Wall", D([0, 0, -3], [4, 3, 0.12], "#b9b4aa")],
+      ["drape", "Drape", D([0, 0, -3.5], [6, 4, 0.05], "#2b2d3a")],
+      ["stage_deck", "Stage deck", D([0, 0, -1], [2.4, 0.6, 1.2], "#2a2a2e")],
+      ["riser", "Riser", D([0, 0, -1.5], [2.4, 0.4, 1.2], "#3a3a3f")],
+      ["truss", "Truss", D([0, 6, 0], [10, 0.3, 0.3], "#c9ccd1")],
+    ],
+  },
+  { group: "Screens", items: [["screen", "LED / projection screen", D([0, 2, -3.8], [4, 2.25, 0.08], "#111111")]] },
+  {
+    group: "People & band",
+    items: [
+      ["person", "Person", D([0, 0, 0], [0.5, 1.75, 0.3], "#3b82f6")],
+      ["guitarist", "Guitarist", D([-2, 0, -1], [0.7, 1.75, 0.4], "#64748b")],
+      ["drum_kit", "Drum kit", D([0, 0.4, -2.4], [2, 1.4, 1.6], "#7f1d1d")],
+      ["keyboard", "Keyboard", D([2, 0, -1.5], [1.3, 1, 0.45], "#18181b")],
+      ["mic_stand", "Mic stand", D([0, 0, 1], [0.6, 1.6, 0.6], "#18181b")],
+    ],
+  },
+  {
+    group: "Audio",
+    items: [
+      ["speaker", "Speaker", D([-5, 0, 3.5], [0.6, 1, 0.5], "#18181b")],
+      ["wedge", "Monitor wedge", D([0, 0, 2], [0.7, 0.4, 0.5], "#18181b")],
+    ],
+  },
+];
+const ALL_KINDS = CATALOG.flatMap((c) => c.items);
+const kindLabel = (k: SceneryKind) => ALL_KINDS.find((x) => x[0] === k)?.[1] ?? k;
 
 const SHOWN_AS: [FixtureKind, string][] = [
   ["puck", "Puck / floor uplighter"],
@@ -20,8 +50,15 @@ const SHOWN_AS: [FixtureKind, string][] = [
   ["generic", "Generic"],
 ];
 
+/** The audience output as the Visualizer's screens should draw it (mirrors the Presenter). */
+function themeFor(show: Show, presentation?: number): Theme | null {
+  const p = show.presentations.find((x) => x.id === presentation);
+  return show.themes.find((t) => t.name === p?.theme) ?? show.themes[0] ?? null;
+}
+
 export default function VisualizerApp() {
-  const { show } = useEngine();
+  const { show, live, layers } = useEngine();
+  const [addOpen, setAddOpen] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<StageScene | null>(null);
   const [selected, setSelected] = useState<Selection>(null);
@@ -54,8 +91,25 @@ export default function VisualizerApp() {
 
   // Rebuild when the patch or scenery changes.
   useEffect(() => {
-    if (show && scene.current) scene.current.setShow(show);
+    if (show && scene.current) {
+      scene.current.setShow(show);
+      scene.current.setAtmosphere(show.visualizer ?? { haze: 0.35, ambient: 0.15 });
+    }
   }, [show]);
+
+  // Screens show what the audience sees.
+  useEffect(() => {
+    if (!show || !scene.current) return;
+    const theme = live ? themeFor(show, live.presentation) : null;
+    const mediaId = layers.media ?? (live ? theme?.background_media : null);
+    const media = show.media.find((m) => m.id === mediaId && m.kind !== "audio");
+    scene.current.setScreenContent({
+      text: live?.text ?? "",
+      theme: theme ?? (live ? null : { ...(show.themes[0] as Theme), background_color: "#000000" }),
+      background: media ? { kind: media.kind === "video" ? "video" : "image", url: mediaUrl(media.path) } : null,
+      countdown: layers.countdown?.show_on_audience ? { label: layers.countdown.label, endsAt: layers.countdown.ends_at_unix_ms } : null,
+    });
+  }, [show, live, layers]);
 
   useEffect(() => {
     scene.current?.select(selected);
@@ -73,13 +127,16 @@ export default function VisualizerApp() {
 
   const addScenery = (kind: SceneryKind) => {
     if (!show) return;
+    setAddOpen(false);
+    const [, label, defaults] = ALL_KINDS.find((x) => x[0] === kind)!;
     const id = Math.max(0, ...show.scenery.map((s) => s.id)) + 1;
     const n = show.scenery.filter((s) => s.kind === kind).length + 1;
-    const name = `${kind[0].toUpperCase()}${kind.slice(1)} ${n}`;
-    void updateShow((d) => void d.scenery.push({ id, name, ...structuredClone(SCENERY_DEFAULTS[kind]) })).then(() =>
+    void updateShow((d) => void d.scenery.push({ id, name: `${label} ${n}`, kind, ...structuredClone(defaults) })).then(() =>
       setSelected({ kind: "scenery", id }),
     );
   };
+  const atmo = show?.visualizer ?? { haze: 0.35, ambient: 0.15 };
+  const setAtmo = (patch: Partial<typeof atmo>) => updateShow((d) => void (d.visualizer = { ...atmo, ...patch }));
 
   const fx = selected?.kind === "fixture" ? show?.fixtures.find((f) => f.id === selected.id) : undefined;
   const sc = selected?.kind === "scenery" ? show?.scenery.find((s) => s.id === selected.id) : undefined;
@@ -97,17 +154,35 @@ export default function VisualizerApp() {
         </label>
         <span className="muted">{frameSource && `receiving ${frameSource}`}</span>
         <span className="grow" />
-        <div className="seg">
-          <button onClick={() => addScenery("wall")} title="Add a wall for lights to land on">
-            + Wall
+        <label className="inline muted viz-slider" title="How visible the beams are in the air">
+          Haze
+          <input type="range" min={0} max={1} step={0.01} value={atmo.haze} onChange={(e) => void setAtmo({ haze: Number(e.target.value) })} />
+          <b>{Math.round(atmo.haze * 100)}%</b>
+        </label>
+        <label className="inline muted viz-slider" title="House / room light">
+          Ambient
+          <input type="range" min={0} max={1} step={0.01} value={atmo.ambient} onChange={(e) => void setAtmo({ ambient: Number(e.target.value) })} />
+          <b>{Math.round(atmo.ambient * 100)}%</b>
+        </label>
+        <span className="viz-add">
+          <button className="primary" onClick={() => setAddOpen(!addOpen)}>
+            + Add to stage ▾
           </button>
-          <button onClick={() => addScenery("drape")} title="Add a drape / curtain">
-            + Drape
-          </button>
-          <button onClick={() => addScenery("riser")} title="Add a platform / riser">
-            + Riser
-          </button>
-        </div>
+          {addOpen && (
+            <div className="popover viz-add-menu" onMouseLeave={() => setAddOpen(false)}>
+              {CATALOG.map((c) => (
+                <div key={c.group}>
+                  <h3>{c.group}</h3>
+                  {c.items.map(([k, label]) => (
+                    <button key={k} className="viz-add-item" onClick={() => addScenery(k)}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </span>
         <div className="seg">
           <button onClick={() => scene.current?.setMode("translate")} title="W">
             Move
@@ -126,7 +201,7 @@ export default function VisualizerApp() {
           ) : fx && show ? (
             <FixtureInspector fixture={fx} show={show} onClose={() => setSelected(null)} />
           ) : (
-            <p className="muted viz-hint">Click a light or a wall in the 3D view (or in the lists below) to move, rotate and edit it. Drag empty space to orbit, scroll to zoom.</p>
+            <p className="muted viz-hint">Click a light or anything on stage in the 3D view (or in the lists below) to move, rotate and edit it. Drag empty space to orbit, scroll to zoom.</p>
           )}
           <h3>Scenery</h3>
           <ul className="list compact">
@@ -134,12 +209,10 @@ export default function VisualizerApp() {
               <li key={s.id} className={sc?.id === s.id ? "sel" : ""} onClick={() => setSelected({ kind: "scenery", id: s.id })}>
                 <span className="viz-swatch" style={{ background: s.color }} />
                 <span className="grow">{s.name}</span>
-                <small>
-                  {s.size[0]}×{s.size[1]} m
-                </small>
+                <small>{kindLabel(s.kind)}</small>
               </li>
             ))}
-            {show?.scenery.length === 0 && <li className="muted">No walls yet — use + Wall</li>}
+            {show?.scenery.length === 0 && <li className="muted">Nothing yet — use + Add to stage</li>}
           </ul>
           <h3>Fixtures</h3>
           <ul className="list compact">
@@ -238,9 +311,15 @@ function SceneryInspector({ s, onClose }: { s: Scenery; onClose: () => void }) {
       </header>
       <div className="row">
         <select value={s.kind} onChange={(e) => void set({ kind: e.target.value as SceneryKind })}>
-          <option value="wall">Wall</option>
-          <option value="drape">Drape</option>
-          <option value="riser">Riser / platform</option>
+          {CATALOG.map((c) => (
+            <optgroup key={c.group} label={c.group}>
+              {c.items.map(([k, label]) => (
+                <option key={k} value={k}>
+                  {label}
+                </option>
+              ))}
+            </optgroup>
+          ))}
         </select>
         <input type="color" value={s.color.slice(0, 7)} onChange={(e) => void set({ color: e.target.value })} title="Surface colour" />
       </div>
@@ -271,7 +350,11 @@ function SceneryInspector({ s, onClose }: { s: Scenery; onClose: () => void }) {
           Delete
         </button>
       </div>
-      <small className="muted">Tip: drag it in the view (Move / Rotate). Colour matters: light shows best on light surfaces.</small>
+      <small className="muted">
+        {s.kind === "screen"
+          ? "Shows the Presenter's audience output live. Size it to match the real screen; Duplicate for more screens."
+          : "Tip: drag it in the view (Move / Rotate). Colour matters: light shows best on light surfaces."}
+      </small>
     </div>
   );
 }

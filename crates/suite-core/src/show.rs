@@ -48,6 +48,36 @@ pub enum SceneryKind {
     Drape,
     /// Platform / box.
     Riser,
+    /// Stage decking with a skirt.
+    StageDeck,
+    /// Box truss; `size[0]` is the length.
+    Truss,
+    /// LED wall / projection screen showing the Presenter's audience output.
+    Screen,
+    Person,
+    DrumKit,
+    Keyboard,
+    Guitarist,
+    MicStand,
+    Speaker,
+    Wedge,
+}
+
+/// Room look in the Visualizer, saved with the show.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(default))]
+pub struct VisualizerSettings {
+    /// 0 = clean air (beams invisible), 1 = thick haze.
+    pub haze: f32,
+    /// 0 = black room, 1 = house lights up.
+    pub ambient: f32,
+}
+
+impl Default for VisualizerSettings {
+    fn default() -> Self {
+        VisualizerSettings { haze: 0.35, ambient: 0.15 }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -85,6 +115,7 @@ pub struct Show {
     pub media: Vec<MediaItem>,
     // Visualizer
     pub scenery: Vec<Scenery>,
+    pub visualizer: VisualizerSettings,
     // Audio
     pub mixer: Option<MixerConfig>,
 }

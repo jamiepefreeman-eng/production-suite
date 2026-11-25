@@ -5,7 +5,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
-import type { FixtureProfile, FixtureVisual, Scenery, Show } from "../../shared/types";
+import type { FixtureProfile, FixtureVisual, Scenery, Show, VisualizerSettings } from "../../shared/types";
+import { ScreenPainter, type ScreenContent } from "./screen";
 
 const DEG = Math.PI / 180;
 
@@ -38,6 +39,10 @@ export class StageScene {
   private gizmo: TransformControls;
   private fixtures = new Map<number, FixtureObj>();
   private scenery = new Map<number, { obj: THREE.Object3D; key: string }>();
+  private ambient = new THREE.AmbientLight(0xffffff, 0.15);
+  private haze = 0.35;
+  /** One painter draws the live slide; every screen object shows its texture. */
+  private painter = new ScreenPainter();
   private stageGroup = new THREE.Group();
   private raf = 0;
   private ro: ResizeObserver;
@@ -63,7 +68,8 @@ export class StageScene {
     });
     this.scene.add(this.gizmo.getHelper());
 
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+    this.scene.add(this.ambient);
+    this.scene.fog = new THREE.FogExp2(0x05060a, 0);
     this.scene.add(this.stageGroup);
 
     this.renderer.domElement.addEventListener("pointerdown", this.onPointer);
@@ -188,7 +194,7 @@ export class StageScene {
       if (!entry || entry.key !== key) {
         const wasSelected = entry && this.gizmo.object === entry.obj;
         if (entry) this.scene.remove(entry.obj);
-        entry = { obj: buildScenery(s), key };
+        entry = { obj: buildScenery(s, this.painter.texture), key };
         this.scenery.set(s.id, entry);
         this.scene.add(entry.obj);
         if (wasSelected) this.gizmo.attach(entry.obj);
@@ -210,7 +216,8 @@ export class StageScene {
       if (f.beam) {
         const m = f.beam.material as THREE.MeshBasicMaterial;
         m.color.copy(color);
-        m.opacity = i * (v.gobo > 0 ? 0.12 : 0.2);
+        // Beams are only visible in haze, like a real room.
+        m.opacity = i * (v.gobo > 0 ? 0.6 : 1) * 0.32 * this.haze;
         f.beam.visible = i > 0.01;
       }
       if (f.light) {
@@ -240,7 +247,20 @@ export class StageScene {
     this.camera.updateProjectionMatrix();
   }
 
+  /** Haze (beam visibility + fog) and ambient light, 0..1 each. */
+  setAtmosphere(v: VisualizerSettings) {
+    this.haze = Math.max(0, Math.min(1, v.haze));
+    this.ambient.intensity = 0.03 + Math.max(0, Math.min(1, v.ambient)) * 1.2;
+    (this.scene.fog as THREE.FogExp2).density = this.haze * 0.025;
+  }
+
+  /** What the screens show (the Presenter's audience output). */
+  setScreenContent(c: ScreenContent) {
+    this.painter.set(c);
+  }
+
   private loop = () => {
+    this.painter.tick();
     this.raf = requestAnimationFrame(this.loop);
     this.orbit.update();
     this.renderer.render(this.scene, this.camera);
@@ -254,6 +274,7 @@ export class StageScene {
     this.gizmo.dispose();
     this.orbit.dispose();
     this.renderer.dispose();
+    this.painter.dispose();
     this.renderer.domElement.remove();
   }
 }
@@ -351,25 +372,163 @@ function makeLight(beamAngle: number, y: number, range: number) {
   return light;
 }
 
-/** Walls, drapes and risers: lit by the fixtures' spotlights. Origin = centre of the bottom face. */
-function buildScenery(s: Scenery): THREE.Object3D {
+/** Nominal size each model is built at; `Scenery.size` scales it. */
+export const NOMINAL: Partial<Record<Scenery["kind"], [number, number, number]>> = {
+  person: [0.5, 1.75, 0.3],
+  drum_kit: [2, 1.4, 1.6],
+  keyboard: [1.3, 1.0, 0.45],
+  guitarist: [0.7, 1.75, 0.4],
+  mic_stand: [0.6, 1.6, 0.6],
+};
+
+const mat = (color: string | number, rough = 0.85, metal = 0) =>
+  new THREE.MeshStandardMaterial({ color: new THREE.Color(color), roughness: rough, metalness: metal, side: THREE.DoubleSide });
+
+/** Walls, drapes, stage, truss, screens, people and instruments — all lit by the fixtures.
+ *  Origin = centre of the bottom face. */
+function buildScenery(s: Scenery, screenTexture: THREE.Texture): THREE.Object3D {
   const [w, h, d] = s.size.map((v) => Math.max(0.02, v));
-  const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(s.color), roughness: s.kind === "drape" ? 1 : 0.85, metalness: 0, side: THREE.DoubleSide });
   const g = new THREE.Group();
   g.userData.sceneryId = s.id;
-  let mesh: THREE.Mesh;
-  if (s.kind === "drape") {
-    // Fabric: a sheet with soft vertical folds.
-    const geo = new THREE.PlaneGeometry(w, h, Math.max(8, Math.round(w * 10)), 1);
-    const pos = geo.attributes.position;
-    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) * 7) * Math.min(0.08, d + 0.04));
-    geo.computeVertexNormals();
-    mesh = new THREE.Mesh(geo, mat);
-  } else {
-    mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  const add = (m: THREE.Mesh, x = 0, y = 0, z = 0) => {
+    m.position.set(x, y, z);
+    m.userData.sceneryId = s.id;
+    g.add(m);
+    return m;
+  };
+  const box = (bw: number, bh: number, bd: number, m: THREE.Material, x = 0, y = 0, z = 0) => add(new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd), m), x, y, z);
+  const cyl = (r: number, len: number, m: THREE.Material, x = 0, y = 0, z = 0, seg = 16) =>
+    add(new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, seg), m), x, y, z);
+  const main = mat(s.color, s.kind === "drape" ? 1 : 0.85);
+
+  switch (s.kind) {
+    case "drape": {
+      const geo = new THREE.PlaneGeometry(w, h, Math.max(8, Math.round(w * 10)), 1);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) * 7) * Math.min(0.08, d + 0.04));
+      geo.computeVertexNormals();
+      add(new THREE.Mesh(geo, main), 0, h / 2);
+      break;
+    }
+    case "stage_deck": {
+      box(w, 0.04, d, mat("#2a2a2e", 0.7), 0, h - 0.02); // top
+      box(w, h - 0.04, d, mat("#0d0d0f", 1), 0, (h - 0.04) / 2); // skirt
+      break;
+    }
+    case "truss": {
+      // Box truss along X: four chords and zig-zag lacing.
+      const t = Math.max(0.2, Math.min(d, h)); // section size
+      const chord = mat("#c9ccd1", 0.35, 0.8);
+      for (const [y, z] of [[0, -t / 2], [0, t / 2], [t, -t / 2], [t, t / 2]] as const) {
+        const c = cyl(0.025, w, chord, 0, y + 0.03, z, 8);
+        c.rotation.z = Math.PI / 2;
+      }
+      const n = Math.max(1, Math.round(w / t));
+      for (let i = 0; i < n; i++) {
+        const x = -w / 2 + (i + 0.5) * (w / n);
+        for (const z of [-t / 2, t / 2]) {
+          const lace = cyl(0.012, Math.hypot(t, w / n), chord, x, t / 2 + 0.03, z, 6);
+          lace.rotation.z = (i % 2 ? 1 : -1) * Math.atan2(w / n, t);
+        }
+      }
+      break;
+    }
+    case "screen": {
+      box(w + 0.08, h + 0.08, d, mat("#050505", 0.5), 0, h / 2); // frame
+      // The picture glows on its own (not lit by the rig).
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false }));
+      add(face, 0, h / 2, d / 2 + 0.002);
+      break;
+    }
+    case "person":
+    case "guitarist": {
+      const skin = mat("#c99a7b", 0.7);
+      const shirt = mat(s.color, 0.9);
+      const pants = mat("#1f2430", 0.9);
+      for (const x of [-0.1, 0.1]) cyl(0.07, 0.85, pants, x, 0.425, 0);
+      add(new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.42, 4, 12), shirt), 0, 1.15, 0);
+      add(new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), skin), 0, 1.6, 0);
+      for (const x of [-0.24, 0.24]) {
+        const arm = cyl(0.05, 0.6, shirt, x, 1.12, 0.05);
+        arm.rotation.x = -0.35;
+      }
+      if (s.kind === "guitarist") {
+        const body = add(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.07, 24), mat("#7c2d12", 0.4)), 0.05, 0.95, 0.2);
+        body.rotation.x = Math.PI / 2;
+        body.scale.set(1, 1, 1.3);
+        const neck = box(0.6, 0.05, 0.03, mat("#3f2a1d", 0.6), 0.38, 1.12, 0.22);
+        neck.rotation.z = 0.35;
+      }
+      break;
+    }
+    case "drum_kit": {
+      const shell = mat(s.color, 0.4, 0.2);
+      const chrome = mat("#d4d4d8", 0.25, 0.9);
+      const brass = mat("#d4a017", 0.3, 0.9);
+      const kick = cyl(0.28, 0.4, shell, 0, 0.28, 0.25, 24);
+      kick.rotation.x = Math.PI / 2;
+      cyl(0.17, 0.15, shell, -0.45, 0.65, 0.15); // snare
+      cyl(0.14, 0.2, shell, -0.18, 0.8, 0.15); // toms
+      cyl(0.14, 0.2, shell, 0.18, 0.8, 0.15);
+      cyl(0.22, 0.4, shell, 0.55, 0.45, 0.1); // floor tom
+      for (const [x, y, z] of [[-0.75, 1.15, 0.2], [0.7, 1.3, -0.05], [-0.35, 1.35, -0.2]]) {
+        cyl(0.015, y, chrome, x, y / 2, z, 6);
+        cyl(0.22, 0.01, brass, x, y, z, 24);
+      }
+      cyl(0.18, 0.05, mat("#111", 0.9), 0, 0.55, -0.45); // stool
+      cyl(0.03, 0.5, chrome, 0, 0.27, -0.45, 6);
+      break;
+    }
+    case "keyboard": {
+      const metal = mat("#222", 0.5, 0.6);
+      for (const sgn of [-1, 1]) {
+        const leg = box(0.04, 1.1, 0.04, metal, 0.35 * sgn, 0.42, 0);
+        leg.rotation.z = 0.55 * sgn;
+      }
+      box(1.25, 0.1, 0.38, mat(s.color, 0.5), 0, 0.92, 0);
+      box(1.1, 0.02, 0.15, mat("#f4f4f5", 0.4), 0, 0.98, 0.08);
+      break;
+    }
+    case "mic_stand": {
+      const metal = mat("#18181b", 0.4, 0.7);
+      for (let i = 0; i < 3; i++) {
+        const leg = box(0.3, 0.02, 0.02, metal, Math.cos((i * 2 * Math.PI) / 3) * 0.13, 0.03, Math.sin((i * 2 * Math.PI) / 3) * 0.13);
+        leg.rotation.y = (-i * 2 * Math.PI) / 3;
+      }
+      cyl(0.012, 1.45, metal, 0, 0.75, 0, 8);
+      const boom = cyl(0.01, 0.5, metal, 0, 1.45, 0.2, 8);
+      boom.rotation.x = Math.PI / 2.6;
+      cyl(0.025, 0.14, mat("#3f3f46", 0.4, 0.8), 0, 1.55, 0.43, 12);
+      break;
+    }
+    case "speaker":
+      box(w, h, d, mat(s.color, 0.9), 0, h / 2);
+      box(w * 0.85, h * 0.9, 0.01, mat("#111", 1), 0, h / 2, d / 2 + 0.006);
+      break;
+    case "wedge": {
+      const shape = new THREE.Shape();
+      shape.moveTo(-d / 2, 0);
+      shape.lineTo(d / 2, 0);
+      shape.lineTo(-d / 2, h);
+      shape.closePath();
+      const geo = new THREE.ExtrudeGeometry(shape, { depth: w, bevelEnabled: false });
+      geo.translate(0, 0, -w / 2);
+      const m = add(new THREE.Mesh(geo, mat(s.color, 0.9)), 0, 0, 0);
+      m.rotation.y = Math.PI / 2;
+      break;
+    }
+    default:
+      // wall, riser
+      box(w, h, d, main, 0, h / 2);
   }
-  mesh.position.y = h / 2;
-  mesh.userData.sceneryId = s.id;
-  g.add(mesh);
+
+  // Models built at a nominal size scale to the requested size.
+  const nominal = NOMINAL[s.kind];
+  if (nominal) {
+    const inner = new THREE.Group();
+    for (const c of [...g.children]) inner.add(c);
+    inner.scale.set(w / nominal[0], h / nominal[1], d / nominal[2]);
+    g.add(inner);
+  }
   return g;
 }

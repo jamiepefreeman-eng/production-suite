@@ -128,7 +128,10 @@ export interface Theme {
   background_media: number | null;
   dim: number;
 }
-export type SceneryKind = "wall" | "drape" | "riser";
+export type SceneryKind =
+  | "wall" | "drape" | "riser" | "stage_deck" | "truss" | "screen"
+  | "person" | "drum_kit" | "keyboard" | "guitarist" | "mic_stand" | "speaker" | "wedge";
+export interface VisualizerSettings { haze: number; ambient: number }
 export interface Scenery {
   id: number;
   name: string;
@@ -157,6 +160,7 @@ export interface Show {
   themes: Theme[];
   media: MediaItem[];
   scenery: Scenery[];
+  visualizer: VisualizerSettings;
   mixer: MixerConfig | null;
 }
 
