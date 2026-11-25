@@ -310,7 +310,7 @@ pub fn demo_show() -> Show {
         }],
     };
 
-    Show {
+    let mut show = Show {
         name: "COR — Sunday Service".into(),
         stage: StageConfig::default(),
         profiles: profiles(),
@@ -427,7 +427,31 @@ pub fn demo_show() -> Show {
         }],
         visualizer: VisualizerSettings::default(),
         mixer: None,
-    }
+        effects: vec![],
+        show_page: Default::default(),
+    };
+    show.effects = demo_effects();
+    show.show_page = crate::show::ShowPage::generate(&show);
+    show
+}
+
+fn demo_effects() -> Vec<crate::lighting::effects::Effect> {
+    use crate::lighting::effects::{Effect, EffectKind};
+    vec![
+        Effect { id: 1, name: "Rainbow wall".into(), kind: EffectKind::Rainbow, group: "Back Wall".into(), speed: 0.15, ..Effect::default() },
+        Effect { id: 2, name: "Red chase".into(), kind: EffectKind::Chase, group: "Back Wall".into(), speed: 0.5, ..Effect::default() },
+        Effect {
+            id: 3,
+            name: "Blue breathe".into(),
+            kind: EffectKind::Pulse,
+            group: "Back Wall".into(),
+            color: Rgb::new(0.1, 0.2, 1.0),
+            speed: 0.2,
+            spread: 0.5,
+            ..Effect::default()
+        },
+        Effect { id: 4, name: "Strobe".into(), kind: EffectKind::Strobe, color: Rgb::new(1.0, 1.0, 1.0), speed: 8.0, spread: 0.0, ..Effect::default() },
+    ]
 }
 
 #[cfg(test)]

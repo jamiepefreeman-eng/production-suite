@@ -3,6 +3,7 @@
 //! Visualizer.
 
 pub mod color;
+pub mod effects;
 pub mod fixture;
 pub mod look;
 pub mod render;

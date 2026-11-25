@@ -3,7 +3,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { api, on } from "./bridge";
-import type { EngineEvent, Layers, Look, Show } from "./types";
+import type { EngineEvent, GroupLevel, Layers, Look, MidiMessage, Show } from "./types";
 
 export interface LiveSlide { presentation: number; slide: number; title: string; label: string; text: string }
 export interface LogEntry { t: number; level: "info" | "warn"; message: string }
@@ -18,6 +18,11 @@ export interface EngineView {
   lastScene: { applied: string[]; issues: string[]; unknown: string[] } | null;
   log: LogEntry[];
   error: string | null;
+  activeEffects: number[];
+  grandMaster: number;
+  groupLevels: GroupLevel[];
+  /** Last MIDI message heard (for "MIDI learn"), with a counter so repeats still register. */
+  lastMidi: { message: MidiMessage; n: number } | null;
 }
 
 let state: EngineView = {
@@ -30,6 +35,10 @@ let state: EngineView = {
   lastScene: null,
   log: [],
   error: null,
+  activeEffects: [],
+  grandMaster: 1,
+  groupLevels: [],
+  lastMidi: null,
 };
 const listeners = new Set<() => void>();
 const set = (patch: Partial<EngineView>) => {
@@ -97,6 +106,15 @@ function handle(ev: EngineEvent) {
     case "blackout_changed":
       set({ blackout: ev.on });
       break;
+    case "effects_changed":
+      set({ activeEffects: ev.active });
+      break;
+    case "masters_changed":
+      set({ grandMaster: ev.grand_master, groupLevels: ev.groups });
+      break;
+    case "midi_received":
+      set({ lastMidi: { message: ev.message, n: (state.lastMidi?.n ?? 0) + 1 } });
+      break;
     case "mixer_out":
       // Fader moves and EQ tweaks are too chatty for the status line; only show cue-like actions.
       if (ev.command.type === "recall_scene") log("info", `Mixer: recall scene ${ev.command.scene}`);
@@ -121,7 +139,16 @@ function start() {
         const sl = p?.slides.find((x) => x.id === sid);
         if (p && sl) live = { presentation: pid, slide: sid, title: p.title, label: sl.label, text: sl.text };
       }
-      set({ activeCue: s.active_cue, programmer: s.programmer, layers: s.layers, live });
+      set({
+        activeCue: s.active_cue,
+        programmer: s.programmer,
+        layers: s.layers,
+        live,
+        activeEffects: s.active_effects ?? [],
+        grandMaster: s.grand_master ?? 1,
+        groupLevels: s.group_levels ?? [],
+        blackout: s.blackout ?? false,
+      });
     })
     .catch(() => {});
   on("engine-event", handle);

@@ -2451,7 +2451,348 @@ export const show: T.Show = {
     "haze": 0.35,
     "ambient": 0.15
   },
-  "mixer": null
+  "mixer": null,
+  "effects": [
+    {
+      "id": 1,
+      "name": "Rainbow wall",
+      "kind": "rainbow",
+      "group": "Back Wall",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.15,
+      "spread": 1.0,
+      "level": 1.0
+    },
+    {
+      "id": 2,
+      "name": "Red chase",
+      "kind": "chase",
+      "group": "Back Wall",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.5,
+      "spread": 1.0,
+      "level": 1.0
+    },
+    {
+      "id": 3,
+      "name": "Blue breathe",
+      "kind": "pulse",
+      "group": "Back Wall",
+      "color": {
+        "r": 0.1,
+        "g": 0.2,
+        "b": 1.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.2,
+      "spread": 0.5,
+      "level": 1.0
+    },
+    {
+      "id": 4,
+      "name": "Strobe",
+      "kind": "strobe",
+      "group": "",
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 8.0,
+      "spread": 0.0,
+      "level": 1.0
+    },
+    {
+      "id": 100,
+      "name": "Effect",
+      "kind": "rainbow",
+      "group": "",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.25,
+      "spread": 1.0,
+      "level": 1.0
+    },
+    {
+      "id": 101,
+      "name": "Effect",
+      "kind": "chase",
+      "group": "",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.25,
+      "spread": 1.0,
+      "level": 1.0
+    },
+    {
+      "id": 102,
+      "name": "Effect",
+      "kind": "pulse",
+      "group": "",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.25,
+      "spread": 1.0,
+      "level": 1.0
+    },
+    {
+      "id": 103,
+      "name": "Effect",
+      "kind": "strobe",
+      "group": "",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.25,
+      "spread": 1.0,
+      "level": 1.0
+    },
+    {
+      "id": 104,
+      "name": "Effect",
+      "kind": "two_colour",
+      "group": "",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "color2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 1.0
+      },
+      "speed": 0.25,
+      "spread": 1.0,
+      "level": 1.0
+    }
+  ],
+  "show_page": {
+    "items": [
+      {
+        "id": 1,
+        "kind": {
+          "type": "cue",
+          "cue": 1
+        },
+        "label": "",
+        "color": "",
+        "midi": {
+          "kind": "note",
+          "channel": 1,
+          "number": 36
+        }
+      },
+      {
+        "id": 2,
+        "kind": {
+          "type": "cue",
+          "cue": 2
+        },
+        "label": "Walk-in",
+        "color": "#ff8800",
+        "midi": {
+          "kind": "cc",
+          "channel": 1,
+          "number": 7
+        }
+      },
+      {
+        "id": 3,
+        "kind": {
+          "type": "cue",
+          "cue": 3
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 4,
+        "kind": {
+          "type": "effect",
+          "effect": 1
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 5,
+        "kind": {
+          "type": "effect",
+          "effect": 2
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 6,
+        "kind": {
+          "type": "effect",
+          "effect": 3
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 7,
+        "kind": {
+          "type": "effect",
+          "effect": 4
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 8,
+        "kind": {
+          "type": "match_background"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 9,
+        "kind": {
+          "type": "blackout"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 10,
+        "kind": {
+          "type": "release"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 11,
+        "kind": {
+          "type": "grand_master"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 12,
+        "kind": {
+          "type": "group_master",
+          "group": "Back Wall"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 13,
+        "kind": {
+          "type": "group_master",
+          "group": "Front Wash"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 14,
+        "kind": {
+          "type": "group_master",
+          "group": "Side Walls"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 15,
+        "kind": {
+          "type": "group_master",
+          "group": "Movers"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      },
+      {
+        "id": 16,
+        "kind": {
+          "type": "group_master",
+          "group": "Backlights"
+        },
+        "label": "",
+        "color": "",
+        "midi": null
+      }
+    ]
+  }
 };
 
 export const commands: T.Command[] = [
@@ -2589,6 +2930,47 @@ export const commands: T.Command[] = [
           "tilt": 0.25
         }
       }
+    }
+  },
+  {
+    "type": "set_effect",
+    "effect": 1,
+    "on": true
+  },
+  {
+    "type": "group_master",
+    "group": "Back Wall",
+    "level": 0.5
+  },
+  {
+    "type": "trigger_show_item",
+    "item": 1,
+    "value": 1.0
+  },
+  {
+    "type": "midi_input",
+    "message": {
+      "type": "note_on",
+      "channel": 1,
+      "note": 36,
+      "velocity": 100
+    }
+  },
+  {
+    "type": "midi_input",
+    "message": {
+      "type": "note_off",
+      "channel": 1,
+      "note": 36
+    }
+  },
+  {
+    "type": "midi_input",
+    "message": {
+      "type": "control_change",
+      "channel": 2,
+      "controller": 7,
+      "value": 64
     }
   },
   {
@@ -5076,7 +5458,348 @@ export const commands: T.Command[] = [
         "haze": 0.35,
         "ambient": 0.15
       },
-      "mixer": null
+      "mixer": null,
+      "effects": [
+        {
+          "id": 1,
+          "name": "Rainbow wall",
+          "kind": "rainbow",
+          "group": "Back Wall",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.15,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 2,
+          "name": "Red chase",
+          "kind": "chase",
+          "group": "Back Wall",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.5,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 3,
+          "name": "Blue breathe",
+          "kind": "pulse",
+          "group": "Back Wall",
+          "color": {
+            "r": 0.1,
+            "g": 0.2,
+            "b": 1.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.2,
+          "spread": 0.5,
+          "level": 1.0
+        },
+        {
+          "id": 4,
+          "name": "Strobe",
+          "kind": "strobe",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 8.0,
+          "spread": 0.0,
+          "level": 1.0
+        },
+        {
+          "id": 100,
+          "name": "Effect",
+          "kind": "rainbow",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 101,
+          "name": "Effect",
+          "kind": "chase",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 102,
+          "name": "Effect",
+          "kind": "pulse",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 103,
+          "name": "Effect",
+          "kind": "strobe",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 104,
+          "name": "Effect",
+          "kind": "two_colour",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        }
+      ],
+      "show_page": {
+        "items": [
+          {
+            "id": 1,
+            "kind": {
+              "type": "cue",
+              "cue": 1
+            },
+            "label": "",
+            "color": "",
+            "midi": {
+              "kind": "note",
+              "channel": 1,
+              "number": 36
+            }
+          },
+          {
+            "id": 2,
+            "kind": {
+              "type": "cue",
+              "cue": 2
+            },
+            "label": "Walk-in",
+            "color": "#ff8800",
+            "midi": {
+              "kind": "cc",
+              "channel": 1,
+              "number": 7
+            }
+          },
+          {
+            "id": 3,
+            "kind": {
+              "type": "cue",
+              "cue": 3
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 4,
+            "kind": {
+              "type": "effect",
+              "effect": 1
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 5,
+            "kind": {
+              "type": "effect",
+              "effect": 2
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 6,
+            "kind": {
+              "type": "effect",
+              "effect": 3
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 7,
+            "kind": {
+              "type": "effect",
+              "effect": 4
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 8,
+            "kind": {
+              "type": "match_background"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 9,
+            "kind": {
+              "type": "blackout"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 10,
+            "kind": {
+              "type": "release"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 11,
+            "kind": {
+              "type": "grand_master"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 12,
+            "kind": {
+              "type": "group_master",
+              "group": "Back Wall"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 13,
+            "kind": {
+              "type": "group_master",
+              "group": "Front Wash"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 14,
+            "kind": {
+              "type": "group_master",
+              "group": "Side Walls"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 15,
+            "kind": {
+              "type": "group_master",
+              "group": "Movers"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 16,
+            "kind": {
+              "type": "group_master",
+              "group": "Backlights"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          }
+        ]
+      }
     }
   },
   {
@@ -7529,7 +8252,348 @@ export const commands: T.Command[] = [
         "haze": 0.35,
         "ambient": 0.15
       },
-      "mixer": null
+      "mixer": null,
+      "effects": [
+        {
+          "id": 1,
+          "name": "Rainbow wall",
+          "kind": "rainbow",
+          "group": "Back Wall",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.15,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 2,
+          "name": "Red chase",
+          "kind": "chase",
+          "group": "Back Wall",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.5,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 3,
+          "name": "Blue breathe",
+          "kind": "pulse",
+          "group": "Back Wall",
+          "color": {
+            "r": 0.1,
+            "g": 0.2,
+            "b": 1.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.2,
+          "spread": 0.5,
+          "level": 1.0
+        },
+        {
+          "id": 4,
+          "name": "Strobe",
+          "kind": "strobe",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 8.0,
+          "spread": 0.0,
+          "level": 1.0
+        },
+        {
+          "id": 100,
+          "name": "Effect",
+          "kind": "rainbow",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 101,
+          "name": "Effect",
+          "kind": "chase",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 102,
+          "name": "Effect",
+          "kind": "pulse",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 103,
+          "name": "Effect",
+          "kind": "strobe",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        },
+        {
+          "id": 104,
+          "name": "Effect",
+          "kind": "two_colour",
+          "group": "",
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "color2": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+          },
+          "speed": 0.25,
+          "spread": 1.0,
+          "level": 1.0
+        }
+      ],
+      "show_page": {
+        "items": [
+          {
+            "id": 1,
+            "kind": {
+              "type": "cue",
+              "cue": 1
+            },
+            "label": "",
+            "color": "",
+            "midi": {
+              "kind": "note",
+              "channel": 1,
+              "number": 36
+            }
+          },
+          {
+            "id": 2,
+            "kind": {
+              "type": "cue",
+              "cue": 2
+            },
+            "label": "Walk-in",
+            "color": "#ff8800",
+            "midi": {
+              "kind": "cc",
+              "channel": 1,
+              "number": 7
+            }
+          },
+          {
+            "id": 3,
+            "kind": {
+              "type": "cue",
+              "cue": 3
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 4,
+            "kind": {
+              "type": "effect",
+              "effect": 1
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 5,
+            "kind": {
+              "type": "effect",
+              "effect": 2
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 6,
+            "kind": {
+              "type": "effect",
+              "effect": 3
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 7,
+            "kind": {
+              "type": "effect",
+              "effect": 4
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 8,
+            "kind": {
+              "type": "match_background"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 9,
+            "kind": {
+              "type": "blackout"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 10,
+            "kind": {
+              "type": "release"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 11,
+            "kind": {
+              "type": "grand_master"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 12,
+            "kind": {
+              "type": "group_master",
+              "group": "Back Wall"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 13,
+            "kind": {
+              "type": "group_master",
+              "group": "Front Wash"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 14,
+            "kind": {
+              "type": "group_master",
+              "group": "Side Walls"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 15,
+            "kind": {
+              "type": "group_master",
+              "group": "Movers"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          },
+          {
+            "id": 16,
+            "kind": {
+              "type": "group_master",
+              "group": "Backlights"
+            },
+            "label": "",
+            "color": "",
+            "midi": null
+          }
+        ]
+      }
     }
   }
 ];
@@ -7617,6 +8681,35 @@ export const events: T.EngineEvent[] = [
   {
     "type": "blackout_changed",
     "on": false
+  },
+  {
+    "type": "effects_changed",
+    "active": [
+      1,
+      2
+    ]
+  },
+  {
+    "type": "masters_changed",
+    "grand_master": 0.8,
+    "groups": [
+      {
+        "group": "Back Wall",
+        "level": 0.5
+      }
+    ]
+  },
+  {
+    "type": "midi_received",
+    "message": {
+      "type": "control_change",
+      "channel": 1,
+      "controller": 1,
+      "value": 0
+    }
+  },
+  {
+    "type": "toggle_match_background"
   },
   {
     "type": "mixer_out",
@@ -8112,7 +9205,30 @@ export const engineStatus: T.EngineStatus = {
       2
     ]
   },
-  "show_path": "/tmp/show.json"
+  "show_path": "/tmp/show.json",
+  "active_effects": [
+    1
+  ],
+  "grand_master": 1.0,
+  "group_levels": [
+    {
+      "group": "Front Wash",
+      "level": 0.7
+    }
+  ],
+  "blackout": false
+};
+
+export const midiStatus: T.MidiStatus = {
+  "available": [
+    "APC mini"
+  ],
+  "connected": [
+    "APC mini"
+  ],
+  "errors": [
+    "x"
+  ]
 };
 
 export const vizFrame: T.VizFrame = {

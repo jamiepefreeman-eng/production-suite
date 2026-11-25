@@ -16,7 +16,9 @@ use crate::viz_input::VizSource;
 use crate::windows::MonitorInfo;
 use serde::Serialize;
 use suite_core::ai::intent::{Action, Intent, ParseOutput};
-use suite_core::engine::{Command, Countdown, Event, Layers, LogLevel};
+use suite_core::engine::{Command, Countdown, Event, GroupLevel, Layers, LogLevel};
+use suite_core::lighting::effects::{Effect, EffectKind};
+use suite_core::midi::{MidiControl, MidiControlKind, MidiMessage};
 use suite_core::presenter::{
     ClearLayer, ElementKind, MediaAnalysis, MediaItem, MediaKind, MediaPlaylist, SlideElement, SlideGroup, SlideTrigger, TextAlign, TextPosition, TextStyle, Theme,
 };
@@ -79,6 +81,13 @@ fn write_typescript_contract() {
         show.scenery.push(Scenery { id: 10 + i as u32, kind, ..Scenery::default() });
     }
     show.media.push(MediaItem { id: 4, name: "Camera".into(), path: "Blackmagic UltraStudio".into(), kind: MediaKind::Input, analysis: None });
+    for (i, kind) in EffectKind::ALL.into_iter().enumerate() {
+        show.effects.push(Effect { id: 100 + i as u32, kind, ..Effect::default() });
+    }
+    show.show_page.items[0].midi = Some(MidiControl { kind: MidiControlKind::Note, channel: 1, number: 36 });
+    show.show_page.items[1].midi = Some(MidiControl { kind: MidiControlKind::Cc, channel: 1, number: 7 });
+    show.show_page.items[1].label = "Walk-in".into();
+    show.show_page.items[1].color = "#ff8800".into();
     show.media_playlists.push(MediaPlaylist { name: "Backgrounds".into(), items: vec![1, 2] });
     show.presentations[1].groups.push(SlideGroup { name: "Vamp".into(), color: "#f97316".into() });
     show.presentations[1].arrangement = Some("Sunday".into());
@@ -202,6 +211,12 @@ fn write_typescript_contract() {
         Command::ApplyIntents { intents: intents.clone(), unknown: vec!["sparkles".into()], source: Some("x".into()) },
         Command::SetFixtureState { fixtures: vec![1, 2], state: state.clone() },
         Command::MergeProgrammer { look: look.clone() },
+        Command::SetEffect { effect: 1, on: true },
+        Command::GroupMaster { group: "Back Wall".into(), level: 0.5 },
+        Command::TriggerShowItem { item: 1, value: 1.0 },
+        Command::MidiInput { message: MidiMessage::NoteOn { channel: 1, note: 36, velocity: 100 } },
+        Command::MidiInput { message: MidiMessage::NoteOff { channel: 1, note: 36 } },
+        Command::MidiInput { message: MidiMessage::ControlChange { channel: 2, controller: 7, value: 64 } },
         Command::RecordCue { name: "Walk-in".into(), fade_ms: 2000 },
         Command::DeleteCue { cue: 1 },
         Command::RecordPosition { name: "Pulpit".into() },
@@ -221,6 +236,10 @@ fn write_typescript_contract() {
         Event::ProgrammerChanged { look: look.clone() },
         Event::SceneBuilt { applied: vec!["a".into()], issues: vec!["b".into()], unknown: vec!["c".into()] },
         Event::BlackoutChanged { on: false },
+        Event::EffectsChanged { active: vec![1, 2] },
+        Event::MastersChanged { grand_master: 0.8, groups: vec![GroupLevel { group: "Back Wall".into(), level: 0.5 }] },
+        Event::MidiReceived { message: MidiMessage::ControlChange { channel: 1, controller: 1, value: 0 } },
+        Event::ToggleMatchBackground,
         Event::MixerOut { command: mixer_cmds[1].clone() },
         Event::Log { level: LogLevel::Info, message: "hi".into() },
         Event::Log { level: LogLevel::Warn, message: "careful".into() },
@@ -252,7 +271,16 @@ fn write_typescript_contract() {
             programmer: look,
             layers,
             show_path: Some("/tmp/show.json".into()),
+            active_effects: vec![1],
+            grand_master: 1.0,
+            group_levels: vec![GroupLevel { group: "Front Wash".into(), level: 0.7 }],
+            blackout: false,
         },
+    );
+    o.add(
+        "midiStatus",
+        "T.MidiStatus",
+        &crate::midi_link::MidiStatus { available: vec!["APC mini".into()], connected: vec!["APC mini".into()], errors: vec!["x".into()] },
     );
     o.add(
         "vizFrame",

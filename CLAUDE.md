@@ -130,6 +130,8 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 - [ ] AI media search with a real API key (only the offline ranking ran in tests); video analysis seeks frames
       through the asset protocol — check speed on a big bin on macOS/Windows
 - [ ] Slide elements (text boxes, pictures, live feeds) aren't drawn on Visualizer screens (slide text formatting is)
+- [ ] MIDI controllers on macOS (CoreMIDI) / Windows (WinMM) — only compiled + unit-tested on Linux (ALSA);
+      Windows allows one app per MIDI input, so close other software (Lightkey, DAW) using the controller
 - [ ] "Match background" reads pixels through the asset protocol (needs its CORS header = app origin; works in
       Chromium tests) — confirm on macOS/Windows that a video background drives the lights
 
@@ -158,7 +160,16 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    Patch (button + Delete key), drag lights on the 2D plan (moves them in the Visualizer too), Plan/3D toggle
    (`lighting/Stage3D.tsx` reuses `shared/stage3d/scene.ts`), "match background" (`shared/bgmatch.ts`:
    samples the on-screen background ~10 Hz into a 48×27 canvas → `merge_programmer`; intercepted in the
-   scene builder before the engine, so it works offline; movers follow the brightest area). Still to do: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),
+   scene builder before the engine, so it works offline; movers follow the brightest area).
+   *v0.9.0:* three modes (`LightingApp` Mode, remembered in localStorage): ⚙ Setup (Stage layout = plan/3D
+   with moving + `SetupInspector`, Patch, Positions, Outputs, MIDI), ✎ Program (lights locked: `StagePlan
+   locked`, `StageScene.setLocked`), ▶ Show (`lighting/ShowPage.tsx`: `Show.show_page` items in order,
+   drag to arrange, rename/colour, MIDI learn). Effects engine (`lighting/effects.rs`: rainbow/chase/pulse/
+   two-colour/strobe over a group, pure function of time, applied in `Engine::frame`), group masters,
+   `TriggerShowItem` (buttons + faders share one path with MIDI), MIDI (`midi.rs` parser; `src-tauri/
+   midi_link.rs` midir thread → `Command::MidiInput`; `ShowItem.midi` mapping in the engine; CC buttons fire
+   on the upward crossing). Match-background "thinking wheel" (`shared/MatchWheel.tsx`).
+   Still to do: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),
    cue list with follow/wait times, multiple playbacks, tap tempo, MIDI controller input.
 4. **Presenter** — *v0.6.0:* ProPresenter layout (toolbar, Service with headers, media folders + bin,
    Live/layers, right tabs Audio/Props/Timers/Macros/Slide), groups + arrangements (saved versions; Reflow
@@ -183,6 +194,7 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    to `Scenery.size`). *v0.7.0:* the 3D stage lives in `shared/stage3d/` (used by Visualizer and Lighting);
    multi-select (Shift/⌘/Ctrl-click) moves/rotates through a pivot and a multi-edit inspector (mixed fields,
    spread evenly); model import (`SceneryKind::Model`: .stl/.obj/.dae/.glb/.gltf via three loaders, units +
-   Z-up, sits on the floor; `size` = scale). Still to do: gobo projection, snap fixtures to truss.
+   Z-up, sits on the floor; `size` = scale). *v0.9.0:* screen size box (`visualizer/screenSize.ts`: 90" diagonal
+   + aspect, 7'x13', 7'6" x 13', 2.1m x 3.7m; bigger number = width). Still to do: gobo projection, snap fixtures to truss.
 7. **Remote**: phone/tablet remote over WebSocket speaking the same `Command`/`Event` JSON.
 8. **Safety**: autosave + crash recovery of the show file, API key in OS keychain, undo.

@@ -31,6 +31,10 @@ pub struct EngineStatus {
     pub programmer: Look,
     pub layers: suite_core::engine::Layers,
     pub show_path: Option<PathBuf>,
+    pub active_effects: Vec<u32>,
+    pub grand_master: f32,
+    pub group_levels: Vec<suite_core::engine::GroupLevel>,
+    pub blackout: bool,
 }
 
 #[tauri::command]
@@ -42,6 +46,10 @@ pub fn engine_status(state: S<'_>) -> EngineStatus {
         programmer: e.programmer.clone(),
         layers: e.layers().clone(),
         show_path: state.show_path.lock().unwrap().clone(),
+        active_effects: e.active_effects().to_vec(),
+        grand_master: e.grand_master(),
+        group_levels: e.group_levels(),
+        blackout: e.blackout(),
     }
 }
 

@@ -138,7 +138,19 @@ export class StageScene {
   };
 
   /** Show the move / rotate gizmo on these items (several: around their centre). */
+  /** Locked: clicking still selects, but there are no move / rotate arrows (Lighting's Program mode). */
+  private locked = false;
+  setLocked(locked: boolean) {
+    this.locked = locked;
+    if (locked) this.gizmo.detach();
+  }
+
   select(items: SelItem[]) {
+    if (this.locked) {
+      this.selected = [];
+      this.gizmo.detach();
+      return;
+    }
     const objs = items
       .map((s) => (s.kind === "fixture" ? this.fixtures.get(s.id)?.root : this.scenery.get(s.id)?.obj))
       .filter((o): o is THREE.Object3D => !!o);

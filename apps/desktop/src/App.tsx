@@ -3,10 +3,14 @@ import { api, inTauri, showFiles, type ModuleId } from "./shared/bridge";
 import { pushLog, send, useEngine } from "./shared/store";
 import { MODULES } from "./modules/registry";
 import AudioLayer from "./shared/AudioLayer";
+import { listenForRemoteToggle } from "./shared/bgmatch";
 
 export default function App() {
   const [active, setActive] = useState<ModuleId>("presenter");
   const eng = useEngine();
+
+  // MIDI / show-page "match background" (the sampler runs in this window).
+  useEffect(listenForRemoteToggle, []);
 
   // Cmd/Ctrl+1–4 switch modules; Esc = clear slide.
   useEffect(() => {

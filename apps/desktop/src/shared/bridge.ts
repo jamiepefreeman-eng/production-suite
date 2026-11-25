@@ -31,6 +31,9 @@ export const api = {
   mixerConnect: (config: T.MixerConfig) => call<T.MixerStatus>("mixer_connect", { config }),
   mixerDisconnect: () => call<T.MixerStatus>("mixer_disconnect"),
   mixerStatus: () => call<T.MixerStatus>("mixer_status"),
+  midiStatus: () => call<T.MidiStatus>("midi_status"),
+  /** null = listen to every MIDI input */
+  midiConnect: (inputs: string[] | null) => call<T.MidiStatus>("midi_connect", { inputs }),
   aiBuildScene: (text: string, forceLlm = false) => call<T.SceneResult>("ai_build_scene", { text, forceLlm }),
   aiRankMedia: (prompt: string, songs: string[], media: T.MediaSummary[]) => call<T.MediaRanking>("ai_rank_media", { prompt, songs, media }),
   aiStatus: () => call<T.AiStatus>("ai_status"),

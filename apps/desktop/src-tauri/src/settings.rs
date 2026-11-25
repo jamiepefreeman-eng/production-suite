@@ -11,6 +11,8 @@ pub struct Settings {
     pub anthropic_api_key: Option<String>,
     pub ai_model: Option<String>,
     pub last_show: Option<PathBuf>,
+    /// MIDI inputs to listen to; `None` = all of them.
+    pub midi_inputs: Option<Vec<String>>,
 }
 
 fn path(app: &AppHandle) -> Option<PathBuf> {

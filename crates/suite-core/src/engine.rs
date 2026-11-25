@@ -13,7 +13,9 @@ use crate::dmx::DmxFrame;
 use crate::lighting::{render_look, Cue, FixtureState, Look, PanTilt, PositionPreset};
 use crate::mixer::MixerCommand;
 use crate::presenter::{ClearLayer, SlideTrigger};
-use crate::show::Show;
+use crate::midi::{MidiControl, MidiMessage};
+use crate::show::{Show, ShowItemKind};
+use std::collections::BTreeMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 /// Presenter layers besides the slide text, ProPresenter-style: each can be
@@ -78,6 +80,14 @@ pub enum Command {
     SetFixtureState { fixtures: Vec<u32>, state: FixtureState },
     /// Set many fixtures to different states in one go (e.g. "match background", ~10×/s).
     MergeProgrammer { look: Look },
+    /// Start / stop an effect.
+    SetEffect { effect: u32, on: bool },
+    /// Brightness of one group (0..1), on top of everything else.
+    GroupMaster { group: String, level: f32 },
+    /// A show-page button pressed (`value` 1) or fader moved (`value` 0..1).
+    TriggerShowItem { item: u32, value: f32 },
+    /// A message from a MIDI controller; mapped to the show page by `ShowItem.midi`.
+    MidiInput { message: MidiMessage },
     RecordCue { name: String, fade_ms: u32 },
     DeleteCue { cue: u32 },
     /// Store the programmer's current pan/tilt as a named focus position.
@@ -105,6 +115,14 @@ pub enum Event {
     ProgrammerChanged { look: Look },
     SceneBuilt { applied: Vec<String>, issues: Vec<String>, unknown: Vec<String> },
     BlackoutChanged { on: bool },
+    /// Which effects are running.
+    EffectsChanged { active: Vec<u32> },
+    /// Grand master and group levels.
+    MastersChanged { grand_master: f32, groups: Vec<GroupLevel> },
+    /// Every MIDI message, for "MIDI learn".
+    MidiReceived { message: MidiMessage },
+    /// A MIDI control asked the app to start / stop "match background" (that runs in the window).
+    ToggleMatchBackground,
     /// The app layer forwards this to the connected desk.
     MixerOut { command: MixerCommand },
     Log { level: LogLevel, message: String },
@@ -125,6 +143,13 @@ fn warn(m: impl Into<String>) -> Event {
     Event::Log { level: LogLevel::Warn, message: m.into() }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GroupLevel {
+    pub group: String,
+    pub level: f32,
+}
+
 struct Fade {
     from: DmxFrame,
     start: Instant,
@@ -142,6 +167,12 @@ pub struct Engine {
     blackout: bool,
     fade: Option<Fade>,
     last_output: DmxFrame,
+    active_effects: Vec<u32>,
+    group_levels: BTreeMap<String, f32>,
+    /// Effects run on time since the engine started.
+    epoch: Option<Instant>,
+    /// Last value seen per MIDI control (to turn CC buttons into presses).
+    midi_last: BTreeMap<(u8, u8, u8), f32>,
 }
 
 impl Engine {
@@ -157,6 +188,114 @@ impl Engine {
             blackout: false,
             fade: None,
             last_output: DmxFrame::default(),
+            active_effects: Vec::new(),
+            group_levels: BTreeMap::new(),
+            epoch: None,
+            midi_last: BTreeMap::new(),
+        }
+    }
+
+    pub fn active_effects(&self) -> &[u32] {
+        &self.active_effects
+    }
+
+    pub fn grand_master(&self) -> f32 {
+        self.grand_master
+    }
+
+    pub fn blackout(&self) -> bool {
+        self.blackout
+    }
+
+    pub fn group_levels(&self) -> Vec<GroupLevel> {
+        self.group_levels.iter().map(|(group, level)| GroupLevel { group: group.clone(), level: *level }).collect()
+    }
+
+    fn masters_changed(&self) -> Event {
+        Event::MastersChanged { grand_master: self.grand_master, groups: self.group_levels() }
+    }
+
+    fn set_effect(&mut self, id: u32, on: bool, ev: &mut Vec<Event>) {
+        if on && !self.show.effects.iter().any(|e| e.id == id) {
+            ev.push(warn(format!("No effect #{id}")));
+            return;
+        }
+        let was = self.active_effects.contains(&id);
+        if on && !was {
+            self.active_effects.push(id);
+        } else if !on && was {
+            self.active_effects.retain(|x| *x != id);
+        } else {
+            return;
+        }
+        ev.push(Event::EffectsChanged { active: self.active_effects.clone() });
+    }
+
+    /// A show-page button press (value 1) or fader move (0..1).
+    fn trigger_item(&mut self, id: u32, value: f32, now: Instant, ev: &mut Vec<Event>) {
+        let Some(item) = self.show.show_page.items.iter().find(|i| i.id == id).cloned() else {
+            ev.push(warn(format!("No show-page item #{id}")));
+            return;
+        };
+        match item.kind {
+            ShowItemKind::Cue { cue } => {
+                if self.active_cue == Some(cue) {
+                    self.handle(Command::ReleaseCue, now).into_iter().for_each(|e| ev.push(e));
+                } else {
+                    self.go_cue(cue, now, ev);
+                }
+            }
+            ShowItemKind::Effect { effect } => {
+                let on = !self.active_effects.contains(&effect);
+                self.set_effect(effect, on, ev);
+            }
+            ShowItemKind::GrandMaster => {
+                self.grand_master = value.clamp(0.0, 1.0);
+                ev.push(self.masters_changed());
+            }
+            ShowItemKind::GroupMaster { group } => {
+                self.group_levels.insert(group, value.clamp(0.0, 1.0));
+                ev.push(self.masters_changed());
+            }
+            ShowItemKind::Blackout => {
+                self.blackout = !self.blackout;
+                ev.push(Event::BlackoutChanged { on: self.blackout });
+            }
+            ShowItemKind::Release => {
+                if self.active_cue.is_some() {
+                    self.handle(Command::ReleaseCue, now).into_iter().for_each(|e| ev.push(e));
+                }
+                if !self.active_effects.is_empty() {
+                    self.active_effects.clear();
+                    ev.push(Event::EffectsChanged { active: vec![] });
+                }
+            }
+            ShowItemKind::MatchBackground => ev.push(Event::ToggleMatchBackground),
+        }
+    }
+
+    fn midi_input(&mut self, msg: MidiMessage, now: Instant, ev: &mut Vec<Event>) {
+        ev.push(Event::MidiReceived { message: msg });
+        let ctl: MidiControl = msg.control();
+        let key = (ctl.kind as u8, ctl.channel, ctl.number);
+        let value = msg.value();
+        let before = self.midi_last.insert(key, value).unwrap_or(0.0);
+        let items: Vec<(u32, bool)> = self.show.show_page.items.iter().filter(|i| i.midi == Some(ctl)).map(|i| (i.id, i.kind.is_fader())).collect();
+        for (id, fader) in items {
+            if fader {
+                // Faders follow CCs; a pad mapped to a fader jumps it full / off.
+                self.trigger_item(id, value, now, ev);
+            } else {
+                // Buttons fire on the press: note-on, or a CC crossing the middle upward.
+                let pressed = match msg {
+                    MidiMessage::NoteOn { .. } => true,
+                    MidiMessage::NoteOff { .. } => false,
+                    MidiMessage::ControlChange { .. } => before < 0.5 && value >= 0.5,
+                };
+                if pressed {
+                    self.trigger_item(id, 1.0, now, ev);
+                }
+            }
         }
     }
 
@@ -232,7 +371,17 @@ impl Engine {
                 self.blackout = on;
                 ev.push(Event::BlackoutChanged { on });
             }
-            Command::GrandMaster { level } => self.grand_master = level.clamp(0.0, 1.0),
+            Command::GrandMaster { level } => {
+                self.grand_master = level.clamp(0.0, 1.0);
+                ev.push(self.masters_changed());
+            }
+            Command::SetEffect { effect, on } => self.set_effect(effect, on, &mut ev),
+            Command::GroupMaster { group, level } => {
+                self.group_levels.insert(group, level.clamp(0.0, 1.0));
+                ev.push(self.masters_changed());
+            }
+            Command::TriggerShowItem { item, value } => self.trigger_item(item, value, now, &mut ev),
+            Command::MidiInput { message } => self.midi_input(message, now, &mut ev),
             Command::ClearProgrammer => {
                 self.programmer.clear();
                 ev.push(Event::ProgrammerChanged { look: self.programmer.clone() });
@@ -462,6 +611,24 @@ impl Engine {
     /// Render the current output. Call at the DMX refresh rate (~40 Hz).
     pub fn frame(&mut self, now: Instant) -> DmxFrame {
         let mut look = self.playback.merged(&self.programmer);
+        let t = now.saturating_duration_since(*self.epoch.get_or_insert(now)).as_secs_f32();
+        for id in &self.active_effects {
+            if let Some(e) = self.show.effects.iter().find(|e| e.id == *id) {
+                crate::lighting::effects::apply(&self.show, e, t, &mut look);
+            }
+        }
+        for (group, level) in &self.group_levels {
+            if *level >= 1.0 {
+                continue;
+            }
+            if let Some(g) = self.show.groups.iter().find(|g| &g.name == group) {
+                for id in &g.fixtures {
+                    if let Some(st) = look.fixtures.get_mut(id) {
+                        st.intensity = st.intensity.map(|i| i * level);
+                    }
+                }
+            }
+        }
         let master = if self.blackout { 0.0 } else { self.grand_master };
         if master < 1.0 {
             for st in look.fixtures.values_mut() {
@@ -489,6 +656,72 @@ impl Engine {
 
 #[cfg(test)]
 mod tests {
+    use crate::midi::{MidiControl, MidiControlKind, MidiMessage};
+    use crate::show::ShowItemKind;
+
+    fn item_id(e: &super::Engine, f: impl Fn(&ShowItemKind) -> bool) -> u32 {
+        e.show.show_page.items.iter().find(|i| f(&i.kind)).unwrap().id
+    }
+
+    #[test]
+    fn show_page_buttons_and_faders() {
+        let mut e = super::Engine::new(crate::demo::demo_show());
+        let now = std::time::Instant::now();
+        // Effect button toggles; the effect changes the output over time.
+        let fx = item_id(&e, |k| matches!(k, ShowItemKind::Effect { effect: 1 }));
+        e.handle(super::Command::TriggerShowItem { item: fx, value: 1.0 }, now);
+        assert_eq!(e.active_effects(), &[1]);
+        let a = e.frame(now);
+        let b = e.frame(now + std::time::Duration::from_secs(2));
+        assert_ne!(a, b, "rainbow moves");
+        // Cue button: go, press again = release.
+        let cue = item_id(&e, |k| matches!(k, ShowItemKind::Cue { .. }));
+        e.handle(super::Command::TriggerShowItem { item: cue, value: 1.0 }, now);
+        assert!(e.active_cue().is_some());
+        e.handle(super::Command::TriggerShowItem { item: cue, value: 1.0 }, now);
+        assert!(e.active_cue().is_none());
+        // Release stops effects.
+        let rel = item_id(&e, |k| matches!(k, ShowItemKind::Release));
+        e.handle(super::Command::TriggerShowItem { item: rel, value: 1.0 }, now);
+        assert!(e.active_effects().is_empty());
+        // Group fader dims only that group.
+        let gm = item_id(&e, |k| matches!(k, ShowItemKind::GroupMaster { .. }));
+        let ev = e.handle(super::Command::TriggerShowItem { item: gm, value: 0.25 }, now);
+        assert!(ev.iter().any(|x| matches!(x, super::Event::MastersChanged { groups, .. } if groups[0].level == 0.25)));
+    }
+
+    #[test]
+    fn midi_learn_maps_pads_and_faders() {
+        let mut show = crate::demo::demo_show();
+        let pad = MidiControl { kind: MidiControlKind::Note, channel: 1, number: 36 };
+        let knob = MidiControl { kind: MidiControlKind::Cc, channel: 1, number: 7 };
+        let cc_btn = MidiControl { kind: MidiControlKind::Cc, channel: 1, number: 20 };
+        for i in show.show_page.items.iter_mut() {
+            match i.kind {
+                ShowItemKind::Effect { effect: 2 } => i.midi = Some(pad),
+                ShowItemKind::GrandMaster => i.midi = Some(knob),
+                ShowItemKind::Blackout => i.midi = Some(cc_btn),
+                _ => {}
+            }
+        }
+        let mut e = super::Engine::new(show);
+        let now = std::time::Instant::now();
+        let ev = e.handle(super::Command::MidiInput { message: MidiMessage::NoteOn { channel: 1, note: 36, velocity: 90 } }, now);
+        assert!(ev.iter().any(|x| matches!(x, super::Event::MidiReceived { .. })));
+        assert_eq!(e.active_effects(), &[2]);
+        e.handle(super::Command::MidiInput { message: MidiMessage::NoteOff { channel: 1, note: 36 } }, now);
+        assert_eq!(e.active_effects(), &[2], "note-off doesn't toggle");
+        e.handle(super::Command::MidiInput { message: MidiMessage::ControlChange { channel: 1, controller: 7, value: 0 } }, now);
+        assert_eq!(e.grand_master(), 0.0);
+        // A CC button fires once on the way up, not again while held.
+        e.handle(super::Command::MidiInput { message: MidiMessage::ControlChange { channel: 1, controller: 20, value: 127 } }, now);
+        e.handle(super::Command::MidiInput { message: MidiMessage::ControlChange { channel: 1, controller: 20, value: 120 } }, now);
+        assert!(e.blackout());
+        e.handle(super::Command::MidiInput { message: MidiMessage::ControlChange { channel: 1, controller: 20, value: 0 } }, now);
+        e.handle(super::Command::MidiInput { message: MidiMessage::ControlChange { channel: 1, controller: 20, value: 127 } }, now);
+        assert!(!e.blackout());
+    }
+
     #[test]
     fn merge_programmer_sets_each_fixture_and_keeps_the_rest() {
         use crate::lighting::look::{FixtureState, Look};

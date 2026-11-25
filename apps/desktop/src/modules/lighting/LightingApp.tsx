@@ -2,53 +2,169 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { api, confirmDialog, on } from "../../shared/bridge";
 import PatchView from "./PatchView";
 import Stage3D from "./Stage3D";
+import ShowPage from "./ShowPage";
+import MidiSetup from "./MidiSetup";
+import EffectTiles from "./Effects";
+import MatchWheel, { MatchProgress } from "../../shared/MatchWheel";
 import { matchStatus, startMatching, stopMatching } from "../../shared/bgmatch";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
-import type { AiStatus, DmxOutputConfig, FixtureProfile, FixtureState, FixtureVisual, Rgb, SerialPortInfo, Show } from "../../shared/types";
+import type {
+  AiStatus,
+  DmxOutputConfig,
+  FixtureProfile,
+  FixtureState,
+  FixtureVisual,
+  Rgb,
+  SerialPortInfo,
+  Show,
+} from "../../shared/types";
 
-type Tab = "live" | "patch" | "positions" | "outputs";
+/** Setup = build the rig (layout, patch, outputs, MIDI); Program = make looks, cues and effects
+ *  (lights can't be moved by accident); Show = just the buttons and faders for the service. */
+type Mode = "setup" | "program" | "show";
+type SetupTab = "stage" | "patch" | "positions" | "outputs" | "midi";
+
+const remember = (k: string, v: string) => {
+  try {
+    localStorage.setItem(k, v);
+  } catch {
+    /* private mode */
+  }
+};
+const recall = <T extends string>(k: string, ok: readonly T[], d: T): T => {
+  try {
+    const v = localStorage.getItem(k) as T | null;
+    return v && ok.includes(v) ? v : d;
+  } catch {
+    return d;
+  }
+};
 
 export default function LightingApp() {
-  const [tab, setTab] = useState<Tab>("live");
+  const [mode, setModeState] = useState<Mode>(() =>
+    recall("lk-mode", ["setup", "program", "show"] as const, "program"),
+  );
+  const [tab, setTabState] = useState<SetupTab>(() =>
+    recall(
+      "lk-setup-tab",
+      ["stage", "patch", "positions", "outputs", "midi"] as const,
+      "stage",
+    ),
+  );
+  const setMode = (m: Mode) => (setModeState(m), remember("lk-mode", m));
+  const setTab = (t: SetupTab) => (setTabState(t), remember("lk-setup-tab", t));
   const { show } = useEngine();
   if (!show) return <div className="empty">Loading show…</div>;
+  const view = mode === "setup" ? `setup-${tab}` : mode;
   return (
-    <div className={`lighting tab-${tab}`}>
-      <div className="lk-tabs seg">
-        {(["live", "patch", "positions", "outputs"] as Tab[]).map((t) => (
-          <button key={t} className={t === tab ? "on" : ""} onClick={() => setTab(t)}>
-            {t[0].toUpperCase() + t.slice(1)}
-          </button>
-        ))}
+    <div className={`lighting view-${view}`}>
+      <div className="lk-modebar">
+        <div className="seg lk-modes">
+          {(
+            [
+              [
+                "setup",
+                "⚙ Setup",
+                "Patch, layout and moving lights, outputs, MIDI controllers",
+              ],
+              [
+                "program",
+                "✎ Program",
+                "Build looks, record cues and effects — lights are locked in place",
+              ],
+              [
+                "show",
+                "▶ Show",
+                "Just your buttons and faders for the service",
+              ],
+            ] as [Mode, string, string][]
+          ).map(([m, label, title]) => (
+            <button
+              key={m}
+              className={m === mode ? "on" : ""}
+              onClick={() => setMode(m)}
+              title={title}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {mode === "setup" && (
+          <div className="seg small lk-setup-tabs">
+            {(
+              [
+                ["stage", "Stage layout"],
+                ["patch", "Patch"],
+                ["positions", "Positions"],
+                ["outputs", "Outputs"],
+                ["midi", "MIDI"],
+              ] as [SetupTab, string][]
+            ).map(([t, l]) => (
+              <button
+                key={t}
+                className={t === tab ? "on" : ""}
+                onClick={() => setTab(t)}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        )}
+        <span className="grow" />
+        <MatchProgress />
       </div>
-      {tab === "live" && <Live show={show} />}
-      {tab === "patch" && <PatchView show={show} />}
-      {tab === "positions" && <Positions show={show} />}
-      {tab === "outputs" && <Outputs show={show} />}
+      {mode === "program" && <Live show={show} mode="program" />}
+      {mode === "show" && <ShowPage show={show} />}
+      {mode === "setup" && tab === "stage" && <Live show={show} mode="setup" />}
+      {mode === "setup" && tab === "patch" && <PatchView show={show} />}
+      {mode === "setup" && tab === "positions" && <Positions show={show} />}
+      {mode === "setup" && tab === "outputs" && <Outputs show={show} />}
+      {mode === "setup" && tab === "midi" && <MidiSetup />}
     </div>
   );
 }
 
 // ─────────────────────────────────────────────── Live (Lightkey-style)
 const SWATCHES: [string, string][] = [
-  ["red", "#ff2222"], ["orange", "#ff7700"], ["amber", "#ffaa00"], ["yellow", "#ffee00"], ["green", "#22ee44"],
-  ["teal", "#00ccbb"], ["cyan", "#00ffff"], ["blue", "#2222ff"], ["congo blue", "#3300ff"], ["purple", "#8800ff"],
-  ["magenta", "#ff00ff"], ["pink", "#ff66bb"], ["warm white", "#ffc880"], ["white", "#ffffff"],
+  ["red", "#ff2222"],
+  ["orange", "#ff7700"],
+  ["amber", "#ffaa00"],
+  ["yellow", "#ffee00"],
+  ["green", "#22ee44"],
+  ["teal", "#00ccbb"],
+  ["cyan", "#00ffff"],
+  ["blue", "#2222ff"],
+  ["congo blue", "#3300ff"],
+  ["purple", "#8800ff"],
+  ["magenta", "#ff00ff"],
+  ["pink", "#ff66bb"],
+  ["warm white", "#ffc880"],
+  ["white", "#ffffff"],
 ];
 
 const toHex = (c: Rgb) =>
-  "#" + [c.r, c.g, c.b].map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0")).join("");
+  "#" +
+  [c.r, c.g, c.b]
+    .map((v) =>
+      Math.round(Math.max(0, Math.min(1, v)) * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("");
 const fromHex = (h: string): Rgb => ({
   r: parseInt(h.slice(1, 3), 16) / 255,
   g: parseInt(h.slice(3, 5), 16) / 255,
   b: parseInt(h.slice(5, 7), 16) / 255,
 });
 
-function Live({ show }: { show: Show }) {
+function Live({ show, mode }: { show: Show; mode: "setup" | "program" }) {
+  const setup = mode === "setup";
   const { activeCue, programmer } = useEngine();
   const [sel, setSel] = useState<number[]>([]);
   const [visuals, setVisuals] = useState<Record<number, FixtureVisual>>({});
-  const [view, setView] = useState<"plan" | "3d">(() => (localStorage.getItem("lk-view") === "3d" ? "3d" : "plan"));
+  const [view, setView] = useState<"plan" | "3d">(() =>
+    localStorage.getItem("lk-view") === "3d" ? "3d" : "plan",
+  );
   const changeView = (v: "plan" | "3d") => {
     setView(v);
     try {
@@ -70,30 +186,51 @@ function Live({ show }: { show: Show }) {
     [],
   );
 
-  const profileOf = (id: number) => show.profiles.find((p) => p.id === show.fixtures.find((f) => f.id === id)?.profile_id);
+  const profileOf = (id: number) =>
+    show.profiles.find(
+      (p) => p.id === show.fixtures.find((f) => f.id === id)?.profile_id,
+    );
   const click = (id: number, e: React.MouseEvent) => {
-    if (e.shiftKey || e.metaKey || e.ctrlKey) setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+    if (e.shiftKey || e.metaKey || e.ctrlKey)
+      setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
     else setSel([id]);
   };
 
   return (
-    <div className="lk-live">
-      <SceneBuilder show={show} />
+    <div className={`lk-live ${setup ? "setup" : ""}`}>
+      {!setup && <SceneBuilder show={show} />}
 
       <aside className="lk-fixtures">
         <GroupsPanel show={show} sel={sel} setSel={setSel} />
         <h3>
           Fixtures
           <span className="grow" />
-          <button className="link" onClick={() => setSel(show.fixtures.map((f) => f.id))}>all</button>
-          <button className="link" onClick={() => setSel([])}>none</button>
+          <button
+            className="link"
+            onClick={() => setSel(show.fixtures.map((f) => f.id))}
+          >
+            all
+          </button>
+          <button className="link" onClick={() => setSel([])}>
+            none
+          </button>
         </h3>
         <ul className="lk-list fixtures">
           {show.fixtures.map((f) => {
             const v = visuals[f.id];
             return (
-              <li key={f.id} className={sel.includes(f.id) ? "sel" : ""} onClick={(e) => click(f.id, e)}>
-                <span className="lk-dot" style={{ background: v ? toHex(v.color) : "#000", opacity: v ? 0.25 + 0.75 * v.intensity : 0.25 }} />
+              <li
+                key={f.id}
+                className={sel.includes(f.id) ? "sel" : ""}
+                onClick={(e) => click(f.id, e)}
+              >
+                <span
+                  className="lk-dot"
+                  style={{
+                    background: v ? toHex(v.color) : "#000",
+                    opacity: v ? 0.25 + 0.75 * v.intensity : 0.25,
+                  }}
+                />
                 <span className="grow ellipsis">{f.name}</span>
                 <small>{v ? Math.round(v.intensity * 100) : 0}%</small>
               </li>
@@ -104,35 +241,82 @@ function Live({ show }: { show: Show }) {
 
       <section className="lk-stage">
         <div className="lk-viewtoggle seg small">
-          <button className={view === "plan" ? "on" : ""} onClick={() => changeView("plan")} title="Top-down plan: quick to read, drag lights to move">
+          <button
+            className={view === "plan" ? "on" : ""}
+            onClick={() => changeView("plan")}
+            title="Top-down plan: quick to read, drag lights to move"
+          >
             Plan
           </button>
-          <button className={view === "3d" ? "on" : ""} onClick={() => changeView("3d")} title="The Visualizer's 3D stage: move lights in height too">
+          <button
+            className={view === "3d" ? "on" : ""}
+            onClick={() => changeView("3d")}
+            title="The Visualizer's 3D stage: move lights in height too"
+          >
             3D
           </button>
         </div>
         {view === "plan" ? (
-          <StagePlan show={show} visuals={visuals} sel={sel} onClick={click} onClear={() => setSel([])} />
+          <StagePlan
+            show={show}
+            visuals={visuals}
+            sel={sel}
+            onClick={click}
+            onClear={() => setSel([])}
+            locked={!setup}
+          />
         ) : (
-          <Stage3D show={show} sel={sel} setSel={setSel} />
+          <Stage3D show={show} sel={sel} setSel={setSel} locked={!setup} />
         )}
       </section>
 
-      <Inspector show={show} sel={sel} programmer={programmer} profileOf={profileOf} />
+      {setup ? (
+        <SetupInspector show={show} sel={sel} />
+      ) : (
+        <Inspector
+          show={show}
+          sel={sel}
+          programmer={programmer}
+          profileOf={profileOf}
+        />
+      )}
 
-      <CueStrip show={show} activeCue={activeCue} programmed={Object.keys(programmer.fixtures).length} />
+      {!setup && (
+        <CueStrip
+          show={show}
+          activeCue={activeCue}
+          programmed={Object.keys(programmer.fixtures).length}
+          sel={sel}
+        />
+      )}
     </div>
   );
 }
 
 /** Groups: click to select, ✎ to edit (rename, other names, add / remove the selected lights). */
-function GroupsPanel({ show, sel, setSel }: { show: Show; sel: number[]; setSel: (s: number[]) => void }) {
+function GroupsPanel({
+  show,
+  sel,
+  setSel,
+}: {
+  show: Show;
+  sel: number[];
+  setSel: (s: number[]) => void;
+}) {
   const [editing, setEditing] = useState<number | null>(null);
-  const edit = (gi: number, fn: (g: Show["groups"][number]) => void) => updateShow((d) => void (d.groups[gi] && fn(d.groups[gi])));
+  const edit = (gi: number, fn: (g: Show["groups"][number]) => void) =>
+    updateShow((d) => void (d.groups[gi] && fn(d.groups[gi])));
   const newGroup = () => {
     let n = 1;
     while (show.groups.some((g) => g.name === `Group ${n}`)) n++;
-    void updateShow((d) => void d.groups.push({ name: `Group ${n}`, aliases: [], fixtures: [...sel] }));
+    void updateShow(
+      (d) =>
+        void d.groups.push({
+          name: `Group ${n}`,
+          aliases: [],
+          fixtures: [...sel],
+        }),
+    );
     setEditing(show.groups.length);
   };
   return (
@@ -140,16 +324,35 @@ function GroupsPanel({ show, sel, setSel }: { show: Show; sel: number[]; setSel:
       <h3>
         Groups
         <span className="grow" />
-        <button className="link" onClick={newGroup} title={sel.length ? `New group from the ${sel.length} selected light(s)` : "New empty group"}>
+        <button
+          className="link"
+          onClick={newGroup}
+          title={
+            sel.length
+              ? `New group from the ${sel.length} selected light(s)`
+              : "New empty group"
+          }
+        >
           + new{sel.length ? ` (${sel.length})` : ""}
         </button>
       </h3>
       <ul className="lk-list">
         {show.groups.map((g, gi) => {
-          const all = g.fixtures.length > 0 && g.fixtures.every((f) => sel.includes(f));
+          const all =
+            g.fixtures.length > 0 && g.fixtures.every((f) => sel.includes(f));
           return (
-            <li key={gi} className={`lk-group ${all ? "sel" : ""} ${editing === gi ? "editing" : ""}`}>
-              <div className="lk-group-row" onClick={(e) => (e.shiftKey ? setSel([...new Set([...sel, ...g.fixtures])]) : setSel(g.fixtures))}>
+            <li
+              key={gi}
+              className={`lk-group ${all ? "sel" : ""} ${editing === gi ? "editing" : ""}`}
+            >
+              <div
+                className="lk-group-row"
+                onClick={(e) =>
+                  e.shiftKey
+                    ? setSel([...new Set([...sel, ...g.fixtures])])
+                    : setSel(g.fixtures)
+                }
+              >
                 <span className="grow ellipsis">{g.name}</span>
                 <small>{g.fixtures.length}</small>
                 <button
@@ -164,27 +367,75 @@ function GroupsPanel({ show, sel, setSel }: { show: Show; sel: number[]; setSel:
                 </button>
               </div>
               {editing === gi && (
-                <div className="lk-group-edit" onClick={(e) => e.stopPropagation()}>
-                  <input value={g.name} onChange={(e) => void edit(gi, (x) => void (x.name = e.target.value))} placeholder="Group name" />
+                <div
+                  className="lk-group-edit"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    value={g.name}
+                    onChange={(e) =>
+                      void edit(gi, (x) => void (x.name = e.target.value))
+                    }
+                    placeholder="Group name"
+                  />
                   <input
                     value={g.aliases.join(", ")}
-                    onChange={(e) => void edit(gi, (x) => void (x.aliases = e.target.value.split(",").map((s) => s.trim()).filter(Boolean)))}
+                    onChange={(e) =>
+                      void edit(
+                        gi,
+                        (x) =>
+                          void (x.aliases = e.target.value
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter(Boolean)),
+                      )
+                    }
                     placeholder="Other names, e.g. drums, kit lights"
                     title="The scene builder understands these names too"
                   />
                   <div className="lk-group-btns">
-                    <button disabled={!sel.length} onClick={() => edit(gi, (x) => void (x.fixtures = [...new Set([...x.fixtures, ...sel])]))}>
+                    <button
+                      disabled={!sel.length}
+                      onClick={() =>
+                        edit(
+                          gi,
+                          (x) =>
+                            void (x.fixtures = [
+                              ...new Set([...x.fixtures, ...sel]),
+                            ]),
+                        )
+                      }
+                    >
                       + Add selected
                     </button>
-                    <button disabled={!sel.some((id) => g.fixtures.includes(id))} onClick={() => edit(gi, (x) => void (x.fixtures = x.fixtures.filter((id) => !sel.includes(id))))}>
+                    <button
+                      disabled={!sel.some((id) => g.fixtures.includes(id))}
+                      onClick={() =>
+                        edit(
+                          gi,
+                          (x) =>
+                            void (x.fixtures = x.fixtures.filter(
+                              (id) => !sel.includes(id),
+                            )),
+                        )
+                      }
+                    >
                       − Remove selected
                     </button>
-                    <button disabled={!sel.length} onClick={() => edit(gi, (x) => void (x.fixtures = [...sel]))} title="Make the group exactly the selected lights">
+                    <button
+                      disabled={!sel.length}
+                      onClick={() =>
+                        edit(gi, (x) => void (x.fixtures = [...sel]))
+                      }
+                      title="Make the group exactly the selected lights"
+                    >
                       = Selection
                     </button>
                     <button
                       onClick={() =>
-                        void confirmDialog(`Delete group “${g.name}”? The lights stay patched.`).then((yes) => {
+                        void confirmDialog(
+                          `Delete group “${g.name}”? The lights stay patched.`,
+                        ).then((yes) => {
                           if (!yes) return;
                           setEditing(null);
                           void updateShow((d) => void d.groups.splice(gi, 1));
@@ -199,7 +450,9 @@ function GroupsPanel({ show, sel, setSel }: { show: Show; sel: number[]; setSel:
             </li>
           );
         })}
-        {show.groups.length === 0 && <li className="muted">Select lights, then “+ new”.</li>}
+        {show.groups.length === 0 && (
+          <li className="muted">Select lights, then “+ new”.</li>
+        )}
       </ul>
     </>
   );
@@ -213,7 +466,10 @@ function SceneBuilder({ show }: { show: Show }) {
   const [ai, setAi] = useState<AiStatus | null>(null);
   const [showResult, setShowResult] = useState(false);
   useEffect(() => {
-    api.aiStatus().then(setAi).catch(() => {});
+    api
+      .aiStatus()
+      .then(setAi)
+      .catch(() => {});
   }, []);
 
   const matching = useSyncExternalStore(matchStatus.subscribe, matchStatus.get);
@@ -222,14 +478,25 @@ function SceneBuilder({ show }: { show: Show }) {
   const build = async (force: boolean) => {
     if (!text.trim()) return;
     // "match background [on back wall]": lights follow the screen picture (runs here, not in the engine).
-    const m = text.trim().match(/^(?:match|follow)\s+(?:the\s+)?(?:background|bg|screen|video|media)\b\s*(?:on|with|for|using)?\s*(.*)$/i);
+    const m = text
+      .trim()
+      .match(
+        /^(?:match|follow)\s+(?:the\s+)?(?:background|bg|screen|video|media)\b\s*(?:on|with|for|using)?\s*(.*)$/i,
+      );
     if (m) {
       const rest = m[1].trim().toLowerCase();
       const groups = rest
-        ? show.groups.filter((g) => [g.name, ...g.aliases].some((n) => rest.includes(n.toLowerCase())))
+        ? show.groups.filter((g) =>
+            [g.name, ...g.aliases].some((n) => rest.includes(n.toLowerCase())),
+          )
         : [];
       const ids = [...new Set(groups.flatMap((g) => g.fixtures))];
-      setMatchMsg(rest && !groups.length ? `No group called “${rest}” — matching with all lights. ` + startMatching([]) : startMatching(ids));
+      setMatchMsg(
+        rest && !groups.length
+          ? `No group called “${rest}” — matching with all lights. ` +
+              startMatching([])
+          : startMatching(ids),
+      );
       return;
     }
     if (/^stop\s+(?:matching|match|following)/i.test(text.trim())) {
@@ -251,7 +518,9 @@ function SceneBuilder({ show }: { show: Show }) {
 
   return (
     <section className="lk-builder">
-      <span className="lk-builder-icon" title="Describe a look in plain words">✦</span>
+      <span className="lk-builder-icon" title="Describe a look in plain words">
+        ✦
+      </span>
       <input
         className="grow"
         value={text}
@@ -259,38 +528,78 @@ function SceneBuilder({ show }: { show: Show }) {
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && build(e.shiftKey)}
       />
-      <button className="primary" disabled={busy} onClick={() => build(false)} title="Enter">
+      <button
+        className="primary"
+        disabled={busy}
+        onClick={() => build(false)}
+        title="Enter"
+      >
         Build
       </button>
-      <button disabled={busy || !ai?.has_api_key} onClick={() => build(true)} title={ai?.has_api_key ? "Shift+Enter" : "Add an API key in AI settings"}>
+      <button
+        disabled={busy || !ai?.has_api_key}
+        onClick={() => build(true)}
+        title={
+          ai?.has_api_key ? "Shift+Enter" : "Add an API key in AI settings"
+        }
+      >
         Ask AI
       </button>
-      <ApiKey hasKey={!!ai?.has_api_key} onSaved={() => api.aiStatus().then(setAi)} />
+      <ApiKey
+        hasKey={!!ai?.has_api_key}
+        onSaved={() => api.aiStatus().then(setAi)}
+      />
       {matching.running ? (
-        <button className="lk-match on" onClick={stopMatching} title={`Lights are following “${matching.media}” (${matching.fixtures} lights). Click to stop.`}>
-          ◉ Matching background · Stop
+        <button
+          className="lk-match on"
+          onClick={stopMatching}
+          title={`Lights are following “${matching.media}” (${matching.fixtures} lights). Click to stop.`}
+        >
+          <MatchWheel size={16} />{" "}
+          {matching.phase === "loading"
+            ? "Opening background…"
+            : "Matching background"}{" "}
+          · Stop
         </button>
       ) : (
-        <button className="lk-match" onClick={() => setMatchMsg(startMatching([]))} title="Lights follow the colours and movement of the background on screen. Type “match background on back wall” for one group.">
+        <button
+          className="lk-match"
+          onClick={() => setMatchMsg(startMatching([]))}
+          title="Lights follow the colours and movement of the background on screen. Type “match background on back wall” for one group."
+        >
           Match background
         </button>
       )}
       {matchMsg && (
-        <div className="lk-scene-result" onClick={() => setMatchMsg(null)} title="Click to hide">
+        <div
+          className="lk-scene-result"
+          onClick={() => setMatchMsg(null)}
+          title="Click to hide"
+        >
           <span className={matching.running ? "ok" : "warn"}>{matchMsg}</span>
         </div>
       )}
       {showResult && lastScene && (
-        <div className="lk-scene-result" onClick={() => setShowResult(false)} title="Click to hide">
+        <div
+          className="lk-scene-result"
+          onClick={() => setShowResult(false)}
+          title="Click to hide"
+        >
           {engineUsed && <span className="tag">{engineUsed}</span>}
           {lastScene.applied.map((a, i) => (
-            <span key={i} className="ok">✓ {a}</span>
+            <span key={i} className="ok">
+              ✓ {a}
+            </span>
           ))}
           {lastScene.issues.map((a, i) => (
-            <span key={i} className="warn">⚠ {a}</span>
+            <span key={i} className="warn">
+              ⚠ {a}
+            </span>
           ))}
           {lastScene.unknown.map((a, i) => (
-            <span key={i} className="muted">? “{a}”</span>
+            <span key={i} className="muted">
+              ? “{a}”
+            </span>
           ))}
         </div>
       )}
@@ -307,20 +616,37 @@ function StagePlan({
   sel,
   onClick,
   onClear,
+  locked,
 }: {
   show: Show;
   visuals: Record<number, FixtureVisual>;
   sel: number[];
   onClick: (id: number, e: React.MouseEvent) => void;
   onClear: () => void;
+  /** Program mode: lights can be selected but not dragged. */
+  locked: boolean;
 }) {
   const plan = useRef<HTMLDivElement>(null);
   // While dragging: which lights, how far (metres), and the scale frozen at the start.
-  const [drag, setDrag] = useState<{ ids: number[]; dx: number; dz: number; b: [number, number, number, number] } | null>(null);
+  const [drag, setDrag] = useState<{
+    ids: number[];
+    dx: number;
+    dz: number;
+    b: [number, number, number, number];
+  } | null>(null);
   const { width, depth } = show.stage;
   // Front-of-house fixtures can sit beyond the stage edge: fit everything.
-  const xs = [...show.fixtures.map((f) => f.position[0]), ...show.scenery.flatMap((s) => [s.position[0] - s.size[0] / 2, s.position[0] + s.size[0] / 2])];
-  const zs = [...show.fixtures.map((f) => f.position[2]), ...show.scenery.map((s) => s.position[2])];
+  const xs = [
+    ...show.fixtures.map((f) => f.position[0]),
+    ...show.scenery.flatMap((s) => [
+      s.position[0] - s.size[0] / 2,
+      s.position[0] + s.size[0] / 2,
+    ]),
+  ];
+  const zs = [
+    ...show.fixtures.map((f) => f.position[2]),
+    ...show.scenery.map((s) => s.position[2]),
+  ];
   const [minX, maxX, minZ, maxZ] = drag?.b ?? [
     Math.min(-width / 2, ...xs) - 0.8,
     Math.max(width / 2, ...xs) + 0.8,
@@ -328,11 +654,13 @@ function StagePlan({
     Math.max(depth / 2, ...zs) + 0.8,
   ];
   const posOf = (f: Show["fixtures"][number]) =>
-    drag?.ids.includes(f.id) ? ([f.position[0] + drag.dx, f.position[2] + drag.dz] as const) : ([f.position[0], f.position[2]] as const);
+    drag?.ids.includes(f.id)
+      ? ([f.position[0] + drag.dx, f.position[2] + drag.dz] as const)
+      : ([f.position[0], f.position[2]] as const);
 
   /** Drag a light (or all selected lights) around the plan; the Visualizer moves with it. */
   const startMove = (e: React.PointerEvent, f: Show["fixtures"][number]) => {
-    if (e.button !== 0 || !plan.current) return;
+    if (locked || e.button !== 0 || !plan.current) return;
     const ids = sel.includes(f.id) && sel.length > 1 ? sel : [f.id];
     const r = plan.current.getBoundingClientRect();
     const b: [number, number, number, number] = [minX, maxX, minZ, maxZ];
@@ -345,7 +673,12 @@ function StagePlan({
     const move = (ev: PointerEvent) => {
       if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 4) return;
       moved = true;
-      setDrag({ ids, dx: snap((ev.clientX - x0) * mx), dz: snap((ev.clientY - y0) * mz), b });
+      setDrag({
+        ids,
+        dx: snap((ev.clientX - x0) * mx),
+        dz: snap((ev.clientY - y0) * mz),
+        b,
+      });
     };
     const up = (ev: PointerEvent) => {
       window.removeEventListener("pointermove", move);
@@ -358,7 +691,17 @@ function StagePlan({
       const dz = snap((ev.clientY - y0) * mz);
       for (const id of ids) {
         const fx = show.fixtures.find((x) => x.id === id);
-        if (fx) void send({ type: "move_fixture", fixture: id, position: [fx.position[0] + dx, fx.position[1], fx.position[2] + dz], rotation: fx.rotation });
+        if (fx)
+          void send({
+            type: "move_fixture",
+            fixture: id,
+            position: [
+              fx.position[0] + dx,
+              fx.position[1],
+              fx.position[2] + dz,
+            ],
+            rotation: fx.rotation,
+          });
       }
     };
     window.addEventListener("pointermove", move);
@@ -368,17 +711,26 @@ function StagePlan({
   const pz = (z: number) => ((z - minZ) / (maxZ - minZ)) * 100;
 
   return (
-    <div className="lk-plan" ref={plan} onClick={(e) => e.target === e.currentTarget && onClear()}>
+    <div
+      className="lk-plan"
+      ref={plan}
+      onClick={(e) => e.target === e.currentTarget && onClear()}
+    >
       <div
         className="lk-plan-stage"
-        style={{ left: `${px(-width / 2)}%`, width: `${px(width / 2) - px(-width / 2)}%`, top: `${pz(-depth / 2)}%`, height: `${pz(depth / 2) - pz(-depth / 2)}%` }}
+        style={{
+          left: `${px(-width / 2)}%`,
+          width: `${px(width / 2) - px(-width / 2)}%`,
+          top: `${pz(-depth / 2)}%`,
+          height: `${pz(depth / 2) - pz(-depth / 2)}%`,
+        }}
       >
         <span>Stage</span>
       </div>
       {show.scenery.map((s) => {
         // Top-down footprint: width along its own X, thickness along Z, turned by its Y rotation.
         const w = (s.size[0] / (maxX - minX)) * 100;
-        const t = Math.max(0.12, s.size[2]) / (maxZ - minZ) * 100;
+        const t = (Math.max(0.12, s.size[2]) / (maxZ - minZ)) * 100;
         return (
           <div
             key={`sc-${s.id}`}
@@ -427,7 +779,11 @@ function StagePlan({
           </button>
         );
       })}
-      <small className="lk-plan-hint">Click to select · Shift-click to add · drag to move (moves in the Visualizer too)</small>
+      <small className="lk-plan-hint">
+        {locked
+          ? "Click to select · Shift-click to add · lights are locked here — move them in ⚙ Setup"
+          : "Click to select · Shift-click to add · drag to move (moves in the Visualizer too)"}
+      </small>
     </div>
   );
 }
@@ -449,30 +805,52 @@ function Inspector({
   useEffect(() => {
     if (first?.intensity != null) setDim(Math.round(first.intensity * 100));
     if (first?.color) setColor(toHex(first.color));
-  }, [sel.join(","), first?.intensity, first?.color?.r, first?.color?.g, first?.color?.b]);
+  }, [
+    sel.join(","),
+    first?.intensity,
+    first?.color?.r,
+    first?.color?.g,
+    first?.color?.b,
+  ]);
 
-  const set = (state: Partial<FixtureState>) => sel.length && send({ type: "set_fixture_state", fixtures: sel, state });
-  const movers = sel.filter((id) => profileOf(id)?.channels.some((c) => c.attr === "pan"));
-  const gobos = Math.max(0, ...sel.map((id) => (profileOf(id)?.gobo_slots.length ?? 1) - 1));
+  const set = (state: Partial<FixtureState>) =>
+    sel.length && send({ type: "set_fixture_state", fixtures: sel, state });
+  const movers = sel.filter((id) =>
+    profileOf(id)?.channels.some((c) => c.attr === "pan"),
+  );
+  const gobos = Math.max(
+    0,
+    ...sel.map((id) => (profileOf(id)?.gobo_slots.length ?? 1) - 1),
+  );
   const colorCapable = sel.some((id) => {
     const p = profileOf(id);
-    return p && (p.channels.some((c) => c.attr === "red") || p.color_wheel.length > 0);
+    return (
+      p &&
+      (p.channels.some((c) => c.attr === "red") || p.color_wheel.length > 0)
+    );
   });
 
   if (sel.length === 0)
     return (
       <aside className="lk-inspector empty-state">
         <h3>Inspector</h3>
-        <p className="muted">Select lights on the stage plan or in the list to change their intensity, colour, position and gobo.</p>
+        <p className="muted">
+          Select lights on the stage plan or in the list to change their
+          intensity, colour, position and gobo.
+        </p>
       </aside>
     );
 
-  const names = sel.map((id) => show.fixtures.find((f) => f.id === id)?.name).filter(Boolean);
+  const names = sel
+    .map((id) => show.fixtures.find((f) => f.id === id)?.name)
+    .filter(Boolean);
 
   return (
     <aside className="lk-inspector">
       <h3>{sel.length === 1 ? names[0] : `${sel.length} lights`}</h3>
-      {sel.length > 1 && <small className="muted ellipsis block">{names.join(", ")}</small>}
+      {sel.length > 1 && (
+        <small className="muted ellipsis block">{names.join(", ")}</small>
+      )}
 
       <div className="lk-insp-section">
         <div className="lk-insp-head">
@@ -543,7 +921,13 @@ function Inspector({
           <XYPad
             pan={programmer.fixtures[String(movers[0])]?.pan ?? 0.5}
             tilt={programmer.fixtures[String(movers[0])]?.tilt ?? 0.5}
-            onChange={(pan, tilt) => send({ type: "set_fixture_state", fixtures: movers, state: { pan, tilt } })}
+            onChange={(pan, tilt) =>
+              send({
+                type: "set_fixture_state",
+                fixtures: movers,
+                state: { pan, tilt },
+              })
+            }
           />
           <div className="lk-presets">
             {show.positions.map((p) => {
@@ -553,7 +937,12 @@ function Inspector({
                   key={p.name}
                   disabled={vals.length === 0}
                   onClick={() => {
-                    for (const v of vals) void send({ type: "set_fixture_state", fixtures: [v.fixture], state: { pan: v.pan, tilt: v.tilt } });
+                    for (const v of vals)
+                      void send({
+                        type: "set_fixture_state",
+                        fixtures: [v.fixture],
+                        state: { pan: v.pan, tilt: v.tilt },
+                      });
                   }}
                 >
                   {p.name}
@@ -569,7 +958,11 @@ function Inspector({
           <div className="lk-insp-head">Gobo</div>
           <div className="lk-gobos">
             {Array.from({ length: gobos + 1 }, (_, g) => (
-              <button key={g} className={first?.gobo === g ? "on" : ""} onClick={() => set({ gobo: g })}>
+              <button
+                key={g}
+                className={first?.gobo === g ? "on" : ""}
+                onClick={() => set({ gobo: g })}
+              >
                 {g === 0 ? "Open" : g}
               </button>
             ))}
@@ -580,7 +973,15 @@ function Inspector({
   );
 }
 
-function XYPad({ pan, tilt, onChange }: { pan: number; tilt: number; onChange: (pan: number, tilt: number) => void }) {
+function XYPad({
+  pan,
+  tilt,
+  onChange,
+}: {
+  pan: number;
+  tilt: number;
+  onChange: (pan: number, tilt: number) => void;
+}) {
   const [pos, setPos] = useState({ pan, tilt });
   const [dragging, setDragging] = useState(false);
   useEffect(() => {
@@ -604,7 +1005,10 @@ function XYPad({ pan, tilt, onChange }: { pan: number; tilt: number; onChange: (
       onPointerMove={(e) => dragging && fromEvent(e)}
       onPointerUp={() => setDragging(false)}
     >
-      <div className="lk-xy-cross" style={{ left: `${pos.pan * 100}%`, top: `${(1 - pos.tilt) * 100}%` }} />
+      <div
+        className="lk-xy-cross"
+        style={{ left: `${pos.pan * 100}%`, top: `${(1 - pos.tilt) * 100}%` }}
+      />
       <span className="lk-xy-label">
         Pan {Math.round(pos.pan * 100)} · Tilt {Math.round(pos.tilt * 100)}
       </span>
@@ -612,8 +1016,19 @@ function XYPad({ pan, tilt, onChange }: { pan: number; tilt: number; onChange: (
   );
 }
 
-function CueStrip({ show, activeCue, programmed }: { show: Show; activeCue: number | null; programmed: number }) {
-  const [gm, setGm] = useState(100);
+function CueStrip({
+  show,
+  activeCue,
+  programmed,
+  sel,
+}: {
+  show: Show;
+  activeCue: number | null;
+  programmed: number;
+  sel: number[];
+}) {
+  const { grandMaster } = useEngine();
+  const gm = Math.round(grandMaster * 100);
   const [cueName, setCueName] = useState("");
   const [fade, setFade] = useState(2);
   return (
@@ -622,16 +1037,31 @@ function CueStrip({ show, activeCue, programmed }: { show: Show; activeCue: numb
         <h3>Cues</h3>
         <div className="grow" />
         <span className="muted">{programmed} light(s) in programmer</span>
-        <input placeholder="New cue name" value={cueName} onChange={(e) => setCueName(e.target.value)} />
+        <input
+          placeholder="New cue name"
+          value={cueName}
+          onChange={(e) => setCueName(e.target.value)}
+        />
         <label className="inline muted">
           Fade
-          <input type="number" min={0} step={0.5} value={fade} onChange={(e) => setFade(Number(e.target.value))} />s
+          <input
+            type="number"
+            min={0}
+            step={0.5}
+            value={fade}
+            onChange={(e) => setFade(Number(e.target.value))}
+          />
+          s
         </label>
         <button
           className="primary"
           disabled={!programmed}
           onClick={() => {
-            void send({ type: "record_cue", name: cueName || `Cue ${show.cues.length + 1}`, fade_ms: fade * 1000 });
+            void send({
+              type: "record_cue",
+              name: cueName || `Cue ${show.cues.length + 1}`,
+              fade_ms: fade * 1000,
+            });
             setCueName("");
           }}
         >
@@ -655,7 +1085,6 @@ function CueStrip({ show, activeCue, programmed }: { show: Show; activeCue: numb
             value={gm}
             onChange={(e) => {
               const v = Number(e.target.value);
-              setGm(v);
               void send({ type: "grand_master", level: v / 100 });
             }}
           />
@@ -663,7 +1092,11 @@ function CueStrip({ show, activeCue, programmed }: { show: Show; activeCue: numb
       </div>
       <div className="lk-cue-tiles">
         {show.cues.map((c) => (
-          <div key={c.id} className={`lk-cue ${c.id === activeCue ? "active" : ""}`} onClick={() => send({ type: "go_cue", cue: c.id })}>
+          <div
+            key={c.id}
+            className={`lk-cue ${c.id === activeCue ? "active" : ""}`}
+            onClick={() => send({ type: "go_cue", cue: c.id })}
+          >
             <div className="lk-cue-num">{c.id}</div>
             <div className="lk-cue-name">{c.name}</div>
             <div className="lk-cue-meta">
@@ -682,7 +1115,12 @@ function CueStrip({ show, activeCue, programmed }: { show: Show; activeCue: numb
             </button>
           </div>
         ))}
-        {show.cues.length === 0 && <div className="muted">No cues yet: build a look, then press Record.</div>}
+        {show.cues.length === 0 && (
+          <div className="muted">
+            No cues yet: build a look, then press Record.
+          </div>
+        )}
+        <EffectTiles show={show} sel={sel} />
       </div>
     </section>
   );
@@ -693,19 +1131,33 @@ function ApiKey({ hasKey, onSaved }: { hasKey: boolean; onSaved: () => void }) {
   const [key, setKey] = useState("");
   return (
     <span className="lk-ai-settings">
-      <button className="icon" title={hasKey ? "AI: key saved" : "AI settings (optional API key)"} onClick={() => setOpen(!open)}>
+      <button
+        className="icon"
+        title={hasKey ? "AI: key saved" : "AI settings (optional API key)"}
+        onClick={() => setOpen(!open)}
+      >
         ⚙
       </button>
       {open && (
         <div className="popover">
-          <label>Anthropic API key (optional; the offline parser works without it)</label>
+          <label>
+            Anthropic API key (optional; the offline parser works without it)
+          </label>
           <div className="row">
-            <input type="password" className="grow" placeholder={hasKey ? "Saved — paste to replace" : "sk-ant-…"} value={key} onChange={(e) => setKey(e.target.value)} />
+            <input
+              type="password"
+              className="grow"
+              placeholder={hasKey ? "Saved — paste to replace" : "sk-ant-…"}
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+            />
             <button
               className="primary"
               disabled={!key.trim()}
               onClick={async () => {
-                await api.setApiKey(key).catch((e) => pushLog("warn", String(e)));
+                await api
+                  .setApiKey(key)
+                  .catch((e) => pushLog("warn", String(e)));
                 setOpen(false);
                 setKey("");
                 onSaved();
@@ -732,7 +1184,11 @@ function Positions({ show }: { show: Show }) {
   const [name, setName] = useState("");
 
   const push = (p: number, t: number) =>
-    send({ type: "set_fixture_state", fixtures: sel, state: { pan: p / 100, tilt: t / 100, intensity: 1 } });
+    send({
+      type: "set_fixture_state",
+      fixtures: sel,
+      state: { pan: p / 100, tilt: t / 100, intensity: 1 },
+    });
 
   return (
     <div className="positions">
@@ -744,20 +1200,57 @@ function Positions({ show }: { show: Show }) {
               <input
                 type="checkbox"
                 checked={sel.includes(m.id)}
-                onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))}
+                onChange={(e) =>
+                  setSel(
+                    e.target.checked
+                      ? [...sel, m.id]
+                      : sel.filter((x) => x !== m.id),
+                  )
+                }
               />
               {m.name}
             </label>
           ))}
         </div>
         <label>Pan {pan}%</label>
-        <input type="range" min={0} max={100} step={0.5} value={pan} onChange={(e) => { setPan(Number(e.target.value)); void push(Number(e.target.value), tilt); }} />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={0.5}
+          value={pan}
+          onChange={(e) => {
+            setPan(Number(e.target.value));
+            void push(Number(e.target.value), tilt);
+          }}
+        />
         <label>Tilt {tilt}%</label>
-        <input type="range" min={0} max={100} step={0.5} value={tilt} onChange={(e) => { setTilt(Number(e.target.value)); void push(pan, Number(e.target.value)); }} />
-        <p className="muted">Tip: open the Visualizer (or watch the stage) while focusing. Do one mover at a time for accurate presets.</p>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={0.5}
+          value={tilt}
+          onChange={(e) => {
+            setTilt(Number(e.target.value));
+            void push(pan, Number(e.target.value));
+          }}
+        />
+        <p className="muted">
+          Tip: open the Visualizer (or watch the stage) while focusing. Do one
+          mover at a time for accurate presets.
+        </p>
         <div className="row">
-          <input placeholder="Preset name e.g. Centre Stage" value={name} onChange={(e) => setName(e.target.value)} />
-          <button className="primary" disabled={!name.trim()} onClick={() => send({ type: "record_position", name })}>
+          <input
+            placeholder="Preset name e.g. Centre Stage"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button
+            className="primary"
+            disabled={!name.trim()}
+            onClick={() => send({ type: "record_position", name })}
+          >
             Store position
           </button>
         </div>
@@ -774,11 +1267,20 @@ function Positions({ show }: { show: Show }) {
               value={p.aliases.join(", ")}
               onChange={(e) =>
                 updateShow((d) => {
-                  d.positions[pi].aliases = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                  d.positions[pi].aliases = e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean);
                 })
               }
             />
-            <button onClick={() => send({ type: "apply_text", text: `movers ${p.name}` })}>Recall</button>
+            <button
+              onClick={() =>
+                send({ type: "apply_text", text: `movers ${p.name}` })
+              }
+            >
+              Recall
+            </button>
           </div>
         ))}
       </div>
@@ -789,17 +1291,28 @@ function Positions({ show }: { show: Show }) {
 // ─────────────────────────────────────────────── Outputs
 function Outputs({ show }: { show: Show }) {
   const [ports, setPorts] = useState<SerialPortInfo[]>([]);
-  const [status, setStatus] = useState<[{ name: string; show_universe: number; error: string | null }[], string[]]>([[], []]);
+  const [status, setStatus] = useState<
+    [{ name: string; show_universe: number; error: string | null }[], string[]]
+  >([[], []]);
 
   const refresh = () => {
-    api.serialPorts().then(setPorts).catch(() => {});
-    api.dmxOutputStatus().then(setStatus).catch(() => {});
+    api
+      .serialPorts()
+      .then(setPorts)
+      .catch(() => {});
+    api
+      .dmxOutputStatus()
+      .then(setStatus)
+      .catch(() => {});
   };
   useEffect(refresh, [show.dmx_outputs]);
 
-  const add = (o: DmxOutputConfig) => updateShow((d) => void d.dmx_outputs.push(o));
-  const remove = (i: number) => updateShow((d) => void d.dmx_outputs.splice(i, 1));
-  const firstPort = ports.find((p) => p.likely_dmx)?.name ?? ports[0]?.name ?? "";
+  const add = (o: DmxOutputConfig) =>
+    updateShow((d) => void d.dmx_outputs.push(o));
+  const remove = (i: number) =>
+    updateShow((d) => void d.dmx_outputs.splice(i, 1));
+  const firstPort =
+    ports.find((p) => p.likely_dmx)?.name ?? ports[0]?.name ?? "";
 
   return (
     <div className="outputs">
@@ -810,15 +1323,54 @@ function Outputs({ show }: { show: Show }) {
             <li key={i}>
               <span className="tag">{o.type}</span>
               <span className="grow">{describe(o)}</span>
-              <button className="icon" onClick={() => remove(i)}>✕</button>
+              <button className="icon" onClick={() => remove(i)}>
+                ✕
+              </button>
             </li>
           ))}
         </ul>
         <div className="row wrap">
-          <button onClick={() => add({ type: "sacn", universe: 1, sacn_universe: 1, priority: 100, unicast_ip: null })}>+ sACN</button>
-          <button onClick={() => add({ type: "art_net", ip: "2.255.255.255", universe: 1, artnet_universe: 0 })}>+ Art-Net</button>
-          <button disabled={!firstPort} onClick={() => add({ type: "enttec_pro", port: firstPort, universe: 1 })}>+ Enttec DMX USB Pro</button>
-          <button disabled={!firstPort} onClick={() => add({ type: "open_dmx", port: firstPort, universe: 1 })}>+ Enttec Open DMX</button>
+          <button
+            onClick={() =>
+              add({
+                type: "sacn",
+                universe: 1,
+                sacn_universe: 1,
+                priority: 100,
+                unicast_ip: null,
+              })
+            }
+          >
+            + sACN
+          </button>
+          <button
+            onClick={() =>
+              add({
+                type: "art_net",
+                ip: "2.255.255.255",
+                universe: 1,
+                artnet_universe: 0,
+              })
+            }
+          >
+            + Art-Net
+          </button>
+          <button
+            disabled={!firstPort}
+            onClick={() =>
+              add({ type: "enttec_pro", port: firstPort, universe: 1 })
+            }
+          >
+            + Enttec DMX USB Pro
+          </button>
+          <button
+            disabled={!firstPort}
+            onClick={() =>
+              add({ type: "open_dmx", port: firstPort, universe: 1 })
+            }
+          >
+            + Enttec Open DMX
+          </button>
           <button onClick={refresh}>Refresh</button>
         </div>
         {status[0].map((s, i) => (
@@ -827,21 +1379,31 @@ function Outputs({ show }: { show: Show }) {
           </div>
         ))}
         {status[1].map((e, i) => (
-          <div key={i} className="warn">⚠ {e}</div>
+          <div key={i} className="warn">
+            ⚠ {e}
+          </div>
         ))}
       </div>
       <div className="card">
         <h3>USB serial devices</h3>
-        {ports.length === 0 && <p className="muted">None found. Plug in the Enttec and press Refresh.</p>}
+        {ports.length === 0 && (
+          <p className="muted">
+            None found. Plug in the Enttec and press Refresh.
+          </p>
+        )}
         <ul className="list compact">
           {ports.map((p) => (
             <li key={p.name}>
-              {p.likely_dmx ? "🎛" : "·"} {p.name} <small>{p.product ?? ""} {p.serial ?? ""}</small>
+              {p.likely_dmx ? "🎛" : "·"} {p.name}{" "}
+              <small>
+                {p.product ?? ""} {p.serial ?? ""}
+              </small>
             </li>
           ))}
         </ul>
         <p className="muted">
-          The DMX USB Pro has its own timing chip and is the reliable choice. Open DMX relies on the computer for timing and may flicker.
+          The DMX USB Pro has its own timing chip and is the reliable choice.
+          Open DMX relies on the computer for timing and may flicker.
         </p>
       </div>
     </div>
@@ -859,4 +1421,139 @@ function describe(o: DmxOutputConfig) {
     case "open_dmx":
       return `Show universe ${o.universe} → ${o.port} (best effort)`;
   }
+}
+
+// ─────────────────────────────────────────────── Setup: where the lights are
+
+/** Number box that keeps what you type ("2.", "-0.") while focused (re-formatting swallows decimals). */
+function Num({
+  value,
+  step,
+  onChange,
+}: {
+  value: number;
+  step: number;
+  onChange: (v: number) => void;
+}) {
+  const [text, setText] = useState(String(Number(value.toFixed(2))));
+  const [focused, setFocused] = useState(false);
+  useEffect(() => {
+    if (!focused) setText(String(Number(value.toFixed(2))));
+  }, [value, focused]);
+  return (
+    <input
+      type="number"
+      step={step}
+      value={text}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onChange={(e) => {
+        setText(e.target.value);
+        const n = Number(e.target.value);
+        if (e.target.value.trim() !== "" && Number.isFinite(n)) onChange(n);
+      }}
+    />
+  );
+}
+
+function SetupInspector({ show, sel }: { show: Show; sel: number[] }) {
+  const fx = show.fixtures.filter((f) => sel.includes(f.id));
+  type V3 = [number, number, number];
+  const move = (f: Show["fixtures"][number], position: V3, rotation: V3) =>
+    send({ type: "move_fixture", fixture: f.id, position, rotation });
+  const setAll = (which: "position" | "rotation", axis: number, v: number) =>
+    fx.forEach((f) => {
+      const p = [...f.position] as V3;
+      const r = [...f.rotation] as V3;
+      (which === "position" ? p : r)[axis] = v;
+      void move(f, p, r);
+    });
+  const same = (vals: number[]) =>
+    vals.every((v) => Math.abs(v - vals[0]) < 1e-6);
+  return (
+    <aside className="lk-inspector">
+      <h3>Stage layout</h3>
+      {fx.length === 0 ? (
+        <p className="muted">
+          Select lights on the plan (or in 3D) and drag them where they hang.
+          Shift-click to move several together. Type exact positions here.
+          <br />
+          <br />
+          Lights are locked in ✎ Program and ▶ Show so nothing moves by accident
+          while you build cues.
+        </p>
+      ) : (
+        <>
+          <p className="muted">
+            {fx.length === 1
+              ? fx[0].name
+              : `${fx.length} lights — boxes set all of them`}
+          </p>
+          {(["position", "rotation"] as const).map((which) => (
+            <div key={which}>
+              <label className="muted">
+                {which === "position"
+                  ? "Position (m) — X across, Y height, Z toward audience"
+                  : "Rotation (°)"}
+              </label>
+              <div className="lk-xyz">
+                {["X", "Y", "Z"].map((a, axis) => {
+                  const vals = fx.map((f) => f[which][axis]);
+                  return (
+                    <label key={a} className="inline">
+                      {a}
+                      {same(vals) ? (
+                        <Num
+                          value={vals[0]}
+                          step={which === "position" ? 0.1 : 5}
+                          onChange={(v) => setAll(which, axis, v)}
+                        />
+                      ) : (
+                        <input
+                          type="number"
+                          placeholder="mixed"
+                          onChange={(e) =>
+                            e.target.value !== "" &&
+                            setAll(which, axis, Number(e.target.value))
+                          }
+                        />
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {fx.length > 1 && (
+            <button
+              title="Even gaps left to right between the outermost two"
+              onClick={() => {
+                const sorted = [...fx].sort(
+                  (a, b) => a.position[0] - b.position[0],
+                );
+                const lo = sorted[0].position[0];
+                const hi = sorted[sorted.length - 1].position[0];
+                sorted.forEach(
+                  (f, i) =>
+                    void move(
+                      f,
+                      [
+                        Math.round(
+                          (lo + ((hi - lo) * i) / (sorted.length - 1)) * 100,
+                        ) / 100,
+                        f.position[1],
+                        f.position[2],
+                      ],
+                      f.rotation,
+                    ),
+                );
+              }}
+            >
+              ↔ Spread evenly
+            </button>
+          )}
+        </>
+      )}
+    </aside>
+  );
 }

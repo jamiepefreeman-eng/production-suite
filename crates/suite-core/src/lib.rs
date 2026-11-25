@@ -16,6 +16,7 @@ pub mod demo;
 pub mod dmx;
 pub mod engine;
 pub mod lighting;
+pub mod midi;
 pub mod mixer;
 pub mod presenter;
 pub mod show;

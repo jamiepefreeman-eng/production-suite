@@ -132,6 +132,77 @@ pub struct Show {
     pub visualizer: VisualizerSettings,
     // Audio
     pub mixer: Option<MixerConfig>,
+    // Lighting show mode
+    pub effects: Vec<crate::lighting::effects::Effect>,
+    pub show_page: ShowPage,
+}
+
+/// What a show-page button or fader does.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(tag = "type", rename_all = "snake_case"))]
+pub enum ShowItemKind {
+    /// Button: go to this cue (press again to release it).
+    Cue { cue: u32 },
+    /// Button: start / stop an effect.
+    Effect { effect: u32 },
+    /// Fader: grand master.
+    GrandMaster,
+    /// Fader: brightness of one group.
+    GroupMaster { group: String },
+    /// Button: blackout on / off.
+    Blackout,
+    /// Button: release the cue and stop every effect.
+    Release,
+    /// Button: lights follow the screen background (runs in the app window).
+    MatchBackground,
+}
+
+impl ShowItemKind {
+    pub fn is_fader(&self) -> bool {
+        matches!(self, ShowItemKind::GrandMaster | ShowItemKind::GroupMaster { .. })
+    }
+}
+
+/// One button or fader on Lighting's show page, in the order the operator arranged them.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct ShowItem {
+    pub id: u32,
+    pub kind: ShowItemKind,
+    /// Shown on the button; empty = the cue / effect / group name.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub label: String,
+    /// CSS colour of the button; empty = default.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub color: String,
+    /// The controller button / fader that triggers it ("MIDI learn").
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub midi: Option<crate::midi::MidiControl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(default))]
+pub struct ShowPage {
+    pub items: Vec<ShowItem>,
+}
+
+impl ShowPage {
+    /// A starting layout: every cue and effect, blackout / release / match background, then faders.
+    pub fn generate(show: &Show) -> ShowPage {
+        let mut kinds: Vec<ShowItemKind> = show.cues.iter().map(|c| ShowItemKind::Cue { cue: c.id }).collect();
+        kinds.extend(show.effects.iter().map(|e| ShowItemKind::Effect { effect: e.id }));
+        kinds.extend([ShowItemKind::MatchBackground, ShowItemKind::Blackout, ShowItemKind::Release, ShowItemKind::GrandMaster]);
+        kinds.extend(show.groups.iter().map(|g| ShowItemKind::GroupMaster { group: g.name.clone() }));
+        ShowPage {
+            items: kinds
+                .into_iter()
+                .enumerate()
+                .map(|(i, kind)| ShowItem { id: i as u32 + 1, kind, label: String::new(), color: String::new(), midi: None })
+                .collect(),
+        }
+    }
 }
 
 impl Show {

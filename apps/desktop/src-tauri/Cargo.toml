@@ -30,3 +30,5 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 serialport = { version = "4", optional = true }
 cpal = { version = "0.15", optional = true }
 socket2 = { version = "0.5", features = ["all"] }
+# MIDI controllers for Lighting's show page (CoreMIDI / WinMM / ALSA).
+midir = "0.10"

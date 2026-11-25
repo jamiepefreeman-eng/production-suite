@@ -239,6 +239,8 @@ export interface Show {
   scenery: Scenery[];
   visualizer: VisualizerSettings;
   mixer: MixerConfig | null;
+  effects: Effect[];
+  show_page: ShowPage;
 }
 
 export type Action =
@@ -270,6 +272,10 @@ export type Command =
   | { type: "apply_intents"; intents: Intent[]; unknown: string[]; source: string | null }
   | { type: "set_fixture_state"; fixtures: number[]; state: Partial<FixtureState> }
   | { type: "merge_programmer"; look: Look }
+  | { type: "set_effect"; effect: number; on: boolean }
+  | { type: "group_master"; group: string; level: number }
+  | { type: "trigger_show_item"; item: number; value: number }
+  | { type: "midi_input"; message: MidiMessage }
   | { type: "record_cue"; name: string; fade_ms: number }
   | { type: "delete_cue"; cue: number }
   | { type: "record_position"; name: string }
@@ -288,6 +294,10 @@ export type EngineEvent =
   | { type: "programmer_changed"; look: Look }
   | { type: "scene_built"; applied: string[]; issues: string[]; unknown: string[] }
   | { type: "blackout_changed"; on: boolean }
+  | { type: "effects_changed"; active: number[] }
+  | { type: "masters_changed"; grand_master: number; groups: GroupLevel[] }
+  | { type: "midi_received"; message: MidiMessage }
+  | { type: "toggle_match_background" }
   | { type: "mixer_out"; command: MixerCommand }
   | { type: "log"; level: "info" | "warn"; message: string };
 
@@ -297,7 +307,44 @@ export interface EngineStatus {
   programmer: Look;
   layers: Layers;
   show_path: string | null;
+  active_effects: number[];
+  grand_master: number;
+  group_levels: GroupLevel[];
+  blackout: boolean;
 }
+export interface GroupLevel { group: string; level: number }
+
+export type EffectKind = "rainbow" | "chase" | "pulse" | "strobe" | "two_colour";
+export interface Effect {
+  id: number;
+  name: string;
+  kind: EffectKind;
+  /** group name; "" = every light */
+  group: string;
+  color: Rgb;
+  color2: Rgb;
+  /** cycles per second */
+  speed: number;
+  spread: number;
+  level: number;
+}
+export type ShowItemKind =
+  | { type: "cue"; cue: number }
+  | { type: "effect"; effect: number }
+  | { type: "grand_master" }
+  | { type: "group_master"; group: string }
+  | { type: "blackout" }
+  | { type: "release" }
+  | { type: "match_background" };
+export type MidiControlKind = "note" | "cc";
+export interface MidiControl { kind: MidiControlKind; channel: number; number: number }
+export interface ShowItem { id: number; kind: ShowItemKind; label: string; color: string; midi: MidiControl | null }
+export interface ShowPage { items: ShowItem[] }
+export type MidiMessage =
+  | { type: "note_on"; channel: number; note: number; velocity: number }
+  | { type: "note_off"; channel: number; note: number }
+  | { type: "control_change"; channel: number; controller: number; value: number };
+export interface MidiStatus { available: string[]; connected: string[]; errors: string[] }
 
 export interface FixtureVisual { id: number; intensity: number; color: Rgb; pan: number; tilt: number; gobo: number }
 export interface VizFrame { source: "internal" | "external"; fixtures: FixtureVisual[] }

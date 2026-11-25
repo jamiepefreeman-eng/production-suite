@@ -28,6 +28,8 @@ pub struct AppState {
     pub external_frame: Arc<Mutex<DmxFrame>>,
     pub show_path: Mutex<Option<PathBuf>>,
     pub settings: Mutex<Settings>,
+    /// MIDI inputs currently open (see midi_link).
+    pub midi_connected: Mutex<Vec<String>>,
 }
 
 impl AppState {
@@ -43,6 +45,7 @@ impl AppState {
             external_frame: Arc::new(Mutex::new(DmxFrame::default())),
             show_path: Mutex::new(None),
             settings: Mutex::new(settings),
+            midi_connected: Mutex::new(Vec::new()),
         }
     }
 

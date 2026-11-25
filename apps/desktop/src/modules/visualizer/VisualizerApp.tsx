@@ -18,6 +18,7 @@ import type {
   VizSource,
 } from "../../shared/types";
 import { StageScene, type SelItem } from "../../shared/stage3d/scene";
+import { ASPECTS, describeSize, parseScreenSize } from "./screenSize";
 
 type Defaults = Omit<Scenery, "id" | "name" | "kind">;
 const D = (
@@ -171,7 +172,9 @@ export default function VisualizerApp() {
     if (!show || !scene.current) return;
     const baseTheme = live ? themeFor(show, live.presentation) : null;
     // The live slide's own formatting (font, colour…) over its theme, like the Presenter draws it.
-    const st = show.presentations.find((p) => p.id === live?.presentation)?.slides.find((s) => s.id === live?.slide)?.style;
+    const st = show.presentations
+      .find((p) => p.id === live?.presentation)
+      ?.slides.find((s) => s.id === live?.slide)?.style;
     const theme = baseTheme && {
       ...baseTheme,
       font: st?.font ?? baseTheme.font,
@@ -658,21 +661,30 @@ function SceneryInspector({ s, onClose }: { s: Scenery; onClose: () => void }) {
           />
         </>
       ) : (
-        <Vec3
-          label="Size (m) — width, height, thickness"
-          value={s.size}
-          step={0.1}
-          min={0.02}
-          onChange={(size) =>
-            void set({
-              size: size.map((v) => Math.max(0.02, v)) as [
-                number,
-                number,
-                number,
-              ],
-            })
-          }
-        />
+        <>
+          {s.kind === "screen" && (
+            <ScreenSizeField
+              w={s.size[0]}
+              h={s.size[1]}
+              onSize={(w, h) => void set({ size: [w, h, s.size[2]] })}
+            />
+          )}
+          <Vec3
+            label="Size (m) — width, height, thickness"
+            value={s.size}
+            step={0.1}
+            min={0.02}
+            onChange={(size) =>
+              void set({
+                size: size.map((v) => Math.max(0.02, v)) as [
+                  number,
+                  number,
+                  number,
+                ],
+              })
+            }
+          />
+        </>
       )}
       <Vec3
         label="Position (m) — centre of the bottom edge"
@@ -1087,6 +1099,76 @@ function MultiInspector({
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/** "90\"" or "7'x13'" → the screen's width and height. */
+function ScreenSizeField({
+  w,
+  h,
+  onSize,
+}: {
+  w: number;
+  h: number;
+  onSize: (w: number, h: number) => void;
+}) {
+  const [text, setText] = useState("");
+  const [aspect, setAspect] = useState("16:9");
+  const parsed = text.trim()
+    ? parseScreenSize(text, ASPECTS.find((a) => a[0] === aspect)![1])
+    : null;
+  const apply = () => {
+    if (parsed && !("error" in parsed)) {
+      onSize(
+        Math.round(parsed.w * 1000) / 1000,
+        Math.round(parsed.h * 1000) / 1000,
+      );
+      setText("");
+    }
+  };
+  return (
+    <div className="viz-screen-size">
+      <label>Screen size</label>
+      <div className="row">
+        <input
+          className="grow"
+          value={text}
+          placeholder={`e.g. 90" or 7'x13' or 4m x 2.25m`}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && apply()}
+        />
+        <select
+          value={aspect}
+          onChange={(e) => setAspect(e.target.value)}
+          title="Shape, for a single (diagonal) size"
+        >
+          {ASPECTS.map(([n]) => (
+            <option key={n}>{n}</option>
+          ))}
+        </select>
+        <button
+          className="primary"
+          disabled={!parsed || "error" in parsed}
+          onClick={apply}
+        >
+          Set
+        </button>
+      </div>
+      <small className={parsed && "error" in parsed ? "warn" : "muted"}>
+        {parsed
+          ? "error" in parsed
+            ? parsed.error
+            : `→ ${describeSize(parsed.w, parsed.h)}`
+          : `Now ${describeSize(w, h)}`}
+      </small>
+      <button
+        className="link small"
+        onClick={() => onSize(h, w)}
+        title="Swap width and height"
+      >
+        ⟲ Portrait / landscape
+      </button>
     </div>
   );
 }

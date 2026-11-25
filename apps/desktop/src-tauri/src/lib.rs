@@ -13,6 +13,7 @@ mod commands;
 #[cfg(test)]
 mod contract_tests;
 mod dmx_out;
+mod midi_link;
 mod mixer_link;
 mod settings;
 mod state;
@@ -61,12 +62,15 @@ pub fn run() {
             dmx_out::rebuild(&state);
             dmx_out::spawn_loop(state.clone(), app.handle().clone());
             mixer_link::spawn_tick(state.clone(), app.handle().clone());
+            midi_link::start(state.clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             commands::get_show,
             commands::engine_command,
             commands::engine_status,
+            midi_link::midi_status,
+            midi_link::midi_connect,
             commands::open_show,
             commands::save_show,
             commands::new_demo_show,

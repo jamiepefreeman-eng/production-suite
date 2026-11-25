@@ -8,7 +8,7 @@
 // Results go to the programmer as one `merge_programmer` command per tick; the AI
 // itself never writes DMX (CLAUDE.md rule 5) — this is plain arithmetic.
 
-import { mediaUrl } from "./bridge";
+import { mediaUrl, on } from "./bridge";
 import { getInputStream } from "./inputs";
 import { getEngine, pushLog, send } from "./store";
 import type { FixtureState, Look, MediaItem, Rgb, Show } from "./types";
@@ -21,8 +21,15 @@ export interface MatchStatus {
   running: boolean;
   media: string | null;
   fixtures: number;
+  /** "loading": opening the background (spinner); "matching": lights are following it. */
+  phase: "idle" | "loading" | "matching";
+  /** Colours being sent to the lights right now, left to right (for the progress wheel). */
+  colors: string[];
+  /** Frames matched so far. */
+  frames: number;
 }
-let status: MatchStatus = { running: false, media: null, fixtures: 0 };
+const IDLE: MatchStatus = { running: false, media: null, fixtures: 0, phase: "idle", colors: [], frames: 0 };
+let status: MatchStatus = IDLE;
 const listeners = new Set<() => void>();
 const setStatus = (s: MatchStatus) => {
   status = s;
@@ -169,8 +176,23 @@ let stopFn: (() => void) | null = null;
 export function stopMatching() {
   stopFn?.();
   stopFn = null;
-  if (status.running) setStatus({ running: false, media: null, fixtures: 0 });
+  if (status.running) setStatus(IDLE);
 }
+
+/** Main window only: a MIDI / show-page "match background" press arrives as an engine event. */
+export function listenForRemoteToggle(): () => void {
+  return on("engine-event", (ev) => {
+    if (ev.type !== "toggle_match_background") return;
+    if (status.running) stopMatching();
+    else {
+      const msg = startMatching([]);
+      if (!status.running) pushLog("warn", msg);
+    }
+  });
+}
+
+const toHex = (c: { r: number; g: number; b: number } | null) =>
+  c ? "#" + [c.r, c.g, c.b].map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0")).join("") : "#000000";
 
 /** Start following the background with these lights (all lights when empty). */
 export function startMatching(fixtureIds: number[]): string {
@@ -242,7 +264,7 @@ export function startMatching(fixtureIds: number[]): string {
       if (now && now.id !== media!.id) {
         media = now;
         load(now);
-        setStatus({ running: true, media: now.name, fixtures: lights.length });
+        setStatus({ ...status, running: true, media: now.name, phase: "loading" });
       }
     }
     const s: HTMLVideoElement | HTMLImageElement | null = source;
@@ -256,6 +278,19 @@ export function startMatching(fixtureIds: number[]): string {
       prevPx = new Uint8ClampedArray(px);
       prevLook = matchFrame(px, W, H, lights, prevLook, motion);
       void send({ type: "merge_programmer", look: prevLook });
+      const sorted = [...lights].sort((a, b) => a.u - b.u);
+      const step = Math.max(1, Math.floor(sorted.length / 12));
+      setStatus({
+        ...status,
+        phase: "matching",
+        frames: status.frames + 1,
+        colors: sorted.filter((_, i) => i % step === 0).map((L) => {
+          const st = prevLook.fixtures[String(L.id)];
+          const c = st?.color ?? null;
+          const k = st?.intensity ?? 0;
+          return toHex(c && { r: c.r * k, g: c.g * k, b: c.b * k });
+        }),
+      });
     } catch (err) {
       if (!warned) pushLog("warn", `Can't read the background's pixels: ${err}`);
       warned = true;
@@ -269,6 +304,6 @@ export function startMatching(fixtureIds: number[]): string {
     void stream;
     holder.remove();
   };
-  setStatus({ running: true, media: media.name, fixtures: lights.length });
+  setStatus({ running: true, media: media.name, fixtures: lights.length, phase: "loading", colors: [], frames: 0 });
   return `Matching “${media.name}” with ${lights.length} light${lights.length === 1 ? "" : "s"}`;
 }
