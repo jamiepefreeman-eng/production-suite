@@ -2436,6 +2436,24 @@ export const commands: T.Command[] = [
     }
   },
   {
+    "type": "merge_programmer",
+    "look": {
+      "fixtures": {
+        "1": {
+          "intensity": 0.8,
+          "color": {
+            "r": 1.0,
+            "g": 0.5,
+            "b": 0.0
+          },
+          "gobo": 2,
+          "pan": 0.5,
+          "tilt": 0.25
+        }
+      }
+    }
+  },
+  {
     "type": "record_cue",
     "name": "Walk-in",
     "fade_ms": 2000

@@ -170,6 +170,7 @@ fn write_typescript_contract() {
         Command::ApplyText { text: "front wash blue".into() },
         Command::ApplyIntents { intents: intents.clone(), unknown: vec!["sparkles".into()], source: Some("x".into()) },
         Command::SetFixtureState { fixtures: vec![1, 2], state: state.clone() },
+        Command::MergeProgrammer { look: look.clone() },
         Command::RecordCue { name: "Walk-in".into(), fade_ms: 2000 },
         Command::DeleteCue { cue: 1 },
         Command::RecordPosition { name: "Pulpit".into() },

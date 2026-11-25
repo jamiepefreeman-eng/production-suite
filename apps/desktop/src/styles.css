@@ -296,6 +296,9 @@ body.output-stream { background: transparent; }
   grid-template-areas: "builder builder builder" "fixtures stage inspector" "cues cues cues"; }
 .lk-builder { grid-area: builder; display: flex; align-items: center; gap: 8px; padding: 10px 320px 10px 12px; border-bottom: 1px solid var(--line); background: var(--panel); position: relative; flex-wrap: wrap; }
 .lk-builder input.grow { font-size: 14px; padding: 7px 10px; }
+.lk-match { white-space: nowrap; }
+.lk-match.on { background: linear-gradient(90deg, #f97316, #ec4899, #8b5cf6); color: #fff; border-color: transparent; animation: lk-match-pulse 2s ease-in-out infinite; }
+@keyframes lk-match-pulse { 50% { filter: brightness(1.25); } }
 .lk-builder-icon { color: var(--accent); font-size: 18px; }
 .lk-ai-settings { position: relative; }
 .lk-scene-result { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; padding: 4px 26px; cursor: pointer; }

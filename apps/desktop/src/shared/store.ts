@@ -128,6 +128,12 @@ function start() {
   on("mixer-error", (m) => log("warn", m));
 }
 
+/** Current engine view outside React (e.g. background samplers). */
+export function getEngine(): EngineView {
+  start();
+  return state;
+}
+
 export function useEngine(): EngineView {
   useEffect(start, []);
   return useSyncExternalStore(

@@ -76,6 +76,8 @@ pub enum Command {
     ApplyIntents { intents: Vec<Intent>, unknown: Vec<String>, source: Option<String> },
     /// Direct programmer edit (faders, pan/tilt pads); merged over what's there.
     SetFixtureState { fixtures: Vec<u32>, state: FixtureState },
+    /// Set many fixtures to different states in one go (e.g. "match background", ~10×/s).
+    MergeProgrammer { look: Look },
     RecordCue { name: String, fade_ms: u32 },
     DeleteCue { cue: u32 },
     /// Store the programmer's current pan/tilt as a named focus position.
@@ -250,6 +252,10 @@ impl Engine {
                     let cur = self.programmer.fixtures.get(&id).cloned().unwrap_or_default();
                     self.programmer.fixtures.insert(id, cur.merged(&state));
                 }
+                ev.push(Event::ProgrammerChanged { look: self.programmer.clone() });
+            }
+            Command::MergeProgrammer { look } => {
+                self.programmer = self.programmer.merged(&look);
                 ev.push(Event::ProgrammerChanged { look: self.programmer.clone() });
             }
             Command::RecordCue { name, fade_ms } => {
@@ -483,6 +489,24 @@ impl Engine {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn merge_programmer_sets_each_fixture_and_keeps_the_rest() {
+        use crate::lighting::look::{FixtureState, Look};
+        use crate::lighting::Rgb;
+        let mut e = super::Engine::new(crate::demo::demo_show());
+        let now = std::time::Instant::now();
+        e.handle(super::Command::SetFixtureState { fixtures: vec![1], state: FixtureState { gobo: Some(2), ..Default::default() } }, now);
+        let mut look = Look::default();
+        look.fixtures.insert(1, FixtureState { color: Some(Rgb { r: 1.0, g: 0.5, b: 0.0 }), intensity: Some(0.8), ..Default::default() });
+        look.fixtures.insert(2, FixtureState { color: Some(Rgb { r: 0.0, g: 0.0, b: 1.0 }), ..Default::default() });
+        let ev = e.handle(super::Command::MergeProgrammer { look }, now);
+        assert_eq!(ev.len(), 1);
+        let p = &e.programmer.fixtures;
+        assert_eq!(p[&1].gobo, Some(2));
+        assert_eq!(p[&1].intensity, Some(0.8));
+        assert_eq!(p[&2].color, Some(Rgb { r: 0.0, g: 0.0, b: 1.0 }));
+    }
+
     #[test]
     fn macros_run_steps_and_props_toggle() {
         let mut e = super::Engine::new(crate::demo::demo_show());

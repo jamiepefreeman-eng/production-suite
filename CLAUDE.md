@@ -125,6 +125,10 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
       Privacy › Camera (owner hit this in v0.6.0). Windows: `on_permission_request` in lib.rs allows camera.
       Some capture drivers allow only one app/window at a time.
 - [ ] Props / video inputs aren't drawn on Visualizer screens yet (text + background + countdown are)
+- [ ] SketchUp model import: STL unit default is inches (SketchUp's default STL export) — check sizes on a real
+      export; large models (>50 MB) may be slow in the webview
+- [ ] "Match background" reads pixels through the asset protocol (needs its CORS header = app origin; works in
+      Chromium tests) — confirm on macOS/Windows that a video background drives the lights
 
 ## Roadmap (suggested order)
 
@@ -147,7 +151,11 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 2. **Fixture library** — *v0.4.0:* 2,279 fixtures / 6,921 modes bundled (OFL + QLC+), Lightkey-style
    patch grid (universes, drag to add/move, overlap warnings, fixture details, groups), real COR patch.
    Still to do: profile editor UI, pixel/matrix modes, import Lightkey patch export.
-3. **Lighting engine**: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),
+3. **Lighting engine** — *v0.7.0:* group editor (create/rename/aliases/add-remove selection), delete fixtures in
+   Patch (button + Delete key), drag lights on the 2D plan (moves them in the Visualizer too), Plan/3D toggle
+   (`lighting/Stage3D.tsx` reuses `shared/stage3d/scene.ts`), "match background" (`shared/bgmatch.ts`:
+   samples the on-screen background ~10 Hz into a 48×27 canvas → `merge_programmer`; intercepted in the
+   scene builder before the engine, so it works offline; movers follow the brightest area). Still to do: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),
    cue list with follow/wait times, multiple playbacks, tap tempo, MIDI controller input.
 4. **Presenter** — *v0.6.0:* ProPresenter layout (toolbar, Service with headers, media folders + bin,
    Live/layers, right tabs Audio/Props/Timers/Macros/Slide), groups + arrangements (saved versions; Reflow
@@ -163,6 +171,9 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 6. **Visualizer** — *v0.5.0:* screens showing the live audience output (`visualizer/screen.ts` paints a
    canvas texture; mirrors presenter/render.tsx), haze + ambient (saved in `Show.visualizer`), stage items
    (deck, truss, people, drums, keys, guitarist, mic, speaker, wedge; built at a nominal size and scaled
-   to `Scenery.size`). Still to do: gobo projection, import a stage model (glTF), snap fixtures to truss.
+   to `Scenery.size`). *v0.7.0:* the 3D stage lives in `shared/stage3d/` (used by Visualizer and Lighting);
+   multi-select (Shift/⌘/Ctrl-click) moves/rotates through a pivot and a multi-edit inspector (mixed fields,
+   spread evenly); model import (`SceneryKind::Model`: .stl/.obj/.dae/.glb/.gltf via three loaders, units +
+   Z-up, sits on the floor; `size` = scale). Still to do: gobo projection, snap fixtures to truss.
 7. **Remote**: phone/tablet remote over WebSocket speaking the same `Command`/`Event` JSON.
 8. **Safety**: autosave + crash recovery of the show file, API key in OS keychain, undo.

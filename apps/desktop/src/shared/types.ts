@@ -225,6 +225,7 @@ export type Command =
   | { type: "apply_text"; text: string }
   | { type: "apply_intents"; intents: Intent[]; unknown: string[]; source: string | null }
   | { type: "set_fixture_state"; fixtures: number[]; state: Partial<FixtureState> }
+  | { type: "merge_programmer"; look: Look }
   | { type: "record_cue"; name: string; fade_ms: number }
   | { type: "delete_cue"; cue: number }
   | { type: "record_position"; name: string }

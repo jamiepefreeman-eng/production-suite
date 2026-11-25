@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { api, confirmDialog, on } from "../../shared/bridge";
 import PatchView from "./PatchView";
 import Stage3D from "./Stage3D";
+import { matchStatus, startMatching, stopMatching } from "../../shared/bgmatch";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type { AiStatus, DmxOutputConfig, FixtureProfile, FixtureState, FixtureVisual, Rgb, SerialPortInfo, Show } from "../../shared/types";
 
@@ -214,10 +215,28 @@ function SceneBuilder({ show }: { show: Show }) {
   useEffect(() => {
     api.aiStatus().then(setAi).catch(() => {});
   }, []);
-  void show;
+
+  const matching = useSyncExternalStore(matchStatus.subscribe, matchStatus.get);
+  const [matchMsg, setMatchMsg] = useState<string | null>(null);
 
   const build = async (force: boolean) => {
     if (!text.trim()) return;
+    // "match background [on back wall]": lights follow the screen picture (runs here, not in the engine).
+    const m = text.trim().match(/^(?:match|follow)\s+(?:the\s+)?(?:background|bg|screen|video|media)\b\s*(?:on|with|for|using)?\s*(.*)$/i);
+    if (m) {
+      const rest = m[1].trim().toLowerCase();
+      const groups = rest
+        ? show.groups.filter((g) => [g.name, ...g.aliases].some((n) => rest.includes(n.toLowerCase())))
+        : [];
+      const ids = [...new Set(groups.flatMap((g) => g.fixtures))];
+      setMatchMsg(rest && !groups.length ? `No group called “${rest}” — matching with all lights. ` + startMatching([]) : startMatching(ids));
+      return;
+    }
+    if (/^stop\s+(?:matching|match|following)/i.test(text.trim())) {
+      stopMatching();
+      setMatchMsg("Stopped matching the background");
+      return;
+    }
     setBusy(true);
     try {
       const r = await api.aiBuildScene(text, force);
@@ -247,6 +266,20 @@ function SceneBuilder({ show }: { show: Show }) {
         Ask AI
       </button>
       <ApiKey hasKey={!!ai?.has_api_key} onSaved={() => api.aiStatus().then(setAi)} />
+      {matching.running ? (
+        <button className="lk-match on" onClick={stopMatching} title={`Lights are following “${matching.media}” (${matching.fixtures} lights). Click to stop.`}>
+          ◉ Matching background · Stop
+        </button>
+      ) : (
+        <button className="lk-match" onClick={() => setMatchMsg(startMatching([]))} title="Lights follow the colours and movement of the background on screen. Type “match background on back wall” for one group.">
+          Match background
+        </button>
+      )}
+      {matchMsg && (
+        <div className="lk-scene-result" onClick={() => setMatchMsg(null)} title="Click to hide">
+          <span className={matching.running ? "ok" : "warn"}>{matchMsg}</span>
+        </div>
+      )}
       {showResult && lastScene && (
         <div className="lk-scene-result" onClick={() => setShowResult(false)} title="Click to hide">
           {engineUsed && <span className="tag">{engineUsed}</span>}
@@ -604,7 +637,14 @@ function CueStrip({ show, activeCue, programmed }: { show: Show; activeCue: numb
         >
           ● Record
         </button>
-        <button onClick={() => send({ type: "clear_programmer" })}>Clear programmer</button>
+        <button
+          onClick={() => {
+            stopMatching(); // otherwise the next frame fills the programmer again
+            void send({ type: "clear_programmer" });
+          }}
+        >
+          Clear programmer
+        </button>
         <button onClick={() => send({ type: "release_cue" })}>Release</button>
         <label className="inline lk-gm">
           Master {gm}%
