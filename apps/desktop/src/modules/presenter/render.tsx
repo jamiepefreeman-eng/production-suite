@@ -110,6 +110,7 @@ export function SlideRender({
   play = false,
   countdown,
   props,
+  transparent = false,
 }: {
   text: string;
   theme?: Theme;
@@ -121,14 +122,20 @@ export function SlideRender({
   countdown?: Countdown | null;
   /** Props showing on top (logo bug, lower third…). */
   props?: { prop: Prop; media: MediaItem | null }[];
+  /** Thumbnails: no theme background — a slide shows only the media it brings itself
+   *  (like ProPresenter); everything else is see-through (checkerboard). */
+  transparent?: boolean;
 }) {
   const stream = kind === "stream";
   const bg = background ?? null;
   const position = stream ? "lower_third" : theme.position;
   return (
-    <div className={`render pos-${position} ${stream ? "render-stream" : ""}`} style={{ background: stream ? "transparent" : theme.background_color }}>
+    <div
+      className={`render pos-${position} ${stream ? "render-stream" : ""} ${transparent && !bg ? "render-transparent" : ""}`}
+      style={{ background: stream || (transparent && !bg) ? undefined : theme.background_color }}
+    >
       {!stream && bg && <MediaFill item={bg} play={play} />}
-      {!stream && theme.dim > 0 && <div className="render-dim" style={{ opacity: theme.dim }} />}
+      {!stream && theme.dim > 0 && bg && <div className="render-dim" style={{ opacity: theme.dim }} />}
       {text && (
         <div
           className={`render-text ${theme.shadow ? "shadow" : ""}`}

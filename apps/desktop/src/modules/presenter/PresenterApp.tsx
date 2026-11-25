@@ -40,7 +40,7 @@ export type SlideRef = { p: number; s: number };
 export type Cursor = { p: number; pos: number } | null;
 
 export default function PresenterApp() {
-  const { show, live, layers } = useEngine();
+  const { show, live } = useEngine();
   const [focus, setFocus] = useState<number | null>(null);
   const [libraryOnly, setLibraryOnly] = useState<number | null>(null);
   const [selSlide, setSelSlide] = useState<SlideRef | null>(null);
@@ -153,7 +153,6 @@ export default function PresenterApp() {
                   onPick={pickSlide}
                   cursor={cursor}
                   onGo={setCursor}
-                  layerMedia={layers.media}
                 />
               ),
             )}
@@ -345,7 +344,7 @@ function LivePanel({ cursor }: { cursor: Cursor }) {
       </div>
       <div className="pp-next-row">
         <div className="pp-preview tiny">
-          <SlideRender text={next?.text ?? ""} theme={theme} background={slideMedia(show, next) ?? slideBackground(show, theme, null)} />
+          <SlideRender text={next?.text ?? ""} theme={theme} background={slideMedia(show, next)} transparent />
         </div>
         <div className="muted">
           <small>NEXT</small>
@@ -777,7 +776,6 @@ function PresentationSection({
   onPick,
   cursor,
   onGo,
-  layerMedia,
 }: {
   p: Presentation;
   show: Show;
@@ -790,10 +788,8 @@ function PresentationSection({
   onPick: (r: SlideRef) => void;
   cursor: Cursor;
   onGo: (c: Cursor) => void;
-  layerMedia: number | null;
 }) {
   const theme = themeFor(show, p.id);
-  const themeBg = slideBackground(show, theme, null);
   const seq = sequence(p);
   // If we know which repeat is live, light only that one.
   const cursorHere = cursor?.p === p.id && seq.some((x) => x.pos === cursor.pos && x.slide.id === liveSlide);
@@ -829,7 +825,7 @@ function PresentationSection({
             num={pos + 1}
             show={show}
             theme={theme}
-            bg={layerMedia != null ? mediaById(show, layerMedia) : (slideMedia(show, slide) ?? themeBg)}
+            bg={slideMedia(show, slide)}
             live={liveSlide === slide.id && (!cursorHere || cursor?.pos === pos)}
             selected={selected?.p === p.id && selected.s === slide.id}
             onPick={() => onPick({ p: p.id, s: slide.id })}
@@ -905,7 +901,7 @@ function SlideTile({
       }}
     >
       <div className="pp-thumb">
-        <SlideRender text={slide.text} theme={theme} background={bg} />
+        <SlideRender text={slide.text} theme={theme} background={bg} transparent />
         {slide.triggers.length > 0 && (
           <div className="pp-badges">
             {slide.triggers.slice(0, 3).map((t, k) => (
@@ -990,7 +986,7 @@ function SlideEditCard({ p, slide, index, theme, show }: { p: Presentation; slid
   return (
     <div className="pp-slide editing">
       <div className="pp-thumb">
-        <SlideRender text={slide.text} theme={theme} background={slideMedia(show, slide) ?? slideBackground(show, theme, null)} />
+        <SlideRender text={slide.text} theme={theme} background={slideMedia(show, slide)} transparent />
       </div>
       <div className="pp-label" style={{ ["--group" as string]: groupColor(slide.label, p) }}>
         <span className="num">{index + 1}</span>
@@ -1034,6 +1030,47 @@ function Reflow({ p, onDone }: { p: Presentation; onDone: () => void }) {
   const [saveVersion, setSaveVersion] = useState("");
   const ta = useRef<HTMLTextAreaElement>(null);
   const names = groupNames(p);
+  const { show } = useEngine();
+  const theme = themeFor(show, p.id);
+
+  // Live preview: re-parse a moment after typing stops, with the same parser Apply uses.
+  const [preview, setPreview] = useState<Slide[]>(p.slides);
+  const [previewErr, setPreviewErr] = useState<string | null>(null);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      api
+        .parseLyrics(p.title, text, lines || 99)
+        .then((r) => {
+          setPreview(r.slides);
+          setPreviewErr(null);
+        })
+        .catch((e) => setPreviewErr(String(e)));
+    }, 250);
+    return () => clearTimeout(t);
+  }, [text, lines, p.title]);
+  /** The n-th slide of a group keeps the media it had (matched by group and position in it). */
+  const mediaFor = (s: Slide, i: number) => {
+    const nth = preview.slice(0, i).filter((x) => x.label === s.label).length;
+    const groupFirst = preview.findIndex((x) => x.label === s.label);
+    const blockLen = preview.slice(groupFirst).findIndex((x) => x.label !== s.label);
+    const idxInGroup = blockLen > 0 ? nth % blockLen : nth;
+    const old = p.slides.filter((x) => x.label === s.label)[idxInGroup];
+    return slideMedia(show, old);
+  };
+  /** Click a preview: put the cursor on that slide's text. */
+  const jumpTo = (s: Slide) => {
+    const el = ta.current;
+    const first = s.text.split("\n")[0];
+    if (!el || !first) return;
+    const head = text.indexOf(`[${s.label}]`);
+    const at = text.indexOf(first, Math.max(0, head));
+    if (at < 0) return;
+    el.focus();
+    el.setSelectionRange(at, at + first.length);
+    // Scroll the textarea so the selection is visible.
+    const linesBefore = text.slice(0, at).split("\n").length;
+    el.scrollTop = Math.max(0, (linesBefore - 4) * (el.scrollHeight / Math.max(1, text.split("\n").length)));
+  };
 
   /** Insert a group header at the cursor (on its own line). */
   const insertGroup = (g: string) => {
@@ -1092,7 +1129,24 @@ function Reflow({ p, onDone }: { p: Presentation; onDone: () => void }) {
           </button>
         ))}
       </div>
-      <textarea ref={ta} value={text} onChange={(e) => setText(e.target.value)} spellCheck />
+      <div className="pp-reflow-split">
+        <textarea ref={ta} value={text} onChange={(e) => setText(e.target.value)} spellCheck />
+        <div className="pp-reflow-preview">
+          {previewErr && <div className="warn">{previewErr}</div>}
+          {preview.map((s, i) => (
+            <div key={i} className="pp-slide" onClick={() => jumpTo(s)} title="Click to find this slide's text">
+              <div className="pp-thumb">
+                <SlideRender text={s.text} theme={theme} background={mediaFor(s, i)} transparent />
+              </div>
+              <div className="pp-label" style={{ ["--group" as string]: groupColor(s.label, p) }}>
+                <span className="num">{i + 1}</span>
+                <span className="grow ellipsis">{s.label}</span>
+              </div>
+            </div>
+          ))}
+          {preview.length === 0 && !previewErr && <p className="muted">No slides yet — type lyrics on the left.</p>}
+        </div>
+      </div>
       <p className="muted">
         Each <code>[Group]</code> starts a section; a blank line inside it starts a new slide. Write a section a second time (e.g. <code>[Chorus]</code>{" "}
         again) and it becomes a repeat in the arrangement, not a duplicate slide.
