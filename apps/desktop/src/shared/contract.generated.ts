@@ -1540,6 +1540,17 @@ export const show: T.Show = {
   ],
   "presentations": [
     {
+      "id": 10,
+      "title": "Main Show",
+      "kind": "header",
+      "ccli": null,
+      "slides": [],
+      "theme": "Default",
+      "groups": [],
+      "arrangements": [],
+      "arrangement": null
+    },
+    {
       "id": 1,
       "title": "Welcome",
       "kind": "announcement",
@@ -1560,6 +1571,56 @@ export const show: T.Show = {
                 "type": "recall_scene",
                 "scene": 1
               }
+            },
+            {
+              "type": "media",
+              "media": 1
+            },
+            {
+              "type": "media",
+              "media": null
+            },
+            {
+              "type": "audio",
+              "audio": 3,
+              "looped": true
+            },
+            {
+              "type": "prop",
+              "prop": 1,
+              "on": true
+            },
+            {
+              "type": "macro",
+              "id": 1
+            },
+            {
+              "type": "clear",
+              "layer": "all"
+            },
+            {
+              "type": "clear",
+              "layer": "slide"
+            },
+            {
+              "type": "clear",
+              "layer": "media"
+            },
+            {
+              "type": "clear",
+              "layer": "audio"
+            },
+            {
+              "type": "clear",
+              "layer": "props"
+            },
+            {
+              "type": "clear",
+              "layer": "timer"
+            },
+            {
+              "type": "clear",
+              "layer": "lights"
             }
           ]
         },
@@ -1570,7 +1631,15 @@ export const show: T.Show = {
           "triggers": []
         }
       ],
-      "theme": "Default"
+      "theme": "Default",
+      "groups": [
+        {
+          "name": "Vamp",
+          "color": "#f97316"
+        }
+      ],
+      "arrangements": [],
+      "arrangement": "Sunday"
     },
     {
       "id": 2,
@@ -1596,7 +1665,19 @@ export const show: T.Show = {
           "triggers": []
         }
       ],
-      "theme": "Worship"
+      "theme": "Worship",
+      "groups": [],
+      "arrangements": [
+        {
+          "name": "Sunday",
+          "sequence": [
+            "Verse 1",
+            "Verse 2",
+            "Verse 1"
+          ]
+        }
+      ],
+      "arrangement": null
     },
     {
       "id": 3,
@@ -1616,10 +1697,14 @@ export const show: T.Show = {
           ]
         }
       ],
-      "theme": "Scripture"
+      "theme": "Scripture",
+      "groups": [],
+      "arrangements": [],
+      "arrangement": null
     }
   ],
   "playlist": [
+    10,
     1,
     2,
     3
@@ -1722,6 +1807,96 @@ export const show: T.Show = {
       "name": "/m/walkin.mp3",
       "path": "/m/walkin.mp3",
       "kind": "audio"
+    },
+    {
+      "id": 4,
+      "name": "Camera",
+      "path": "Blackmagic UltraStudio",
+      "kind": "input"
+    }
+  ],
+  "media_playlists": [
+    {
+      "name": "Backgrounds",
+      "items": [
+        1,
+        2
+      ]
+    }
+  ],
+  "props": [
+    {
+      "id": 1,
+      "name": "Logo bug",
+      "media": null,
+      "text": "COR",
+      "x": 0.88,
+      "y": 0.05,
+      "w": 0.09,
+      "h": 0.08,
+      "color": "#ffffff",
+      "background": "#00000000"
+    },
+    {
+      "id": 2,
+      "name": "Speaker lower third",
+      "media": null,
+      "text": "Pastor · Sunday message",
+      "x": 0.05,
+      "y": 0.78,
+      "w": 0.5,
+      "h": 0.11,
+      "color": "#ffffff",
+      "background": "#000000b3"
+    }
+  ],
+  "macros": [
+    {
+      "id": 1,
+      "name": "Walk-in",
+      "color": "#22c55e",
+      "actions": [
+        {
+          "type": "clear",
+          "layer": "all"
+        },
+        {
+          "type": "lighting_cue",
+          "cue": 1
+        },
+        {
+          "type": "prop",
+          "prop": 1,
+          "on": true
+        },
+        {
+          "type": "mixer",
+          "command": {
+            "type": "recall_scene",
+            "scene": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Sermon",
+      "color": "#3b82f6",
+      "actions": [
+        {
+          "type": "clear",
+          "layer": "slide"
+        },
+        {
+          "type": "lighting_cue",
+          "cue": 3
+        },
+        {
+          "type": "prop",
+          "prop": 2,
+          "on": true
+        }
+      ]
     }
   ],
   "scenery": [
@@ -2102,6 +2277,18 @@ export const commands: T.Command[] = [
   },
   {
     "type": "clear_all"
+  },
+  {
+    "type": "set_prop",
+    "prop": 1,
+    "on": true
+  },
+  {
+    "type": "clear_props"
+  },
+  {
+    "type": "run_macro",
+    "id": 1
   },
   {
     "type": "go_cue",
@@ -3750,6 +3937,17 @@ export const commands: T.Command[] = [
       ],
       "presentations": [
         {
+          "id": 10,
+          "title": "Main Show",
+          "kind": "header",
+          "ccli": null,
+          "slides": [],
+          "theme": "Default",
+          "groups": [],
+          "arrangements": [],
+          "arrangement": null
+        },
+        {
           "id": 1,
           "title": "Welcome",
           "kind": "announcement",
@@ -3770,6 +3968,56 @@ export const commands: T.Command[] = [
                     "type": "recall_scene",
                     "scene": 1
                   }
+                },
+                {
+                  "type": "media",
+                  "media": 1
+                },
+                {
+                  "type": "media",
+                  "media": null
+                },
+                {
+                  "type": "audio",
+                  "audio": 3,
+                  "looped": true
+                },
+                {
+                  "type": "prop",
+                  "prop": 1,
+                  "on": true
+                },
+                {
+                  "type": "macro",
+                  "id": 1
+                },
+                {
+                  "type": "clear",
+                  "layer": "all"
+                },
+                {
+                  "type": "clear",
+                  "layer": "slide"
+                },
+                {
+                  "type": "clear",
+                  "layer": "media"
+                },
+                {
+                  "type": "clear",
+                  "layer": "audio"
+                },
+                {
+                  "type": "clear",
+                  "layer": "props"
+                },
+                {
+                  "type": "clear",
+                  "layer": "timer"
+                },
+                {
+                  "type": "clear",
+                  "layer": "lights"
                 }
               ]
             },
@@ -3780,7 +4028,15 @@ export const commands: T.Command[] = [
               "triggers": []
             }
           ],
-          "theme": "Default"
+          "theme": "Default",
+          "groups": [
+            {
+              "name": "Vamp",
+              "color": "#f97316"
+            }
+          ],
+          "arrangements": [],
+          "arrangement": "Sunday"
         },
         {
           "id": 2,
@@ -3806,7 +4062,19 @@ export const commands: T.Command[] = [
               "triggers": []
             }
           ],
-          "theme": "Worship"
+          "theme": "Worship",
+          "groups": [],
+          "arrangements": [
+            {
+              "name": "Sunday",
+              "sequence": [
+                "Verse 1",
+                "Verse 2",
+                "Verse 1"
+              ]
+            }
+          ],
+          "arrangement": null
         },
         {
           "id": 3,
@@ -3826,10 +4094,14 @@ export const commands: T.Command[] = [
               ]
             }
           ],
-          "theme": "Scripture"
+          "theme": "Scripture",
+          "groups": [],
+          "arrangements": [],
+          "arrangement": null
         }
       ],
       "playlist": [
+        10,
         1,
         2,
         3
@@ -3932,6 +4204,96 @@ export const commands: T.Command[] = [
           "name": "/m/walkin.mp3",
           "path": "/m/walkin.mp3",
           "kind": "audio"
+        },
+        {
+          "id": 4,
+          "name": "Camera",
+          "path": "Blackmagic UltraStudio",
+          "kind": "input"
+        }
+      ],
+      "media_playlists": [
+        {
+          "name": "Backgrounds",
+          "items": [
+            1,
+            2
+          ]
+        }
+      ],
+      "props": [
+        {
+          "id": 1,
+          "name": "Logo bug",
+          "media": null,
+          "text": "COR",
+          "x": 0.88,
+          "y": 0.05,
+          "w": 0.09,
+          "h": 0.08,
+          "color": "#ffffff",
+          "background": "#00000000"
+        },
+        {
+          "id": 2,
+          "name": "Speaker lower third",
+          "media": null,
+          "text": "Pastor · Sunday message",
+          "x": 0.05,
+          "y": 0.78,
+          "w": 0.5,
+          "h": 0.11,
+          "color": "#ffffff",
+          "background": "#000000b3"
+        }
+      ],
+      "macros": [
+        {
+          "id": 1,
+          "name": "Walk-in",
+          "color": "#22c55e",
+          "actions": [
+            {
+              "type": "clear",
+              "layer": "all"
+            },
+            {
+              "type": "lighting_cue",
+              "cue": 1
+            },
+            {
+              "type": "prop",
+              "prop": 1,
+              "on": true
+            },
+            {
+              "type": "mixer",
+              "command": {
+                "type": "recall_scene",
+                "scene": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Sermon",
+          "color": "#3b82f6",
+          "actions": [
+            {
+              "type": "clear",
+              "layer": "slide"
+            },
+            {
+              "type": "lighting_cue",
+              "cue": 3
+            },
+            {
+              "type": "prop",
+              "prop": 2,
+              "on": true
+            }
+          ]
         }
       ],
       "scenery": [
@@ -5818,6 +6180,17 @@ export const commands: T.Command[] = [
       ],
       "presentations": [
         {
+          "id": 10,
+          "title": "Main Show",
+          "kind": "header",
+          "ccli": null,
+          "slides": [],
+          "theme": "Default",
+          "groups": [],
+          "arrangements": [],
+          "arrangement": null
+        },
+        {
           "id": 1,
           "title": "Welcome",
           "kind": "announcement",
@@ -5838,6 +6211,56 @@ export const commands: T.Command[] = [
                     "type": "recall_scene",
                     "scene": 1
                   }
+                },
+                {
+                  "type": "media",
+                  "media": 1
+                },
+                {
+                  "type": "media",
+                  "media": null
+                },
+                {
+                  "type": "audio",
+                  "audio": 3,
+                  "looped": true
+                },
+                {
+                  "type": "prop",
+                  "prop": 1,
+                  "on": true
+                },
+                {
+                  "type": "macro",
+                  "id": 1
+                },
+                {
+                  "type": "clear",
+                  "layer": "all"
+                },
+                {
+                  "type": "clear",
+                  "layer": "slide"
+                },
+                {
+                  "type": "clear",
+                  "layer": "media"
+                },
+                {
+                  "type": "clear",
+                  "layer": "audio"
+                },
+                {
+                  "type": "clear",
+                  "layer": "props"
+                },
+                {
+                  "type": "clear",
+                  "layer": "timer"
+                },
+                {
+                  "type": "clear",
+                  "layer": "lights"
                 }
               ]
             },
@@ -5848,7 +6271,15 @@ export const commands: T.Command[] = [
               "triggers": []
             }
           ],
-          "theme": "Default"
+          "theme": "Default",
+          "groups": [
+            {
+              "name": "Vamp",
+              "color": "#f97316"
+            }
+          ],
+          "arrangements": [],
+          "arrangement": "Sunday"
         },
         {
           "id": 2,
@@ -5874,7 +6305,19 @@ export const commands: T.Command[] = [
               "triggers": []
             }
           ],
-          "theme": "Worship"
+          "theme": "Worship",
+          "groups": [],
+          "arrangements": [
+            {
+              "name": "Sunday",
+              "sequence": [
+                "Verse 1",
+                "Verse 2",
+                "Verse 1"
+              ]
+            }
+          ],
+          "arrangement": null
         },
         {
           "id": 3,
@@ -5894,10 +6337,14 @@ export const commands: T.Command[] = [
               ]
             }
           ],
-          "theme": "Scripture"
+          "theme": "Scripture",
+          "groups": [],
+          "arrangements": [],
+          "arrangement": null
         }
       ],
       "playlist": [
+        10,
         1,
         2,
         3
@@ -6000,6 +6447,96 @@ export const commands: T.Command[] = [
           "name": "/m/walkin.mp3",
           "path": "/m/walkin.mp3",
           "kind": "audio"
+        },
+        {
+          "id": 4,
+          "name": "Camera",
+          "path": "Blackmagic UltraStudio",
+          "kind": "input"
+        }
+      ],
+      "media_playlists": [
+        {
+          "name": "Backgrounds",
+          "items": [
+            1,
+            2
+          ]
+        }
+      ],
+      "props": [
+        {
+          "id": 1,
+          "name": "Logo bug",
+          "media": null,
+          "text": "COR",
+          "x": 0.88,
+          "y": 0.05,
+          "w": 0.09,
+          "h": 0.08,
+          "color": "#ffffff",
+          "background": "#00000000"
+        },
+        {
+          "id": 2,
+          "name": "Speaker lower third",
+          "media": null,
+          "text": "Pastor · Sunday message",
+          "x": 0.05,
+          "y": 0.78,
+          "w": 0.5,
+          "h": 0.11,
+          "color": "#ffffff",
+          "background": "#000000b3"
+        }
+      ],
+      "macros": [
+        {
+          "id": 1,
+          "name": "Walk-in",
+          "color": "#22c55e",
+          "actions": [
+            {
+              "type": "clear",
+              "layer": "all"
+            },
+            {
+              "type": "lighting_cue",
+              "cue": 1
+            },
+            {
+              "type": "prop",
+              "prop": 1,
+              "on": true
+            },
+            {
+              "type": "mixer",
+              "command": {
+                "type": "recall_scene",
+                "scene": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Sermon",
+          "color": "#3b82f6",
+          "actions": [
+            {
+              "type": "clear",
+              "layer": "slide"
+            },
+            {
+              "type": "lighting_cue",
+              "cue": 3
+            },
+            {
+              "type": "prop",
+              "prop": 2,
+              "on": true
+            }
+          ]
         }
       ],
       "scenery": [
@@ -6363,7 +6900,11 @@ export const events: T.EngineEvent[] = [
         "label": "Service starts",
         "ends_at_unix_ms": 1800000000000,
         "show_on_audience": true
-      }
+      },
+      "props": [
+        1,
+        2
+      ]
     }
   },
   {
@@ -6372,7 +6913,8 @@ export const events: T.EngineEvent[] = [
       "media": null,
       "audio": null,
       "audio_loop": false,
-      "countdown": null
+      "countdown": null,
+      "props": []
     }
   },
   {
@@ -6916,7 +7458,11 @@ export const engineStatus: T.EngineStatus = {
       "label": "Service starts",
       "ends_at_unix_ms": 1800000000000,
       "show_on_audience": true
-    }
+    },
+    "props": [
+      1,
+      2
+    ]
   },
   "show_path": "/tmp/show.json"
 };

@@ -3,7 +3,7 @@
 use crate::dmx::DmxOutputConfig;
 use crate::lighting::{Cue, Fixture, FixtureProfile, Group, PositionPreset};
 use crate::mixer::MixerConfig;
-use crate::presenter::{MediaItem, Presentation, Theme};
+use crate::presenter::{Macro, MediaItem, MediaPlaylist, Presentation, Prop, Theme};
 
 /// Something on stage that light lands on: walls, drapes, risers.
 /// Drawn by the Visualizer and the Lighting stage plan; no DMX.
@@ -113,6 +113,9 @@ pub struct Show {
     pub playlist: Vec<u32>,
     pub themes: Vec<Theme>,
     pub media: Vec<MediaItem>,
+    pub media_playlists: Vec<MediaPlaylist>,
+    pub props: Vec<Prop>,
+    pub macros: Vec<Macro>,
     // Visualizer
     pub scenery: Vec<Scenery>,
     pub visualizer: VisualizerSettings,

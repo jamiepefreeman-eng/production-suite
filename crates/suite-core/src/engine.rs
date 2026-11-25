@@ -12,7 +12,7 @@ use crate::ai::{self, Intent};
 use crate::dmx::DmxFrame;
 use crate::lighting::{render_look, Cue, FixtureState, Look, PanTilt, PositionPreset};
 use crate::mixer::MixerCommand;
-use crate::presenter::SlideTrigger;
+use crate::presenter::{ClearLayer, SlideTrigger};
 use crate::show::Show;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -28,6 +28,9 @@ pub struct Layers {
     pub audio: Option<u32>,
     pub audio_loop: bool,
     pub countdown: Option<Countdown>,
+    /// Props showing, in the order they were turned on.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub props: Vec<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -56,8 +59,11 @@ pub enum Command {
     PlayAudio { audio: Option<u32>, looped: bool },
     StartCountdown { label: String, seconds: u32, show_on_audience: bool },
     ClearCountdown,
-    /// Slide, media, audio and countdown (not lighting).
+    /// Slide, media, audio, props and countdown (not lighting).
     ClearAll,
+    SetProp { prop: u32, on: bool },
+    ClearProps,
+    RunMacro { id: u32 },
     // ── Lighting
     GoCue { cue: u32 },
     ReleaseCue,
@@ -208,12 +214,10 @@ impl Engine {
                 self.layers.countdown = None;
                 ev.push(Event::LayersChanged { layers: self.layers.clone() });
             }
-            Command::ClearAll => {
-                self.live_slide = None;
-                self.layers = Layers::default();
-                ev.push(Event::SlideCleared);
-                ev.push(Event::LayersChanged { layers: self.layers.clone() });
-            }
+            Command::ClearAll => self.run_trigger(SlideTrigger::Clear { layer: ClearLayer::All }, now, &mut ev, 0),
+            Command::SetProp { prop, on } => self.run_trigger(SlideTrigger::Prop { prop, on }, now, &mut ev, 0),
+            Command::ClearProps => self.run_trigger(SlideTrigger::Clear { layer: ClearLayer::Props }, now, &mut ev, 0),
+            Command::RunMacro { id } => self.run_trigger(SlideTrigger::Macro { id }, now, &mut ev, 0),
             Command::GoCue { cue } => self.go_cue(cue, now, &mut ev),
             Command::ReleaseCue => {
                 self.start_fade(now, 1000);
@@ -329,24 +333,90 @@ impl Engine {
         self.live_slide = Some((presentation, slide));
         ev.push(Event::SlideLive { presentation, slide, title, label, text });
         for t in triggers {
-            match t {
-                SlideTrigger::LightingCue { cue } => self.go_cue(cue, now, ev),
-                SlideTrigger::LightingText { text } => {
-                    let parsed = ai::parse(&self.show, &text);
-                    let res = ai::resolve(&self.show, &parsed.intents, &self.playback);
-                    self.start_fade(now, 1000);
-                    self.playback = self.playback.merged(&res.look);
-                    for i in res.issues.iter().chain(parsed.unknown.iter()) {
-                        ev.push(warn(format!("Slide lighting: {i}")));
-                    }
+            self.run_trigger(t, now, ev, 0);
+        }
+    }
+
+    /// One slide action / macro step. `depth` stops macros that call each other forever.
+    fn run_trigger(&mut self, t: SlideTrigger, now: Instant, ev: &mut Vec<Event>, depth: u8) {
+        let layers_before = self.layers.clone();
+        match t {
+            SlideTrigger::LightingCue { cue } => self.go_cue(cue, now, ev),
+            SlideTrigger::LightingText { text } => {
+                let parsed = ai::parse(&self.show, &text);
+                let res = ai::resolve(&self.show, &parsed.intents, &self.playback);
+                self.start_fade(now, 1000);
+                self.playback = self.playback.merged(&res.look);
+                for i in res.issues.iter().chain(parsed.unknown.iter()) {
+                    ev.push(warn(format!("Slide lighting: {i}")));
                 }
-                SlideTrigger::Blackout => {
-                    self.start_fade(now, 0);
-                    self.blackout = true;
-                    ev.push(Event::BlackoutChanged { on: true });
-                }
-                SlideTrigger::Mixer { command } => ev.push(Event::MixerOut { command }),
             }
+            SlideTrigger::Blackout => {
+                self.start_fade(now, 0);
+                self.blackout = true;
+                ev.push(Event::BlackoutChanged { on: true });
+            }
+            SlideTrigger::Mixer { command } => ev.push(Event::MixerOut { command }),
+            SlideTrigger::Media { media } => {
+                if self.media_ok(media, ev) {
+                    self.layers.media = media;
+                }
+            }
+            SlideTrigger::Audio { audio, looped } => {
+                if self.media_ok(audio, ev) {
+                    self.layers.audio = audio;
+                    self.layers.audio_loop = looped;
+                }
+            }
+            SlideTrigger::Prop { prop, on } => {
+                if !self.show.props.iter().any(|p| p.id == prop) {
+                    ev.push(warn(format!("No prop #{prop}")));
+                } else if on && !self.layers.props.contains(&prop) {
+                    self.layers.props.push(prop);
+                } else if !on {
+                    self.layers.props.retain(|p| *p != prop);
+                }
+            }
+            SlideTrigger::Macro { id } => {
+                let Some(m) = self.show.macros.iter().find(|m| m.id == id).cloned() else {
+                    ev.push(warn(format!("No macro #{id}")));
+                    return;
+                };
+                if depth >= 4 {
+                    ev.push(warn(format!("Macro “{}” calls too many other macros — stopped", m.name)));
+                    return;
+                }
+                ev.push(info(format!("Macro: {}", m.name)));
+                for a in m.actions {
+                    self.run_trigger(a, now, ev, depth + 1);
+                }
+            }
+            SlideTrigger::Clear { layer } => match layer {
+                ClearLayer::All => {
+                    if self.live_slide.take().is_some() {
+                        ev.push(Event::SlideCleared);
+                    }
+                    self.layers = Layers::default();
+                }
+                ClearLayer::Slide => {
+                    self.live_slide = None;
+                    ev.push(Event::SlideCleared);
+                }
+                ClearLayer::Media => self.layers.media = None,
+                ClearLayer::Audio => self.layers.audio = None,
+                ClearLayer::Props => self.layers.props.clear(),
+                ClearLayer::Timer => self.layers.countdown = None,
+                ClearLayer::Lights => {
+                    self.start_fade(now, 1000);
+                    self.playback.clear();
+                    self.active_cue = None;
+                    ev.push(Event::CueReleased);
+                }
+            },
+        }
+        // Macro steps (depth > 0) are announced once, by the call that started the macro.
+        if depth == 0 && self.layers != layers_before {
+            ev.push(Event::LayersChanged { layers: self.layers.clone() });
         }
     }
 
@@ -413,6 +483,34 @@ impl Engine {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn macros_run_steps_and_props_toggle() {
+        let mut e = super::Engine::new(crate::demo::demo_show());
+        let now = std::time::Instant::now();
+        e.handle(super::Command::GoSlide { presentation: 1, slide: 1 }, now);
+        let ev = e.handle(super::Command::RunMacro { id: 1 }, now); // Walk-in: clear all, cue 1, logo, mixer
+        assert_eq!(e.live_slide(), None);
+        assert_eq!(e.active_cue(), Some(1));
+        assert_eq!(e.layers().props, vec![1]);
+        assert!(ev.iter().any(|x| matches!(x, super::Event::MixerOut { .. })));
+        assert_eq!(ev.iter().filter(|x| matches!(x, super::Event::LayersChanged { .. })).count(), 1);
+        e.handle(super::Command::SetProp { prop: 2, on: true }, now);
+        assert_eq!(e.layers().props, vec![1, 2]);
+        e.handle(super::Command::SetProp { prop: 1, on: false }, now);
+        assert_eq!(e.layers().props, vec![2]);
+        e.handle(super::Command::ClearAll, now);
+        assert!(e.layers().props.is_empty());
+    }
+
+    #[test]
+    fn macro_that_calls_itself_stops() {
+        let mut show = crate::demo::demo_show();
+        show.macros.push(crate::presenter::Macro { id: 9, name: "Loop".into(), color: "#fff".into(), actions: vec![crate::presenter::SlideTrigger::Macro { id: 9 }] });
+        let mut e = super::Engine::new(show);
+        let ev = e.handle(super::Command::RunMacro { id: 9 }, std::time::Instant::now());
+        assert!(ev.iter().any(|x| matches!(x, super::Event::Log { message, .. } if message.contains("too many"))));
+    }
+
     #[test]
     fn layers_set_and_clear_all() {
         let mut show = crate::demo::demo_show();

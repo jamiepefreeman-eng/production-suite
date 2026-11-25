@@ -26,7 +26,7 @@ let state: EngineView = {
   activeCue: null,
   programmer: { fixtures: {} },
   blackout: false,
-  layers: { media: null, audio: null, audio_loop: false, countdown: null },
+  layers: { media: null, audio: null, audio_loop: false, countdown: null, props: [] },
   lastScene: null,
   log: [],
   error: null,

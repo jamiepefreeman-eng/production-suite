@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useEngine } from "../../shared/store";
-import { CountdownText, DEFAULT_THEME, SlideRender, mediaById, slideBackground, themeFor, useNow } from "./render";
+import { CountdownText, DEFAULT_THEME, SlideRender, liveProps, mediaById, slideBackground, slideMedia, themeFor, useNow } from "./render";
 
 type Kind = "audience" | "stage" | "stream";
 
@@ -47,7 +47,9 @@ export default function OutputView({ kind }: { kind: Kind }) {
 
   // With no slide live (Clear Slide) only the media layer stays up, like ProPresenter.
   const theme = live ? themeFor(show, live.presentation) : { ...DEFAULT_THEME, background_color: "#000000" };
-  const background = live ? slideBackground(show, theme, layers.media) : mediaById(show, layers.media);
+  const slide = show?.presentations.find((p) => p.id === live?.presentation)?.slides.find((s) => s.id === live?.slide);
+  // Media layer wins; then media dragged onto the live slide; then the theme's background.
+  const background = mediaById(show, layers.media) ?? (live ? (slideMedia(show, slide) ?? slideBackground(show, theme, null)) : null);
   return (
     <div className={`output output-${kind}`}>
       <SlideRender
@@ -57,6 +59,7 @@ export default function OutputView({ kind }: { kind: Kind }) {
         kind={kind}
         play
         countdown={kind === "audience" && layers.countdown?.show_on_audience ? layers.countdown : null}
+        props={liveProps(show, layers.props)}
       />
     </div>
   );

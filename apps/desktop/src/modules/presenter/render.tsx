@@ -1,10 +1,11 @@
 // One renderer for every place a slide appears — thumbnails, Live/Next
 // previews and the real outputs — so what the operator sees is what the room sees.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { mediaUrl } from "../../shared/bridge";
+import { useInputStream } from "../../shared/inputs";
 import { pushLog } from "../../shared/store";
-import type { Countdown, MediaItem, Show, Theme } from "../../shared/types";
+import type { Countdown, MediaItem, Prop, Show, Slide, Theme } from "../../shared/types";
 
 export const DEFAULT_THEME: Theme = {
   name: "Default",
@@ -45,7 +46,22 @@ function reportBroken(item: MediaItem, e: React.SyntheticEvent<HTMLImageElement 
   pushLog("warn", `Can't show “${item.name}” — is the file still at ${item.path}?${why}`);
 }
 
+/** Live capture card / camera / NDI-webcam picture. */
+function InputFill({ item }: { item: MediaItem }) {
+  const { stream, error } = useInputStream(item.path);
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (ref.current && stream) {
+      ref.current.srcObject = stream;
+      void ref.current.play().catch(() => {});
+    }
+  }, [stream]);
+  if (error) return <div className="media-fill media-error">{error}</div>;
+  return <video ref={ref} className="media-fill" autoPlay muted playsInline />;
+}
+
 export function MediaFill({ item, play }: { item: MediaItem; play: boolean }) {
+  if (item.kind === "input") return play ? <InputFill item={item} /> : <div className="media-fill media-input-thumb">● {item.name}</div>;
   const src = mediaUrl(item.path);
   if (item.kind === "image") return <img className="media-fill" src={src} alt="" draggable={false} onError={(e) => reportBroken(item, e)} />;
   if (item.kind === "video")
@@ -65,6 +81,7 @@ export function SlideRender({
   kind = "audience",
   play = false,
   countdown,
+  props,
 }: {
   text: string;
   theme?: Theme;
@@ -74,6 +91,8 @@ export function SlideRender({
   /** Play video backgrounds (outputs and Live preview); thumbnails stay still. */
   play?: boolean;
   countdown?: Countdown | null;
+  /** Props showing on top (logo bug, lower third…). */
+  props?: { prop: Prop; media: MediaItem | null }[];
 }) {
   const stream = kind === "stream";
   const bg = background ?? null;
@@ -98,6 +117,16 @@ export function SlideRender({
           ))}
         </div>
       )}
+      {props?.map(({ prop, media }) => (
+        <div
+          key={prop.id}
+          className="render-prop"
+          style={{ left: `${prop.x * 100}%`, top: `${prop.y * 100}%`, width: `${prop.w * 100}%`, height: `${prop.h * 100}%`, background: prop.background, color: prop.color, ["--ph" as string]: prop.h }}
+        >
+          {media && <MediaFill item={media} play={play} />}
+          {prop.text && <span>{prop.text}</span>}
+        </div>
+      ))}
       {countdown && <CountdownBadge c={countdown} />}
     </div>
   );
@@ -106,6 +135,21 @@ export function SlideRender({
 /** Background for a slide: the media layer if one is set, else the theme's own media. */
 export function slideBackground(show: Show | null, theme: Theme, mediaLayer: number | null): MediaItem | null {
   return mediaById(show, mediaLayer) ?? mediaById(show, theme.background_media);
+}
+
+/** The media a slide brings with it (dragged on from the bin), if any. */
+export function slideMedia(show: Show | null, slide: Slide | undefined): MediaItem | null {
+  const t = slide?.triggers.find((x) => x.type === "media");
+  return t && t.type === "media" ? mediaById(show, t.media) : null;
+}
+
+/** Props currently on screen, resolved for rendering. */
+export function liveProps(show: Show | null, ids: number[]) {
+  if (!show) return [];
+  return ids
+    .map((id) => show.props.find((p) => p.id === id))
+    .filter((p): p is Prop => !!p)
+    .map((prop) => ({ prop, media: mediaById(show, prop.media) }));
 }
 
 export function useNow(intervalMs = 250) {

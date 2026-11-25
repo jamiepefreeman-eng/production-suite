@@ -5,7 +5,7 @@
 
 use crate::dmx::DmxOutputConfig;
 use crate::lighting::*;
-use crate::presenter::{parse_lyrics, Presentation, PresentationKind, Slide, SlideTrigger};
+use crate::presenter::{parse_lyrics, Arrangement, ClearLayer, Macro, Presentation, PresentationKind, Prop, Slide, SlideTrigger};
 use crate::mixer::MixerCommand;
 use crate::presenter::{TextPosition, Theme};
 use crate::show::{Scenery, SceneryKind, Show, StageConfig, VisualizerSettings};
@@ -251,6 +251,9 @@ pub fn demo_show() -> Show {
         kind: PresentationKind::Announcement,
         ccli: None,
         theme: "Default".into(),
+        groups: vec![],
+        arrangements: vec![],
+        arrangement: None,
         slides: vec![
             Slide {
                 id: 1,
@@ -273,6 +276,18 @@ pub fn demo_show() -> Show {
     );
     grace.ccli = Some("22025".into());
     grace.theme = "Worship".into();
+    grace.arrangements = vec![Arrangement { name: "Sunday".into(), sequence: vec!["Verse 1".into(), "Verse 2".into(), "Verse 1".into()] }];
+    let main_show = Presentation {
+        id: 10,
+        title: "Main Show".into(),
+        kind: PresentationKind::Header,
+        ccli: None,
+        slides: vec![],
+        theme: "Default".into(),
+        groups: vec![],
+        arrangements: vec![],
+        arrangement: None,
+    };
     if let Some(first) = grace.slides.first_mut() {
         first.triggers.push(SlideTrigger::LightingCue { cue: 2 });
     }
@@ -282,6 +297,9 @@ pub fn demo_show() -> Show {
         kind: PresentationKind::Scripture,
         ccli: None,
         theme: "Scripture".into(),
+        groups: vec![],
+        arrangements: vec![],
+        arrangement: None,
         slides: vec![Slide {
             id: 1,
             label: "John 3:16".into(),
@@ -299,8 +317,8 @@ pub fn demo_show() -> Show {
         positions,
         cues,
         dmx_outputs: vec![DmxOutputConfig::Sacn { universe: 1, sacn_universe: 1, priority: 100, unicast_ip: None }],
-        presentations: vec![welcome, grace, scripture],
-        playlist: vec![1, 2, 3],
+        presentations: vec![main_show, welcome, grace, scripture],
+        playlist: vec![10, 1, 2, 3],
         themes: vec![
             Theme::default(),
             Theme {
@@ -327,6 +345,44 @@ pub fn demo_show() -> Show {
             },
         ],
         media: vec![],
+        media_playlists: vec![],
+        props: vec![
+            Prop { id: 1, name: "Logo bug".into(), text: "COR".into(), x: 0.88, y: 0.05, w: 0.09, h: 0.08, ..Prop::default() },
+            Prop {
+                id: 2,
+                name: "Speaker lower third".into(),
+                text: "Pastor · Sunday message".into(),
+                x: 0.05,
+                y: 0.78,
+                w: 0.5,
+                h: 0.11,
+                background: "#000000b3".into(),
+                ..Prop::default()
+            },
+        ],
+        macros: vec![
+            Macro {
+                id: 1,
+                name: "Walk-in".into(),
+                color: "#22c55e".into(),
+                actions: vec![
+                    SlideTrigger::Clear { layer: ClearLayer::All },
+                    SlideTrigger::LightingCue { cue: 1 },
+                    SlideTrigger::Prop { prop: 1, on: true },
+                    SlideTrigger::Mixer { command: MixerCommand::RecallScene { scene: 1 } },
+                ],
+            },
+            Macro {
+                id: 2,
+                name: "Sermon".into(),
+                color: "#3b82f6".into(),
+                actions: vec![
+                    SlideTrigger::Clear { layer: ClearLayer::Slide },
+                    SlideTrigger::LightingCue { cue: 3 },
+                    SlideTrigger::Prop { prop: 2, on: true },
+                ],
+            },
+        ],
         scenery: vec![Scenery {
             id: 1,
             name: "Back wall".into(),

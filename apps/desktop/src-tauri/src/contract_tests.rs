@@ -17,7 +17,7 @@ use crate::windows::MonitorInfo;
 use serde::Serialize;
 use suite_core::ai::intent::{Action, Intent, ParseOutput};
 use suite_core::engine::{Command, Countdown, Event, Layers, LogLevel};
-use suite_core::presenter::{MediaItem, MediaKind, TextPosition, Theme};
+use suite_core::presenter::{ClearLayer, MediaItem, MediaKind, MediaPlaylist, SlideGroup, SlideTrigger, TextPosition, Theme};
 use suite_core::show::{Scenery, SceneryKind};
 use suite_core::lighting::{FixtureState, FixtureVisual, Look, Rgb};
 use suite_core::mixer::connection::MixerFeedback;
@@ -64,11 +64,31 @@ fn write_typescript_contract() {
     {
         show.scenery.push(Scenery { id: 10 + i as u32, kind, ..Scenery::default() });
     }
+    show.media.push(MediaItem { id: 4, name: "Camera".into(), path: "Blackmagic UltraStudio".into(), kind: MediaKind::Input });
+    show.media_playlists.push(MediaPlaylist { name: "Backgrounds".into(), items: vec![1, 2] });
+    show.presentations[1].groups.push(SlideGroup { name: "Vamp".into(), color: "#f97316".into() });
+    show.presentations[1].arrangement = Some("Sunday".into());
+    let triggers = vec![
+        SlideTrigger::Media { media: Some(1) },
+        SlideTrigger::Media { media: None },
+        SlideTrigger::Audio { audio: Some(3), looped: true },
+        SlideTrigger::Prop { prop: 1, on: true },
+        SlideTrigger::Macro { id: 1 },
+        SlideTrigger::Clear { layer: ClearLayer::All },
+        SlideTrigger::Clear { layer: ClearLayer::Slide },
+        SlideTrigger::Clear { layer: ClearLayer::Media },
+        SlideTrigger::Clear { layer: ClearLayer::Audio },
+        SlideTrigger::Clear { layer: ClearLayer::Props },
+        SlideTrigger::Clear { layer: ClearLayer::Timer },
+        SlideTrigger::Clear { layer: ClearLayer::Lights },
+    ];
+    show.presentations[1].slides[0].triggers.extend(triggers.clone());
     let layers = Layers {
         media: Some(2),
         audio: Some(3),
         audio_loop: true,
         countdown: Some(Countdown { label: "Service starts".into(), ends_at_unix_ms: 1_800_000_000_000, show_on_audience: true }),
+        props: vec![1, 2],
     };
     let mut look = Look::default();
     let state = FixtureState {
@@ -138,6 +158,9 @@ fn write_typescript_contract() {
         Command::StartCountdown { label: "Service".into(), seconds: 300, show_on_audience: true },
         Command::ClearCountdown,
         Command::ClearAll,
+        Command::SetProp { prop: 1, on: true },
+        Command::ClearProps,
+        Command::RunMacro { id: 1 },
         Command::GoCue { cue: 1 },
         Command::ReleaseCue,
         Command::Blackout { on: true },

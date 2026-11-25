@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Merged into the app's Info.plist by Tauri. macOS asks the user before any camera use. -->
+  <key>NSCameraUsageDescription</key>
+  <string>Production Suite shows capture cards, cameras and NDI Webcam sources as live video in Presenter and the Visualizer.</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Production Suite can use audio from capture devices.</string>
+</dict>
+</plist>

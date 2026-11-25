@@ -99,10 +99,34 @@ export type SlideTrigger =
   | { type: "lighting_cue"; cue: number }
   | { type: "lighting_text"; text: string }
   | { type: "blackout" }
-  | { type: "mixer"; command: MixerCommand };
+  | { type: "mixer"; command: MixerCommand }
+  | { type: "media"; media: number | null }
+  | { type: "audio"; audio: number | null; looped: boolean }
+  | { type: "prop"; prop: number; on: boolean }
+  | { type: "macro"; id: number }
+  | { type: "clear"; layer: ClearLayer };
+
+export type ClearLayer = "all" | "slide" | "media" | "audio" | "props" | "timer" | "lights";
+export interface SlideGroup { name: string; color: string }
+export interface Arrangement { name: string; sequence: string[] }
+export interface Prop {
+  id: number;
+  name: string;
+  media: number | null;
+  text: string;
+  /** Position / size as fractions of the screen. */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  color: string;
+  background: string;
+}
+export interface Macro { id: number; name: string; color: string; actions: SlideTrigger[] }
+export interface MediaPlaylist { name: string; items: number[] }
 
 export interface Slide { id: number; label: string; text: string; triggers: SlideTrigger[] }
-export type PresentationKind = "song" | "scripture" | "announcement" | "media";
+export type PresentationKind = "song" | "scripture" | "announcement" | "media" | "header";
 export interface Presentation {
   id: number;
   title: string;
@@ -110,9 +134,12 @@ export interface Presentation {
   ccli: string | null;
   slides: Slide[];
   theme: string;
+  groups: SlideGroup[];
+  arrangements: Arrangement[];
+  arrangement: string | null;
 }
 
-export type MediaKind = "image" | "video" | "audio";
+export type MediaKind = "image" | "video" | "audio" | "input";
 export interface MediaItem { id: number; name: string; path: string; kind: MediaKind }
 export type TextPosition = "top" | "center" | "bottom" | "lower_third";
 export interface Theme {
@@ -144,7 +171,7 @@ export interface Scenery {
   color: string;
 }
 export interface Countdown { label: string; ends_at_unix_ms: number; show_on_audience: boolean }
-export interface Layers { media: number | null; audio: number | null; audio_loop: boolean; countdown: Countdown | null }
+export interface Layers { media: number | null; audio: number | null; audio_loop: boolean; countdown: Countdown | null; props: number[] }
 
 export interface Show {
   name: string;
@@ -159,6 +186,9 @@ export interface Show {
   playlist: number[];
   themes: Theme[];
   media: MediaItem[];
+  media_playlists: MediaPlaylist[];
+  props: Prop[];
+  macros: Macro[];
   scenery: Scenery[];
   visualizer: VisualizerSettings;
   mixer: MixerConfig | null;
@@ -181,6 +211,9 @@ export type Command =
   | { type: "start_countdown"; label: string; seconds: number; show_on_audience: boolean }
   | { type: "clear_countdown" }
   | { type: "clear_all" }
+  | { type: "set_prop"; prop: number; on: boolean }
+  | { type: "clear_props" }
+  | { type: "run_macro"; id: number }
   | { type: "go_cue"; cue: number }
   | { type: "release_cue" }
   | { type: "blackout"; on: boolean }

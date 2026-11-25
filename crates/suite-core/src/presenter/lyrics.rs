@@ -91,6 +91,9 @@ pub fn parse_lyrics(id: u32, title: &str, text: &str, max_lines: usize) -> Prese
         ccli: None,
         slides,
         theme: "Default".into(),
+        groups: vec![],
+        arrangements: vec![],
+        arrangement: None,
     }
 }
 

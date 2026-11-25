@@ -79,7 +79,11 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    `tools/build_fixture_library.py` from the Open Fixture Library (MIT) and QLC+ fixtures (Apache 2.0);
    keep `fixture-library-LICENSES.txt` next to it. Library modes become show profiles via
    `profileFromLibrary` (Lighting › PatchView) when patched; the engine never reads the library.
-12. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
+12. **Layout debugging without Tauri**: Playwright against the Vite dev server (`localhost:1420`) with a
+   stub `window.__TAURI_INTERNALS__` (invoke → show JSON from contract.generated.ts, convertFileSrc) shows
+   the real DOM/CSS — far quicker than guessing from Xvfb screenshots. Beware class-name clashes in the
+   single global stylesheet (e.g. `.output` is the output-window class).
+13. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
    (use the rotated `.vfader-wrap` pattern), check caniuse for newer features.
 
 ## Hardware / protocol facts used
@@ -112,6 +116,9 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
       Linux WebKitGTK can't stream video from the asset protocol (media error 4), so untested here.
       Images and audio-file playback paths are the same mechanism.
 - [ ] Media paths are absolute: a show file moved to another computer needs the media at the same paths
+- [ ] Video inputs (getUserMedia) in WKWebView (macOS asks via NSCameraUsageDescription in src-tauri/Info.plist)
+      and WebView2 (Windows) — not testable headlessly; some capture drivers allow only one app/window at a time
+- [ ] Props / video inputs aren't drawn on Visualizer screens yet (text + background + countdown are)
 
 ## Roadmap (suggested order)
 
@@ -136,7 +143,13 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
    Still to do: profile editor UI, pixel/matrix modes, import Lightkey patch export.
 3. **Lighting engine**: HTP/LTP, 16-bit-aware pan/tilt fades, effects (chase, rainbow, pan/tilt circles),
    cue list with follow/wait times, multiple playbacks, tap tempo, MIDI controller input.
-4. **Presenter**: themes/backgrounds (images + video loops), media playback, scripture library
+4. **Presenter** — *v0.6.0:* ProPresenter layout (toolbar, Service with headers, media folders + bin,
+   Live/layers, right tabs Audio/Props/Timers/Macros/Slide), groups + arrangements (saved versions; Reflow
+   repeats become arrangement entries), props layer, macros (`SlideTrigger` lists, depth-limited), drag
+   media/props/macros onto slides, video inputs (`shared/inputs.ts`, getUserMedia by device name) in
+   Presenter and on Visualizer screens. Still to do: scripture library, media transport (play/pause/scrub),
+   stage display layouts, native NDI (now via NDI Tools "NDI Webcam"), CCLI report.
+   Older notes: themes/backgrounds (images + video loops), media playback, scripture library
    (public-domain KJV/WEB bundled; others need licences), arrangements (V1 C V2 C B C), stage display
    layouts, NDI output, CCLI usage report export. SongSelect import needs a CCLI agreement.
 5. **Audio**: playback engine (cpal) for walk-in music / tracks / click to chosen outputs; desk feedback

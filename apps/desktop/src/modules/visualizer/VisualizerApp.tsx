@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, confirmDialog, mediaUrl, on } from "../../shared/bridge";
+import { getInputStream } from "../../shared/inputs";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type { Fixture, FixtureKind, Scenery, SceneryKind, Show, Theme, VizSource } from "../../shared/types";
 import { StageScene, type Selection } from "./scene";
@@ -103,12 +104,24 @@ export default function VisualizerApp() {
     const theme = live ? themeFor(show, live.presentation) : null;
     const mediaId = layers.media ?? (live ? theme?.background_media : null);
     const media = show.media.find((m) => m.id === mediaId && m.kind !== "audio");
-    scene.current.setScreenContent({
+    const content = {
       text: live?.text ?? "",
       theme: theme ?? (live ? null : { ...(show.themes[0] as Theme), background_color: "#000000" }),
-      background: media ? { kind: media.kind === "video" ? "video" : "image", url: mediaUrl(media.path) } : null,
+      background: media && media.kind !== "input" ? { kind: media.kind === "video" ? ("video" as const) : ("image" as const), url: mediaUrl(media.path) } : null,
       countdown: layers.countdown?.show_on_audience ? { label: layers.countdown.label, endsAt: layers.countdown.ends_at_unix_ms } : null,
-    });
+      stream: null as MediaStream | null,
+    };
+    scene.current.setScreenContent(content);
+    // Live camera / capture input on the screens too.
+    if (media?.kind === "input") {
+      let current = true;
+      getInputStream(media.path)
+        .then((stream) => current && scene.current?.setScreenContent({ ...content, stream }))
+        .catch((e) => pushLog("warn", String(e?.message ?? e)));
+      return () => {
+        current = false;
+      };
+    }
   }, [show, live, layers]);
 
   useEffect(() => {
