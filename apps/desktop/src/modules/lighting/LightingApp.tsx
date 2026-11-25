@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api, confirmDialog, on } from "../../shared/bridge";
 import PatchView from "./PatchView";
+import Stage3D from "./Stage3D";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type { AiStatus, DmxOutputConfig, FixtureProfile, FixtureState, FixtureVisual, Rgb, SerialPortInfo, Show } from "../../shared/types";
 
@@ -46,6 +47,15 @@ function Live({ show }: { show: Show }) {
   const { activeCue, programmer } = useEngine();
   const [sel, setSel] = useState<number[]>([]);
   const [visuals, setVisuals] = useState<Record<number, FixtureVisual>>({});
+  const [view, setView] = useState<"plan" | "3d">(() => (localStorage.getItem("lk-view") === "3d" ? "3d" : "plan"));
+  const changeView = (v: "plan" | "3d") => {
+    setView(v);
+    try {
+      localStorage.setItem("lk-view", v);
+    } catch {
+      /* private mode */
+    }
+  };
 
   // What the rig is actually doing right now (20 Hz from the engine), for the stage plan.
   useEffect(
@@ -92,7 +102,19 @@ function Live({ show }: { show: Show }) {
       </aside>
 
       <section className="lk-stage">
-        <StagePlan show={show} visuals={visuals} sel={sel} onClick={click} onClear={() => setSel([])} />
+        <div className="lk-viewtoggle seg small">
+          <button className={view === "plan" ? "on" : ""} onClick={() => changeView("plan")} title="Top-down plan: quick to read, drag lights to move">
+            Plan
+          </button>
+          <button className={view === "3d" ? "on" : ""} onClick={() => changeView("3d")} title="The Visualizer's 3D stage: move lights in height too">
+            3D
+          </button>
+        </div>
+        {view === "plan" ? (
+          <StagePlan show={show} visuals={visuals} sel={sel} onClick={click} onClear={() => setSel([])} />
+        ) : (
+          <Stage3D show={show} sel={sel} setSel={setSel} />
+        )}
       </section>
 
       <Inspector show={show} sel={sel} programmer={programmer} profileOf={profileOf} />

@@ -157,7 +157,7 @@ export interface Theme {
 }
 export type SceneryKind =
   | "wall" | "drape" | "riser" | "stage_deck" | "truss" | "screen"
-  | "person" | "drum_kit" | "keyboard" | "guitarist" | "mic_stand" | "speaker" | "wedge";
+  | "person" | "drum_kit" | "keyboard" | "guitarist" | "mic_stand" | "speaker" | "wedge" | "model";
 export interface VisualizerSettings { haze: number; ambient: number }
 export interface Scenery {
   id: number;
@@ -169,6 +169,9 @@ export interface Scenery {
   size: [number, number, number];
   rotation: [number, number, number];
   color: string;
+  model_path: string;
+  model_unit: string;
+  model_z_up: boolean;
 }
 export interface Countdown { label: string; ends_at_unix_ms: number; show_on_audience: boolean }
 export interface Layers { media: number | null; audio: number | null; audio_loop: boolean; countdown: Countdown | null; props: number[] }

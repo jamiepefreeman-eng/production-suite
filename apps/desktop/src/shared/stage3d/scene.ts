@@ -5,7 +5,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
-import type { FixtureProfile, FixtureVisual, Scenery, Show, VisualizerSettings } from "../../shared/types";
+import { mediaUrl } from "../bridge";
+import type { FixtureProfile, FixtureVisual, Scenery, Show, VisualizerSettings } from "../types";
 import { ScreenPainter, type ScreenContent } from "./screen";
 
 const DEG = Math.PI / 180;
@@ -23,10 +24,13 @@ interface FixtureObj {
   profile: FixtureProfile;
 }
 
-export type Selection = { kind: "fixture"; id: number } | { kind: "scenery"; id: number } | null;
+export type SelItem = { kind: "fixture"; id: number } | { kind: "scenery"; id: number };
+/** @deprecated single selection; use SelItem[] */
+export type Selection = SelItem | null;
 
 export interface SceneCallbacks {
-  onSelect: (sel: Selection) => void;
+  /** `additive` = Shift / Cmd / Ctrl held: add to (or remove from) the selection. `null` = clear. */
+  onSelect: (sel: SelItem | null, additive: boolean) => void;
   onMoved: (id: number, position: [number, number, number], rotation: [number, number, number]) => void;
   onSceneryMoved: (id: number, position: [number, number, number], rotation: [number, number, number]) => void;
 }
@@ -47,6 +51,11 @@ export class StageScene {
   private raf = 0;
   private ro: ResizeObserver;
   private dragging = false;
+  /** What's selected (objects in the scene). Several = moved together through `pivot`. */
+  private selected: THREE.Object3D[] = [];
+  private pivot = new THREE.Object3D();
+  private pivotStart = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
+  private members: { obj: THREE.Object3D; pos: THREE.Vector3; quat: THREE.Quaternion }[] = [];
 
   constructor(private host: HTMLElement, private cb: SceneCallbacks) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -64,8 +73,23 @@ export class StageScene {
     this.gizmo.addEventListener("dragging-changed", (e) => {
       this.dragging = Boolean(e.value);
       this.orbit.enabled = !this.dragging;
-      if (!this.dragging) this.emitMove();
+      if (this.dragging && this.gizmo.object === this.pivot) {
+        this.pivotStart = { pos: this.pivot.position.clone(), quat: this.pivot.quaternion.clone() };
+        this.members = this.selected.map((obj) => ({ obj, pos: obj.position.clone(), quat: obj.quaternion.clone() }));
+      }
+      if (!this.dragging) for (const o of this.selected) this.emitMove(o);
     });
+    // Moving the pivot carries every selected object with it (translate and rotate around the centre).
+    this.gizmo.addEventListener("objectChange", () => {
+      if (this.gizmo.object !== this.pivot || !this.dragging) return;
+      const dq = this.pivot.quaternion.clone().multiply(this.pivotStart.quat.clone().invert());
+      for (const m of this.members) {
+        const off = m.pos.clone().sub(this.pivotStart.pos).applyQuaternion(dq);
+        m.obj.position.copy(this.pivot.position).add(off);
+        m.obj.quaternion.copy(dq.clone().multiply(m.quat));
+      }
+    });
+    this.scene.add(this.pivot);
     this.scene.add(this.gizmo.getHelper());
 
     this.scene.add(this.ambient);
@@ -94,7 +118,7 @@ export class StageScene {
     if ((e.target as HTMLElement)?.closest("input, textarea, select")) return;
     if (e.key === "w") this.setMode("translate");
     if (e.key === "e") this.setMode("rotate");
-    if (e.key === "Escape") this.cb.onSelect(null);
+    if (e.key === "Escape") this.cb.onSelect(null, false);
   };
 
   private onPointer = (e: PointerEvent) => {
@@ -108,20 +132,34 @@ export class StageScene {
       .intersectObjects(targets, true)
       .find((h) => h.object.userData.fixtureId !== undefined || h.object.userData.sceneryId !== undefined);
     if (!hit) return;
-    if (hit.object.userData.fixtureId !== undefined) this.cb.onSelect({ kind: "fixture", id: hit.object.userData.fixtureId as number });
-    else this.cb.onSelect({ kind: "scenery", id: hit.object.userData.sceneryId as number });
+    const additive = e.shiftKey || e.metaKey || e.ctrlKey;
+    if (hit.object.userData.fixtureId !== undefined) this.cb.onSelect({ kind: "fixture", id: hit.object.userData.fixtureId as number }, additive);
+    else this.cb.onSelect({ kind: "scenery", id: hit.object.userData.sceneryId as number }, additive);
   };
 
-  select(sel: Selection) {
-    const obj =
-      sel?.kind === "fixture" ? this.fixtures.get(sel.id)?.root : sel?.kind === "scenery" ? this.scenery.get(sel.id)?.obj : undefined;
-    if (obj) this.gizmo.attach(obj);
-    else this.gizmo.detach();
+  /** Show the move / rotate gizmo on these items (several: around their centre). */
+  select(items: SelItem[]) {
+    const objs = items
+      .map((s) => (s.kind === "fixture" ? this.fixtures.get(s.id)?.root : this.scenery.get(s.id)?.obj))
+      .filter((o): o is THREE.Object3D => !!o);
+    this.selected = objs;
+    if (objs.length === 0) this.gizmo.detach();
+    else if (objs.length === 1) this.gizmo.attach(objs[0]);
+    else {
+      const c = new THREE.Vector3();
+      for (const o of objs) c.add(o.position);
+      this.pivot.position.copy(c.divideScalar(objs.length));
+      this.pivot.quaternion.identity();
+      this.gizmo.attach(this.pivot);
+    }
   }
 
-  private emitMove() {
-    const obj = this.gizmo.object;
-    if (!obj) return;
+  /** Is this object being dragged right now (so show updates mustn't snap it back)? */
+  private held(obj: THREE.Object3D) {
+    return this.dragging && (this.gizmo.object === obj || (this.gizmo.object === this.pivot && this.selected.includes(obj)));
+  }
+
+  private emitMove(obj: THREE.Object3D) {
     const p = obj.position;
     const r = obj.rotation;
     const rot: [number, number, number] = [round(r.x / DEG), round(r.y / DEG), round(r.z / DEG)];
@@ -171,7 +209,7 @@ export class StageScene {
         this.fixtures.set(fx.id, obj);
         this.scene.add(obj.root);
       }
-      if (!(this.dragging && this.gizmo.object === obj.root)) {
+      if (!this.held(obj.root)) {
         obj.root.position.set(...fx.position);
         obj.root.rotation.set(fx.rotation[0] * DEG, fx.rotation[1] * DEG, fx.rotation[2] * DEG);
       }
@@ -189,7 +227,7 @@ export class StageScene {
     }
     for (const s of list) {
       // Rebuild geometry only when the shape changes; moves just update the transform.
-      const key = `${s.kind}|${s.size.join(",")}|${s.color}`;
+      const key = `${s.kind}|${s.size.join(",")}|${s.color}|${s.model_path}|${s.model_unit}|${s.model_z_up}`;
       let entry = this.scenery.get(s.id);
       if (!entry || entry.key !== key) {
         const wasSelected = entry && this.gizmo.object === entry.obj;
@@ -199,7 +237,7 @@ export class StageScene {
         this.scene.add(entry.obj);
         if (wasSelected) this.gizmo.attach(entry.obj);
       }
-      if (!(this.dragging && this.gizmo.object === entry.obj)) {
+      if (!this.held(entry.obj)) {
         entry.obj.position.set(...s.position);
         entry.obj.rotation.set(s.rotation[0] * DEG, s.rotation[1] * DEG, s.rotation[2] * DEG);
       }
@@ -517,6 +555,9 @@ function buildScenery(s: Scenery, screenTexture: THREE.Texture): THREE.Object3D 
       m.rotation.y = Math.PI / 2;
       break;
     }
+    case "model":
+      loadModel(s, g);
+      break;
     default:
       // wall, riser
       box(w, h, d, main, 0, h / 2);
@@ -531,4 +572,59 @@ function buildScenery(s: Scenery, screenTexture: THREE.Texture): THREE.Object3D 
     g.add(inner);
   }
   return g;
+}
+
+const UNIT_SCALE: Record<string, number> = { m: 1, cm: 0.01, mm: 0.001, in: 0.0254, ft: 0.3048 };
+
+/** Load an imported model (SketchUp etc.) into `g`: scaled to metres, Z-up turned Y-up,
+ *  sitting on the floor and centred on its position. Loaders are fetched only when needed. */
+function loadModel(s: Scenery, g: THREE.Group) {
+  if (!s.model_path) return;
+  const url = mediaUrl(s.model_path);
+  const ext = s.model_path.split(".").pop()?.toLowerCase();
+  const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(s.color), roughness: 0.8, side: THREE.DoubleSide });
+  const place = (obj: THREE.Object3D, keepMaterials: boolean) => {
+    obj.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh) {
+        const m = o as THREE.Mesh;
+        if (!keepMaterials) m.material = material;
+        m.userData.sceneryId = s.id;
+      }
+    });
+    // inner: file units → metres, Z-up → Y-up. holder: the user's scale (size) on stage axes.
+    const inner = new THREE.Group();
+    inner.add(obj);
+    inner.scale.setScalar(UNIT_SCALE[s.model_unit] ?? 1);
+    if (s.model_z_up) inner.rotation.x = -Math.PI / 2;
+    const holder = new THREE.Group();
+    holder.add(inner);
+    holder.scale.set(...s.size);
+    holder.updateMatrixWorld(true);
+    // Sit on the floor, centred on the item's position.
+    const box = new THREE.Box3().setFromObject(holder);
+    const c = box.getCenter(new THREE.Vector3());
+    holder.position.set(-c.x, -box.min.y, -c.z);
+    g.add(holder);
+  };
+  const fail = (e: unknown) => console.warn(`Couldn't load model ${s.model_path}:`, e);
+  (async () => {
+    if (ext === "stl") {
+      const { STLLoader } = await import("three/examples/jsm/loaders/STLLoader.js");
+      const geo = await new STLLoader().loadAsync(url);
+      geo.computeVertexNormals();
+      place(new THREE.Mesh(geo, material), false);
+    } else if (ext === "obj") {
+      const { OBJLoader } = await import("three/examples/jsm/loaders/OBJLoader.js");
+      place(await new OBJLoader().loadAsync(url), false);
+    } else if (ext === "dae") {
+      const { ColladaLoader } = await import("three/examples/jsm/loaders/ColladaLoader.js");
+      const r = await new ColladaLoader().loadAsync(url);
+      // Collada files say which way is up; the loader already turns them Y-up.
+      if (r) place(r.scene, true);
+    } else if (ext === "glb" || ext === "gltf") {
+      const { GLTFLoader } = await import("three/examples/jsm/loaders/GLTFLoader.js");
+      const r = await new GLTFLoader().loadAsync(url);
+      place(r.scene, true);
+    } else fail(`unsupported file type .${ext}`);
+  })().catch(fail);
 }

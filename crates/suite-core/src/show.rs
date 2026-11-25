@@ -22,6 +22,12 @@ pub struct Scenery {
     pub rotation: [f32; 3],
     /// CSS colour of the surface.
     pub color: String,
+    /// `Model` only: absolute path of an imported 3D file (.stl .obj .dae .glb/.gltf, e.g. from SketchUp).
+    pub model_path: String,
+    /// `Model` only: units the file was saved in: "m", "cm", "mm", "in", "ft".
+    pub model_unit: String,
+    /// `Model` only: the file is Z-up (SketchUp, most CAD) rather than Y-up.
+    pub model_z_up: bool,
 }
 
 impl Default for Scenery {
@@ -34,6 +40,9 @@ impl Default for Scenery {
             size: [4.0, 3.0, 0.1],
             rotation: [0.0, 0.0, 0.0],
             color: "#b9b4aa".into(),
+            model_path: String::new(),
+            model_unit: "m".into(),
+            model_z_up: true,
         }
     }
 }
@@ -61,6 +70,8 @@ pub enum SceneryKind {
     MicStand,
     Speaker,
     Wedge,
+    /// Imported 3D model (set, venue, truss rig…).
+    Model,
 }
 
 /// Room look in the Visualizer, saved with the show.

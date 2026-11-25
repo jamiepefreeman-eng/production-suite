@@ -4,7 +4,7 @@
 // colour / image / video, darkening, countdown.
 
 import * as THREE from "three";
-import type { Theme } from "../../shared/types";
+import type { Theme } from "../types";
 
 export interface ScreenContent {
   text: string;

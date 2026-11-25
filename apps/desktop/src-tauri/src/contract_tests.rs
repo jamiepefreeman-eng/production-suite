@@ -58,6 +58,7 @@ fn write_typescript_contract() {
         SceneryKind::MicStand,
         SceneryKind::Speaker,
         SceneryKind::Wedge,
+        SceneryKind::Model,
     ]
     .into_iter()
     .enumerate()

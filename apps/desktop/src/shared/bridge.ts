@@ -64,6 +64,12 @@ export async function pickMediaFiles(): Promise<string[]> {
   return Array.isArray(r) ? r : [r];
 }
 
+/** Pick a 3D model exported from SketchUp / Blender etc. Returns the absolute path or null. */
+export async function pickModelFile(): Promise<string | null> {
+  const r = await openDialog({ filters: [{ name: "3D model", extensions: ["stl", "obj", "dae", "glb", "gltf"] }] });
+  return typeof r === "string" ? r : null;
+}
+
 /** Native open/save pickers for show files (".json"; macOS rejects dotted extensions like "show.json"). */
 export const showFiles = {
   open: async () => {

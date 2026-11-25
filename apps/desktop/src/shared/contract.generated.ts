@@ -1919,7 +1919,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 4,
@@ -1940,7 +1943,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#111111"
+      "color": "#111111",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 2,
@@ -1961,7 +1967,10 @@ export const show: T.Show = {
         90.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 3,
@@ -1982,7 +1991,10 @@ export const show: T.Show = {
         90.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 10,
@@ -2003,7 +2015,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 11,
@@ -2024,7 +2039,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 12,
@@ -2045,7 +2063,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 13,
@@ -2066,7 +2087,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 14,
@@ -2087,7 +2111,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 15,
@@ -2108,7 +2135,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 16,
@@ -2129,7 +2159,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 17,
@@ -2150,7 +2183,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 18,
@@ -2171,7 +2207,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 19,
@@ -2192,7 +2231,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 20,
@@ -2213,7 +2255,10 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     },
     {
       "id": 21,
@@ -2234,7 +2279,34 @@ export const show: T.Show = {
         0.0,
         0.0
       ],
-      "color": "#b9b4aa"
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
+    },
+    {
+      "id": 22,
+      "name": "Wall",
+      "kind": "model",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        4.0,
+        3.0,
+        0.1
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b9b4aa",
+      "model_path": "",
+      "model_unit": "m",
+      "model_z_up": true
     }
   ],
   "visualizer": {
@@ -4316,7 +4388,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 4,
@@ -4337,7 +4412,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#111111"
+          "color": "#111111",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 2,
@@ -4358,7 +4436,10 @@ export const commands: T.Command[] = [
             90.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 3,
@@ -4379,7 +4460,10 @@ export const commands: T.Command[] = [
             90.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 10,
@@ -4400,7 +4484,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 11,
@@ -4421,7 +4508,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 12,
@@ -4442,7 +4532,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 13,
@@ -4463,7 +4556,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 14,
@@ -4484,7 +4580,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 15,
@@ -4505,7 +4604,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 16,
@@ -4526,7 +4628,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 17,
@@ -4547,7 +4652,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 18,
@@ -4568,7 +4676,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 19,
@@ -4589,7 +4700,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 20,
@@ -4610,7 +4724,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 21,
@@ -4631,7 +4748,34 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
+        },
+        {
+          "id": 22,
+          "name": "Wall",
+          "kind": "model",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         }
       ],
       "visualizer": {
@@ -6559,7 +6703,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 4,
@@ -6580,7 +6727,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#111111"
+          "color": "#111111",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 2,
@@ -6601,7 +6751,10 @@ export const commands: T.Command[] = [
             90.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 3,
@@ -6622,7 +6775,10 @@ export const commands: T.Command[] = [
             90.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 10,
@@ -6643,7 +6799,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 11,
@@ -6664,7 +6823,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 12,
@@ -6685,7 +6847,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 13,
@@ -6706,7 +6871,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 14,
@@ -6727,7 +6895,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 15,
@@ -6748,7 +6919,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 16,
@@ -6769,7 +6943,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 17,
@@ -6790,7 +6967,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 18,
@@ -6811,7 +6991,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 19,
@@ -6832,7 +7015,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 20,
@@ -6853,7 +7039,10 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         },
         {
           "id": 21,
@@ -6874,7 +7063,34 @@ export const commands: T.Command[] = [
             0.0,
             0.0
           ],
-          "color": "#b9b4aa"
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
+        },
+        {
+          "id": 22,
+          "name": "Wall",
+          "kind": "model",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            4.0,
+            3.0,
+            0.1
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "color": "#b9b4aa",
+          "model_path": "",
+          "model_unit": "m",
+          "model_z_up": true
         }
       ],
       "visualizer": {

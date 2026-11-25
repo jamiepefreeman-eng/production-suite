@@ -391,6 +391,7 @@ pub fn demo_show() -> Show {
             size: [13.5, 5.0, 0.15],
             rotation: [0.0, 0.0, 0.0],
             color: "#b9b4aa".into(),
+            ..Scenery::default()
         },
         Scenery {
             id: 4,
@@ -400,6 +401,7 @@ pub fn demo_show() -> Show {
             size: [4.0, 2.25, 0.08],
             rotation: [0.0, 0.0, 0.0],
             color: "#111111".into(),
+            ..Scenery::default()
         },
         Scenery {
             id: 2,
@@ -409,6 +411,7 @@ pub fn demo_show() -> Show {
             size: [8.0, 4.0, 0.15],
             rotation: [0.0, 90.0, 0.0],
             color: "#b9b4aa".into(),
+            ..Scenery::default()
         },
         Scenery {
             id: 3,
@@ -418,6 +421,7 @@ pub fn demo_show() -> Show {
             size: [8.0, 4.0, 0.15],
             rotation: [0.0, 90.0, 0.0],
             color: "#b9b4aa".into(),
+            ..Scenery::default()
         }],
         visualizer: VisualizerSettings::default(),
         mixer: None,
