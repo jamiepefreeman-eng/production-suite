@@ -139,6 +139,67 @@ pub struct Show {
     pub lyric_follow: crate::presenter::follow::FollowSettings,
     /// Libraries the operator made (kept even while empty). "Default", "Songs" and "Scripture" always exist.
     pub libraries: Vec<String>,
+    /// CCLI licence number and where the song copyright notice is shown.
+    pub ccli: CcliSettings,
+    /// MIDI from a playback app (MultiTracks Playback, Loop Community Prime) or a controller → Presenter.
+    pub midi_triggers: Vec<MidiTrigger>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+pub enum CcliFooter {
+    /// On the first slide of each song (as it is played).
+    First,
+    #[default]
+    /// On the last slide of each song.
+    Last,
+    /// On every slide.
+    All,
+    Off,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(default))]
+pub struct CcliSettings {
+    /// The church's CCLI Copyright / Streaming licence number.
+    pub license: String,
+    pub footer: CcliFooter,
+}
+
+/// What a MIDI trigger does in the Presenter.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(tag = "type", rename_all = "snake_case"))]
+pub enum MidiAction {
+    NextSlide,
+    PreviousSlide,
+    /// First slide of this group ("Chorus") in the song that's live (or the first song, if none is).
+    GoGroup { group: String },
+    /// Slide number `index` (1-based, in arrangement order) of the live song — like ProPresenter's note numbers.
+    GoSlideIndex { index: u32 },
+    /// Start item `index` (1-based) of the service, skipping section headers.
+    GoServiceItem { index: u32 },
+    GoSlide { presentation: u32, slide: u32 },
+    /// Anything a slide can do: lighting cue, mixer scene, media, macro, clear…
+    Trigger { trigger: crate::presenter::SlideTrigger },
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct MidiTrigger {
+    pub id: u32,
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub name: String,
+    /// The note / CC / program it answers to (`None` = not learned yet).
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub control: Option<crate::midi::MidiControl>,
+    /// Use the note number / program number as the slide or service item number
+    /// (one trigger for "note 1 = slide 1, note 2 = slide 2 …"). Any number on that channel matches.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub number_is_index: bool,
+    pub action: MidiAction,
 }
 
 /// What a show-page button or fader does.
@@ -265,6 +326,15 @@ impl Show {
             }
         }
         order.iter().position(|x| *x == slide)
+    }
+
+    /// Slides of one presentation in arrangement order.
+    pub fn sequence_of(&self, presentation: u32) -> Vec<u32> {
+        let Some(p) = self.presentation(presentation) else { return vec![] };
+        match p.arrangement.as_ref().and_then(|n| p.arrangements.iter().find(|a| &a.name == n)) {
+            Some(a) => a.sequence.iter().flat_map(|g| p.slides.iter().filter(move |s| &s.label == g).map(|s| s.id)).collect(),
+            None => p.slides.iter().map(|s| s.id).collect(),
+        }
     }
 
     pub fn slide_text(&self, presentation: u32, slide: u32) -> Option<&str> {

@@ -7,6 +7,7 @@ pub use lyrics::parse_lyrics;
 
 /// A file in the media bin. Paths are absolute on the computer that added them.
 pub mod follow;
+pub mod songselect;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MediaItem {
@@ -371,6 +372,12 @@ pub struct Presentation {
     /// everything else → "Default").
     #[cfg_attr(feature = "serde", serde(default))]
     pub library: String,
+    /// Writers, as SongSelect / Planning Center list them ("Chris Tomlin | John Newton").
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub authors: String,
+    /// Copyright line ("© 2006 sixsteps Music …"), shown with the CCLI licence on the slides.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub copyright: String,
 }
 
 impl Presentation {

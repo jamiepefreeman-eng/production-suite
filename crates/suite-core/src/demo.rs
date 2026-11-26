@@ -255,6 +255,8 @@ pub fn demo_show() -> Show {
         arrangements: vec![],
         arrangement: None,
         library: String::new(),
+        authors: String::new(),
+        copyright: String::new(),
         slides: vec![
             Slide {
                 id: 1,
@@ -290,6 +292,8 @@ pub fn demo_show() -> Show {
         arrangements: vec![],
         arrangement: None,
         library: String::new(),
+        authors: String::new(),
+        copyright: String::new(),
     };
     if let Some(first) = grace.slides.first_mut() {
         first.triggers.push(SlideTrigger::LightingCue { cue: 2 });
@@ -304,6 +308,8 @@ pub fn demo_show() -> Show {
         arrangements: vec![],
         arrangement: None,
         library: String::new(),
+        authors: String::new(),
+        copyright: String::new(),
         slides: vec![Slide {
             id: 1,
             label: "John 3:16".into(),
@@ -434,6 +440,8 @@ pub fn demo_show() -> Show {
         show_page: Default::default(),
         lyric_follow: Default::default(),
         libraries: vec![],
+        ccli: Default::default(),
+        midi_triggers: vec![],
     };
     show.effects = demo_effects();
     show.show_page = crate::show::ShowPage::generate(&show);

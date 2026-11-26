@@ -10,6 +10,8 @@ pub enum MidiMessage {
     NoteOn { channel: u8, note: u8, velocity: u8 },
     NoteOff { channel: u8, note: u8 },
     ControlChange { channel: u8, controller: u8, value: u8 },
+    /// Program change — playback apps often send one per song.
+    ProgramChange { channel: u8, program: u8 },
 }
 
 impl MidiMessage {
@@ -22,6 +24,7 @@ impl MidiMessage {
             (0x90, [note, vel, ..]) if *vel > 0 => Some(MidiMessage::NoteOn { channel, note: *note & 0x7f, velocity: *vel & 0x7f }),
             (0x90, [note, _, ..]) | (0x80, [note, _, ..]) => Some(MidiMessage::NoteOff { channel, note: *note & 0x7f }),
             (0xb0, [cc, val, ..]) => Some(MidiMessage::ControlChange { channel, controller: *cc & 0x7f, value: *val & 0x7f }),
+            (0xc0, [prog, ..]) => Some(MidiMessage::ProgramChange { channel, program: *prog & 0x7f }),
             _ => None,
         }
     }
@@ -31,6 +34,7 @@ impl MidiMessage {
         match *self {
             MidiMessage::NoteOn { channel, note, .. } | MidiMessage::NoteOff { channel, note } => MidiControl { kind: MidiControlKind::Note, channel, number: note },
             MidiMessage::ControlChange { channel, controller, .. } => MidiControl { kind: MidiControlKind::Cc, channel, number: controller },
+            MidiMessage::ProgramChange { channel, program } => MidiControl { kind: MidiControlKind::Program, channel, number: program },
         }
     }
 
@@ -40,6 +44,7 @@ impl MidiMessage {
             MidiMessage::NoteOn { velocity, .. } => velocity as f32 / 127.0,
             MidiMessage::NoteOff { .. } => 0.0,
             MidiMessage::ControlChange { value, .. } => value as f32 / 127.0,
+            MidiMessage::ProgramChange { .. } => 1.0,
         }
     }
 }
@@ -51,6 +56,8 @@ pub enum MidiControlKind {
     #[default]
     Note,
     Cc,
+    /// Program change (number = program).
+    Program,
 }
 
 /// A button / pad (note) or knob / fader (CC) on a controller.
@@ -73,6 +80,7 @@ mod tests {
         assert_eq!(MidiMessage::parse(&[0x80, 61, 40]), Some(MidiMessage::NoteOff { channel: 1, note: 61 }));
         assert_eq!(MidiMessage::parse(&[0xB0, 7, 127]), Some(MidiMessage::ControlChange { channel: 1, controller: 7, value: 127 }));
         assert_eq!(MidiMessage::parse(&[0xF8]), None); // clock
+        assert_eq!(MidiMessage::parse(&[0xC2, 5]), Some(MidiMessage::ProgramChange { channel: 3, program: 5 }));
         assert_eq!(MidiMessage::parse(&[0x90, 60]), None); // short
         let cc = MidiMessage::parse(&[0xB3, 20, 64]).unwrap();
         assert_eq!(cc.control(), MidiControl { kind: MidiControlKind::Cc, channel: 4, number: 20 });

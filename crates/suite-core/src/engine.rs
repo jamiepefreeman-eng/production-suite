@@ -274,6 +274,64 @@ impl Engine {
         }
     }
 
+    /// Where the live slide is in the play order (first match), for next / previous.
+    fn live_pos(&self, order: &[(u32, u32)]) -> Option<usize> {
+        self.live_slide.and_then(|ls| Show::locate(order, ls, None))
+    }
+
+    /// The song MIDI section / slide-number triggers act on: the live one, else the first in the service.
+    fn target_presentation(&self) -> Option<u32> {
+        self.live_slide.map(|(p, _)| p).or_else(|| {
+            self.show.running_order().into_iter().find(|p| p.kind != crate::presenter::PresentationKind::Header && !p.slides.is_empty()).map(|p| p.id)
+        })
+    }
+
+    fn midi_action(&mut self, action: crate::show::MidiAction, number: Option<u32>, now: Instant, ev: &mut Vec<Event>) {
+        use crate::show::MidiAction as A;
+        let go = |e: &mut Self, ps: Option<(u32, u32)>, ev: &mut Vec<Event>, what: &str| match ps {
+            Some((p, s)) => e.go_slide(p, s, now, ev),
+            None => ev.push(warn(format!("MIDI: {what}"))),
+        };
+        match action {
+            A::NextSlide | A::PreviousSlide => {
+                let order = self.show.play_order();
+                let target = match (self.live_pos(&order), &action) {
+                    (Some(i), A::NextSlide) => order.get(i + 1).copied(),
+                    (Some(i), _) => i.checked_sub(1).and_then(|j| order.get(j).copied()),
+                    (None, _) => order.first().copied(),
+                };
+                go(self, target, ev, "no slide to go to");
+            }
+            A::GoGroup { group } => {
+                let target = self.target_presentation().and_then(|pid| {
+                    let p = self.show.presentation(pid)?;
+                    let seq = self.show.sequence_of(pid);
+                    seq.into_iter().find(|sid| p.slide(*sid).is_some_and(|s| s.label.eq_ignore_ascii_case(group.trim()))).map(|sid| (pid, sid))
+                });
+                go(self, target, ev, &format!("no “{group}” in the live song"));
+            }
+            A::GoSlideIndex { index } => {
+                let n = number.unwrap_or(index).max(1);
+                let target = self.target_presentation().and_then(|pid| self.show.sequence_of(pid).get(n as usize - 1).map(|sid| (pid, *sid)));
+                go(self, target, ev, &format!("the live song has no slide {n}"));
+            }
+            A::GoServiceItem { index } => {
+                let n = number.unwrap_or(index).max(1);
+                let items: Vec<u32> = self
+                    .show
+                    .playlist
+                    .iter()
+                    .filter(|id| self.show.presentation(**id).is_some_and(|p| p.kind != crate::presenter::PresentationKind::Header))
+                    .copied()
+                    .collect();
+                let target = items.get(n as usize - 1).and_then(|pid| self.show.sequence_of(*pid).first().map(|sid| (*pid, *sid)));
+                go(self, target, ev, &format!("the service has no item {n}"));
+            }
+            A::GoSlide { presentation, slide } => self.go_slide(presentation, slide, now, ev),
+            A::Trigger { trigger } => self.run_trigger(trigger, now, ev, 0),
+        }
+    }
+
     fn midi_input(&mut self, msg: MidiMessage, now: Instant, ev: &mut Vec<Event>) {
         ev.push(Event::MidiReceived { message: msg });
         let ctl: MidiControl = msg.control();
@@ -288,7 +346,7 @@ impl Engine {
             } else {
                 // Buttons fire on the press: note-on, or a CC crossing the middle upward.
                 let pressed = match msg {
-                    MidiMessage::NoteOn { .. } => true,
+                    MidiMessage::NoteOn { .. } | MidiMessage::ProgramChange { .. } => true,
                     MidiMessage::NoteOff { .. } => false,
                     MidiMessage::ControlChange { .. } => before < 0.5 && value >= 0.5,
                 };
@@ -296,6 +354,33 @@ impl Engine {
                     self.trigger_item(id, 1.0, now, ev);
                 }
             }
+        }
+        // Presenter triggers (MultiTracks Playback / Loop Prime cues, controller pads).
+        let pressed = match msg {
+            MidiMessage::NoteOn { .. } | MidiMessage::ProgramChange { .. } => true,
+            MidiMessage::NoteOff { .. } => false,
+            MidiMessage::ControlChange { .. } => before < 0.5 && value >= 0.5,
+        };
+        if !pressed {
+            return;
+        }
+        let hits: Vec<(crate::show::MidiAction, Option<u32>)> = self
+            .show
+            .midi_triggers
+            .iter()
+            .filter_map(|t| {
+                let c = t.control?;
+                if t.number_is_index {
+                    // Program changes count from 1 in every app's display ("Program 1" is byte 0).
+                    let n = ctl.number as u32 + u32::from(ctl.kind == crate::midi::MidiControlKind::Program);
+                    (c.kind == ctl.kind && c.channel == ctl.channel).then(|| (t.action.clone(), Some(n)))
+                } else {
+                    (c == ctl).then(|| (t.action.clone(), None))
+                }
+            })
+            .collect();
+        for (action, number) in hits {
+            self.midi_action(action, number, now, ev);
         }
     }
 
@@ -688,6 +773,48 @@ mod tests {
         let gm = item_id(&e, |k| matches!(k, ShowItemKind::GroupMaster { .. }));
         let ev = e.handle(super::Command::TriggerShowItem { item: gm, value: 0.25 }, now);
         assert!(ev.iter().any(|x| matches!(x, super::Event::MastersChanged { groups, .. } if groups[0].level == 0.25)));
+    }
+
+    #[test]
+    fn midi_triggers_drive_the_presenter() {
+        use crate::show::{MidiAction, MidiTrigger};
+        let mut show = crate::demo::demo_show();
+        let song = show.presentations.iter().find(|p| p.kind == crate::presenter::PresentationKind::Song && p.slides.len() >= 2).unwrap().clone();
+        let note = |n: u8| Some(MidiControl { kind: MidiControlKind::Note, channel: 1, number: n });
+        let second_label = song.slides[1].label.clone();
+        show.midi_triggers = vec![
+            MidiTrigger { id: 1, name: "next".into(), control: note(60), number_is_index: false, action: MidiAction::NextSlide },
+            MidiTrigger { id: 2, name: "section".into(), control: note(61), number_is_index: false, action: MidiAction::GoGroup { group: second_label.to_uppercase() } },
+            MidiTrigger {
+                id: 3,
+                name: "song by program".into(),
+                control: Some(MidiControl { kind: MidiControlKind::Program, channel: 16, number: 0 }),
+                number_is_index: true,
+                action: MidiAction::GoServiceItem { index: 1 },
+            },
+            MidiTrigger { id: 4, name: "lights".into(), control: note(62), number_is_index: false, action: MidiAction::Trigger { trigger: crate::presenter::SlideTrigger::LightingCue { cue: 1 } } },
+        ];
+        let items: Vec<u32> = show.playlist.iter().filter(|id| show.presentation(**id).is_some_and(|p| p.kind != crate::presenter::PresentationKind::Header)).copied().collect();
+        let song_index = items.iter().position(|id| *id == song.id).unwrap() as u8; // program byte = index (shown as index+1)
+        let mut e = super::Engine::new(show);
+        let now = std::time::Instant::now();
+        let on = |n: u8| super::Command::MidiInput { message: MidiMessage::NoteOn { channel: 1, note: n, velocity: 100 } };
+        // Program change picks the song, section note jumps inside it, next note steps on.
+        e.handle(super::Command::MidiInput { message: MidiMessage::ProgramChange { channel: 16, program: song_index } }, now);
+        assert_eq!(e.live_slide(), Some((song.id, e.show.sequence_of(song.id)[0])));
+        e.handle(on(61), now);
+        assert_eq!(e.live_slide(), Some((song.id, song.slides[1].id)), "section by name, any case");
+        let order = e.show.play_order();
+        let at = super::Show::locate(&order, e.live_slide().unwrap(), None).unwrap();
+        e.handle(on(60), now);
+        assert_eq!(e.live_slide(), order.get(at + 1).copied());
+        e.handle(on(62), now);
+        assert_eq!(e.active_cue(), Some(1));
+        // Note-offs and unknown notes do nothing.
+        let before = e.live_slide();
+        e.handle(super::Command::MidiInput { message: MidiMessage::NoteOff { channel: 1, note: 60 } }, now);
+        e.handle(on(10), now);
+        assert_eq!(e.live_slide(), before);
     }
 
     #[test]

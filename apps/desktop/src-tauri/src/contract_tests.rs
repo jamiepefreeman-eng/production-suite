@@ -90,6 +90,30 @@ fn write_typescript_contract() {
     show.show_page.items[1].color = "#ff8800".into();
     show.lyric_follow.mode = suite_core::presenter::follow::FollowMode::Auto;
     show.libraries = vec!["Christmas".into()];
+    show.ccli = suite_core::show::CcliSettings { license: "1234567".into(), footer: suite_core::show::CcliFooter::First };
+    show.presentations[2].authors = "John Newton".into();
+    show.presentations[2].copyright = "Public Domain".into();
+    {
+        use suite_core::show::{MidiAction as A, MidiTrigger};
+        let pc = Some(MidiControl { kind: MidiControlKind::Program, channel: 16, number: 0 });
+        let actions = vec![
+            A::NextSlide,
+            A::PreviousSlide,
+            A::GoGroup { group: "Chorus".into() },
+            A::GoSlideIndex { index: 1 },
+            A::GoServiceItem { index: 2 },
+            A::GoSlide { presentation: 2, slide: 1 },
+            A::Trigger { trigger: SlideTrigger::LightingCue { cue: 1 } },
+        ];
+        show.midi_triggers = actions
+            .into_iter()
+            .enumerate()
+            .map(|(i, action)| MidiTrigger { id: i as u32 + 1, name: format!("t{i}"), control: if i == 0 { None } else { pc }, number_is_index: i == 4, action })
+            .collect();
+    }
+    for footer in [suite_core::show::CcliFooter::Last, suite_core::show::CcliFooter::All, suite_core::show::CcliFooter::Off] {
+        let _ = footer; // every variant appears in ccliFooters below
+    }
     show.presentations[1].library = "Christmas".into();
     show.media_playlists.push(MediaPlaylist { name: "Backgrounds".into(), items: vec![1, 2] });
     show.presentations[1].groups.push(SlideGroup { name: "Vamp".into(), color: "#f97316".into() });
@@ -220,6 +244,7 @@ fn write_typescript_contract() {
         Command::MidiInput { message: MidiMessage::NoteOn { channel: 1, note: 36, velocity: 100 } },
         Command::MidiInput { message: MidiMessage::NoteOff { channel: 1, note: 36 } },
         Command::MidiInput { message: MidiMessage::ControlChange { channel: 2, controller: 7, value: 64 } },
+        Command::MidiInput { message: MidiMessage::ProgramChange { channel: 16, program: 3 } },
         Command::RecordCue { name: "Walk-in".into(), fade_ms: 2000 },
         Command::DeleteCue { cue: 1 },
         Command::RecordPosition { name: "Pulpit".into() },
@@ -313,6 +338,46 @@ fn write_typescript_contract() {
     );
     o.add("modelProgress", "T.ModelProgress", &crate::lyric_follow::Progress { name: "base.en".into(), downloaded: 10, total: Some(100) });
     o.add("modelProgressUnknown", "T.ModelProgress", &crate::lyric_follow::Progress { name: "base.en".into(), downloaded: 10, total: None });
+    o.add(
+        "ccliFooters",
+        "T.CcliFooter[]",
+        &vec![suite_core::show::CcliFooter::First, suite_core::show::CcliFooter::Last, suite_core::show::CcliFooter::All, suite_core::show::CcliFooter::Off],
+    );
+    o.add(
+        "importedSongs",
+        "T.ImportedSong[]",
+        &vec![
+            crate::songs::ImportedSong { path: "/x/a.txt".into(), presentation: Some(suite_core::presenter::parse_lyrics(1, "A", "x", 2)), error: None },
+            crate::songs::ImportedSong { path: "/x/b.txt".into(), presentation: None, error: Some("no lyrics".into()) },
+        ],
+    );
+    o.add(
+        "ccliUsage",
+        "T.UsageEntry[]",
+        &vec![crate::songs::UsageEntry { at: 1, title: "Way Maker".into(), ccli: Some("7115744".into()), authors: "Sinach".into(), copyright: "©".into(), show: "Sunday".into() }],
+    );
+    o.add("pcoStatus", "T.PcoStatus", &crate::pco::PcoStatus { signed_in: true, app_id: "abc".into() });
+    o.add("pcoServiceTypes", "T.PcoServiceType[]", &vec![crate::pco::PcoServiceType { id: "1".into(), name: "Sunday".into() }]);
+    o.add("pcoPlans", "T.PcoPlan[]", &vec![crate::pco::PcoPlan { id: "2".into(), title: "Advent 1".into(), dates: "Dec 7".into(), series: "Advent".into() }]);
+    {
+        use crate::pco::{PcoItem, PcoItemKind as K};
+        let item = |kind: K| PcoItem {
+            kind,
+            title: "x".into(),
+            key: "G".into(),
+            ccli: Some("1".into()),
+            authors: "a".into(),
+            copyright: "c".into(),
+            arrangement: "Default".into(),
+            lyrics: "Verse 1\nx".into(),
+            sequence: vec!["Verse 1".into()],
+        };
+        o.add(
+            "pcoPlan",
+            "T.PcoPlanImport",
+            &crate::pco::PcoPlanImport { title: "Advent".into(), dates: "Dec 7".into(), items: vec![item(K::Song), item(K::Header), item(K::Item), item(K::Media)] },
+        );
+    }
     o.add(
         "recentShows",
         "T.RecentShow[]",

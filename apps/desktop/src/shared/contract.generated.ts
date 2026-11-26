@@ -1549,7 +1549,9 @@ export const show: T.Show = {
       "groups": [],
       "arrangements": [],
       "arrangement": null,
-      "library": ""
+      "library": "",
+      "authors": "",
+      "copyright": ""
     },
     {
       "id": 1,
@@ -1723,7 +1725,9 @@ export const show: T.Show = {
       ],
       "arrangements": [],
       "arrangement": "Sunday",
-      "library": "Christmas"
+      "library": "Christmas",
+      "authors": "",
+      "copyright": ""
     },
     {
       "id": 2,
@@ -1786,7 +1790,9 @@ export const show: T.Show = {
         }
       ],
       "arrangement": null,
-      "library": ""
+      "library": "",
+      "authors": "John Newton",
+      "copyright": "Public Domain"
     },
     {
       "id": 3,
@@ -1822,7 +1828,9 @@ export const show: T.Show = {
       "groups": [],
       "arrangements": [],
       "arrangement": null,
-      "library": ""
+      "library": "",
+      "authors": "",
+      "copyright": ""
     }
   ],
   "playlist": [
@@ -2807,6 +2815,108 @@ export const show: T.Show = {
   },
   "libraries": [
     "Christmas"
+  ],
+  "ccli": {
+    "license": "1234567",
+    "footer": "first"
+  },
+  "midi_triggers": [
+    {
+      "id": 1,
+      "name": "t0",
+      "control": null,
+      "number_is_index": false,
+      "action": {
+        "type": "next_slide"
+      }
+    },
+    {
+      "id": 2,
+      "name": "t1",
+      "control": {
+        "kind": "program",
+        "channel": 16,
+        "number": 0
+      },
+      "number_is_index": false,
+      "action": {
+        "type": "previous_slide"
+      }
+    },
+    {
+      "id": 3,
+      "name": "t2",
+      "control": {
+        "kind": "program",
+        "channel": 16,
+        "number": 0
+      },
+      "number_is_index": false,
+      "action": {
+        "type": "go_group",
+        "group": "Chorus"
+      }
+    },
+    {
+      "id": 4,
+      "name": "t3",
+      "control": {
+        "kind": "program",
+        "channel": 16,
+        "number": 0
+      },
+      "number_is_index": false,
+      "action": {
+        "type": "go_slide_index",
+        "index": 1
+      }
+    },
+    {
+      "id": 5,
+      "name": "t4",
+      "control": {
+        "kind": "program",
+        "channel": 16,
+        "number": 0
+      },
+      "number_is_index": true,
+      "action": {
+        "type": "go_service_item",
+        "index": 2
+      }
+    },
+    {
+      "id": 6,
+      "name": "t5",
+      "control": {
+        "kind": "program",
+        "channel": 16,
+        "number": 0
+      },
+      "number_is_index": false,
+      "action": {
+        "type": "go_slide",
+        "presentation": 2,
+        "slide": 1
+      }
+    },
+    {
+      "id": 7,
+      "name": "t6",
+      "control": {
+        "kind": "program",
+        "channel": 16,
+        "number": 0
+      },
+      "number_is_index": false,
+      "action": {
+        "type": "trigger",
+        "trigger": {
+          "type": "lighting_cue",
+          "cue": 1
+        }
+      }
+    }
   ]
 };
 
@@ -2986,6 +3096,14 @@ export const commands: T.Command[] = [
       "channel": 2,
       "controller": 7,
       "value": 64
+    }
+  },
+  {
+    "type": "midi_input",
+    "message": {
+      "type": "program_change",
+      "channel": 16,
+      "program": 3
     }
   },
   {
@@ -4571,7 +4689,9 @@ export const commands: T.Command[] = [
           "groups": [],
           "arrangements": [],
           "arrangement": null,
-          "library": ""
+          "library": "",
+          "authors": "",
+          "copyright": ""
         },
         {
           "id": 1,
@@ -4745,7 +4865,9 @@ export const commands: T.Command[] = [
           ],
           "arrangements": [],
           "arrangement": "Sunday",
-          "library": "Christmas"
+          "library": "Christmas",
+          "authors": "",
+          "copyright": ""
         },
         {
           "id": 2,
@@ -4808,7 +4930,9 @@ export const commands: T.Command[] = [
             }
           ],
           "arrangement": null,
-          "library": ""
+          "library": "",
+          "authors": "John Newton",
+          "copyright": "Public Domain"
         },
         {
           "id": 3,
@@ -4844,7 +4968,9 @@ export const commands: T.Command[] = [
           "groups": [],
           "arrangements": [],
           "arrangement": null,
-          "library": ""
+          "library": "",
+          "authors": "",
+          "copyright": ""
         }
       ],
       "playlist": [
@@ -5829,6 +5955,108 @@ export const commands: T.Command[] = [
       },
       "libraries": [
         "Christmas"
+      ],
+      "ccli": {
+        "license": "1234567",
+        "footer": "first"
+      },
+      "midi_triggers": [
+        {
+          "id": 1,
+          "name": "t0",
+          "control": null,
+          "number_is_index": false,
+          "action": {
+            "type": "next_slide"
+          }
+        },
+        {
+          "id": 2,
+          "name": "t1",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "previous_slide"
+          }
+        },
+        {
+          "id": 3,
+          "name": "t2",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "go_group",
+            "group": "Chorus"
+          }
+        },
+        {
+          "id": 4,
+          "name": "t3",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "go_slide_index",
+            "index": 1
+          }
+        },
+        {
+          "id": 5,
+          "name": "t4",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": true,
+          "action": {
+            "type": "go_service_item",
+            "index": 2
+          }
+        },
+        {
+          "id": 6,
+          "name": "t5",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "go_slide",
+            "presentation": 2,
+            "slide": 1
+          }
+        },
+        {
+          "id": 7,
+          "name": "t6",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "trigger",
+            "trigger": {
+              "type": "lighting_cue",
+              "cue": 1
+            }
+          }
+        }
       ]
     }
   },
@@ -7380,7 +7608,9 @@ export const commands: T.Command[] = [
           "groups": [],
           "arrangements": [],
           "arrangement": null,
-          "library": ""
+          "library": "",
+          "authors": "",
+          "copyright": ""
         },
         {
           "id": 1,
@@ -7554,7 +7784,9 @@ export const commands: T.Command[] = [
           ],
           "arrangements": [],
           "arrangement": "Sunday",
-          "library": "Christmas"
+          "library": "Christmas",
+          "authors": "",
+          "copyright": ""
         },
         {
           "id": 2,
@@ -7617,7 +7849,9 @@ export const commands: T.Command[] = [
             }
           ],
           "arrangement": null,
-          "library": ""
+          "library": "",
+          "authors": "John Newton",
+          "copyright": "Public Domain"
         },
         {
           "id": 3,
@@ -7653,7 +7887,9 @@ export const commands: T.Command[] = [
           "groups": [],
           "arrangements": [],
           "arrangement": null,
-          "library": ""
+          "library": "",
+          "authors": "",
+          "copyright": ""
         }
       ],
       "playlist": [
@@ -8638,6 +8874,108 @@ export const commands: T.Command[] = [
       },
       "libraries": [
         "Christmas"
+      ],
+      "ccli": {
+        "license": "1234567",
+        "footer": "first"
+      },
+      "midi_triggers": [
+        {
+          "id": 1,
+          "name": "t0",
+          "control": null,
+          "number_is_index": false,
+          "action": {
+            "type": "next_slide"
+          }
+        },
+        {
+          "id": 2,
+          "name": "t1",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "previous_slide"
+          }
+        },
+        {
+          "id": 3,
+          "name": "t2",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "go_group",
+            "group": "Chorus"
+          }
+        },
+        {
+          "id": 4,
+          "name": "t3",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "go_slide_index",
+            "index": 1
+          }
+        },
+        {
+          "id": 5,
+          "name": "t4",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": true,
+          "action": {
+            "type": "go_service_item",
+            "index": 2
+          }
+        },
+        {
+          "id": 6,
+          "name": "t5",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "go_slide",
+            "presentation": 2,
+            "slide": 1
+          }
+        },
+        {
+          "id": 7,
+          "name": "t6",
+          "control": {
+            "kind": "program",
+            "channel": 16,
+            "number": 0
+          },
+          "number_is_index": false,
+          "action": {
+            "type": "trigger",
+            "trigger": {
+              "type": "lighting_cue",
+              "cue": 1
+            }
+          }
+        }
       ]
     }
   }
@@ -9342,6 +9680,149 @@ export const modelProgressUnknown: T.ModelProgress = {
   "name": "base.en",
   "downloaded": 10,
   "total": null
+};
+
+export const ccliFooters: T.CcliFooter[] = [
+  "first",
+  "last",
+  "all",
+  "off"
+];
+
+export const importedSongs: T.ImportedSong[] = [
+  {
+    "path": "/x/a.txt",
+    "presentation": {
+      "id": 1,
+      "title": "A",
+      "kind": "song",
+      "ccli": null,
+      "slides": [
+        {
+          "id": 1,
+          "label": "Lyrics",
+          "text": "x",
+          "triggers": [],
+          "style": {
+            "font": null,
+            "size": null,
+            "color": null,
+            "bold": null,
+            "italic": null,
+            "uppercase": null,
+            "shadow": null,
+            "position": null,
+            "align": null
+          },
+          "elements": []
+        }
+      ],
+      "theme": "Default",
+      "groups": [],
+      "arrangements": [],
+      "arrangement": null,
+      "library": "",
+      "authors": "",
+      "copyright": ""
+    },
+    "error": null
+  },
+  {
+    "path": "/x/b.txt",
+    "presentation": null,
+    "error": "no lyrics"
+  }
+];
+
+export const ccliUsage: T.UsageEntry[] = [
+  {
+    "at": 1,
+    "title": "Way Maker",
+    "ccli": "7115744",
+    "authors": "Sinach",
+    "copyright": "©",
+    "show": "Sunday"
+  }
+];
+
+export const pcoStatus: T.PcoStatus = {
+  "signed_in": true,
+  "app_id": "abc"
+};
+
+export const pcoServiceTypes: T.PcoServiceType[] = [
+  {
+    "id": "1",
+    "name": "Sunday"
+  }
+];
+
+export const pcoPlans: T.PcoPlan[] = [
+  {
+    "id": "2",
+    "title": "Advent 1",
+    "dates": "Dec 7",
+    "series": "Advent"
+  }
+];
+
+export const pcoPlan: T.PcoPlanImport = {
+  "title": "Advent",
+  "dates": "Dec 7",
+  "items": [
+    {
+      "kind": "song",
+      "title": "x",
+      "key": "G",
+      "ccli": "1",
+      "authors": "a",
+      "copyright": "c",
+      "arrangement": "Default",
+      "lyrics": "Verse 1\nx",
+      "sequence": [
+        "Verse 1"
+      ]
+    },
+    {
+      "kind": "header",
+      "title": "x",
+      "key": "G",
+      "ccli": "1",
+      "authors": "a",
+      "copyright": "c",
+      "arrangement": "Default",
+      "lyrics": "Verse 1\nx",
+      "sequence": [
+        "Verse 1"
+      ]
+    },
+    {
+      "kind": "item",
+      "title": "x",
+      "key": "G",
+      "ccli": "1",
+      "authors": "a",
+      "copyright": "c",
+      "arrangement": "Default",
+      "lyrics": "Verse 1\nx",
+      "sequence": [
+        "Verse 1"
+      ]
+    },
+    {
+      "kind": "media",
+      "title": "x",
+      "key": "G",
+      "ccli": "1",
+      "authors": "a",
+      "copyright": "c",
+      "arrangement": "Default",
+      "lyrics": "Verse 1\nx",
+      "sequence": [
+        "Verse 1"
+      ]
+    }
+  ]
 };
 
 export const recentShows: T.RecentShow[] = [

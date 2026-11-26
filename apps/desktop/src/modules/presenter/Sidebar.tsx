@@ -2,7 +2,7 @@
 // and the open show's Service order. Laid out by layout.tsx PaneColumn.
 
 import { useEffect, useRef, useState } from "react";
-import { api, confirmDialog, showFiles } from "../../shared/bridge";
+import { api, confirmDialog, pickSongFiles, showFiles } from "../../shared/bridge";
 import { startDrag, useDropTarget, wasDragging } from "../../shared/drag";
 import { pushLog, updateShow } from "../../shared/store";
 import type {
@@ -64,6 +64,8 @@ export function newPresentation(
       arrangements: [],
       arrangement: null,
       library: BUILT_IN_LIBRARIES.includes(library) ? "" : library,
+      authors: "",
+      copyright: "",
       slides:
         kind === "header"
           ? []
@@ -71,6 +73,44 @@ export function newPresentation(
     });
     if (addToService) d.playlist.push(id);
   }).then(() => id);
+}
+
+// ─────────────────────────────────────────────── Song import (SongSelect / ChordPro / Planning Center)
+
+const sameSong = (a: Presentation, b: { title: string; ccli: string | null }) =>
+  a.kind === "song" && ((!!a.ccli && !!b.ccli && a.ccli === b.ccli) || a.title.trim().toLowerCase() === b.title.trim().toLowerCase());
+
+/** Add songs to the Library (skipping ones already there — same CCLI number or title). Returns the ids,
+ *  existing ones included, in the same order. */
+export async function addSongs(show: Show, songs: Presentation[], library: string): Promise<{ ids: number[]; added: number; skipped: string[] }> {
+  const theme = show.themes.find((t) => t.name === "Worship")?.name ?? show.themes[0]?.name ?? "Default";
+  let next = Math.max(0, ...show.presentations.map((p) => p.id));
+  const ids: number[] = [];
+  const fresh: Presentation[] = [];
+  const skipped: string[] = [];
+  for (const s of songs) {
+    const existing = [...show.presentations, ...fresh].find((p) => sameSong(p, s));
+    if (existing) {
+      ids.push(existing.id);
+      skipped.push(s.title);
+      continue;
+    }
+    const p: Presentation = { ...s, id: ++next, theme, library: BUILT_IN_LIBRARIES.includes(library) ? "" : library };
+    fresh.push(p);
+    ids.push(p.id);
+  }
+  if (fresh.length) await updateShow((d) => void d.presentations.push(...fresh));
+  return { ids, added: fresh.length, skipped };
+}
+
+/** Import SongSelect / ChordPro files into the Library. */
+export async function importSongFiles(show: Show, paths: string[], library: string): Promise<number[]> {
+  const res = await api.importSongFiles(paths);
+  const ok = res.filter((r) => r.presentation).map((r) => r.presentation!);
+  for (const r of res.filter((r) => r.error)) pushLog("warn", `${r.path.split(/[\\/]/).pop()}: ${r.error}`);
+  const { ids, added, skipped } = await addSongs(show, ok, library);
+  pushLog("info", `Imported ${added} song${added === 1 ? "" : "s"}${skipped.length ? ` · already in the Library: ${skipped.join(", ")}` : ""}`);
+  return ids;
 }
 
 // ─────────────────────────────────────────────── Library
@@ -88,8 +128,20 @@ export function LibraryActions({
 }) {
   return (
     <div className="seg small pp-lib-add">
-      <button onClick={onImport} title="Paste lyrics">
+      <button onClick={onImport} title="Paste lyrics (SongSelect “Copy”, a ChordPro chart, or typed)">
         + Song
+      </button>
+      <button
+        onClick={async () => {
+          const paths = await pickSongFiles();
+          if (paths.length) {
+            const ids = await importSongFiles(show, paths, activeLib);
+            if (ids[0] != null) onNew(ids[0]);
+          }
+        }}
+        title="Import songs downloaded from CCLI SongSelect (Lyrics .txt) or ChordPro files — or drag them onto the window"
+      >
+        ⇪ Import
       </button>
       <button
         onClick={() =>
@@ -417,9 +469,12 @@ export function useRecentShows(show: Show) {
   return { list, refresh };
 }
 
-export function ServicesActions({ refresh }: { refresh: () => void }) {
+export function ServicesActions({ refresh, onPlanningCenter }: { refresh: () => void; onPlanningCenter: () => void }) {
   return (
     <>
+      <button className="icon" title="Import a plan from Planning Center Services" onClick={onPlanningCenter}>
+        ⇣ PCO
+      </button>
       <button
         className="icon"
         title="Save the open show as a new service file"

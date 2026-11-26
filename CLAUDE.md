@@ -109,6 +109,25 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 * Building needs CMake + a C/C++ compiler + libclang (whisper.cpp). Build without it:
   `--no-default-features --features usb-dmx,audio`.
 
+## Integrations (v0.13.0)
+
+* **SongSelect / ChordPro**: `suite_core::presenter::songselect::import_song` (tested) reads SongSelect lyric .txt
+  (title, sections, footer: `CCLI Song #`, writers `A | B`, `©…`), ChordPro (`{title}`, `{ccli}`, `{soc}`, chords
+  stripped) and plain lyrics; ALL-CAPS headings are title-cased. Commands `import_song_files` / `import_song_text`
+  (src-tauri `songs.rs`); Library "⇪ Import", drag files onto the Presenter (`bridge.onFileDrop`: song files →
+  Library, media → bin), "+ Song" paste. `Presentation.authors/copyright`. Partner-only SongSelect API is NOT used.
+* **CCLI**: `Show.ccli {license, footer: first|last|all|off}`; `render.tsx ccliFooter` puts the notice on song slides
+  (audience + previews, not stream). Usage log `songs.rs` (SlideLive → `ccli-usage.json` in app data, one entry per
+  song per 6 h); Presenter toolbar © CCLI = settings + report (copy / CSV via `write_text_file`).
+* **MIDI triggers** (MultiTracks Playback / Loop Prime / controllers): `Show.midi_triggers` (`MidiTrigger {control,
+  number_is_index, action: MidiAction}`), run in the engine (`Engine::midi_action`, tested): next / previous (play
+  order), section by name in the live song, slide N, service item N (program change N+1 shown as "Program N"),
+  any `SlideTrigger`. `MidiMessage::ProgramChange`. UI: Presenter › Tools › MIDI (`MidiTriggers.tsx`, learn).
+* **Planning Center**: src-tauri `pco.rs` (Personal Access Token in `Settings.pco`, Basic auth; service types,
+  plans, items with `include=song,arrangement`; mapping unit-tested on sample JSON). UI `PlanningCenter.tsx`:
+  import a plan as a NEW service file (asks for the path first, saves the open service, reuses Library songs by
+  CCLI/title and adds PCO's sequence as an arrangement via `mapSequence`).
+
 ## Branding
 
 Freeman Creative (owner's ministry/brand). App icons in `src-tauri/icons/` are generated from the CF mark on a
@@ -161,6 +180,11 @@ dark rounded square (`npx tauri icon <1024px png>`); `public/brand/mark.png` is 
 - [ ] Lyric Follow end to end (mic → Whisper → advance): this cloud can't download models (huggingface.co
       blocked) and has no microphone — only compiled and unit-tested. Tune gate / confidence / words early
       with a real vocal channel at rehearsal; check latency on the Windows PCs
+- [ ] Planning Center: field names (`arrangement.lyrics/sequence`, `song.ccli_number/author/copyright`,
+      `item.item_type/key_name`) from the public API docs — this cloud can't reach api.planningcenteronline.com;
+      test with the church's real account
+- [ ] SongSelect file variants (lyrics .txt checked against the documented layout; chord-sheet .txt not handled)
+- [ ] MultiTracks Playback / Loop Prime MIDI out → triggers (only simulated MIDI in tests)
 - [ ] "Match background" reads pixels through the asset protocol (needs its CORS header = app origin; works in
       Chromium tests) — confirm on macOS/Windows that a video background drives the lights
 

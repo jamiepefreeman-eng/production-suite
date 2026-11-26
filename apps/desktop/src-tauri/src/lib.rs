@@ -16,7 +16,9 @@ mod dmx_out;
 mod lyric_follow;
 mod midi_link;
 mod mixer_link;
+mod pco;
 mod settings;
+mod songs;
 mod state;
 mod transcribe;
 mod usb_dmx;
@@ -59,7 +61,10 @@ pub fn run() {
                             dmx_out::rebuild_if_needed(&st);
                             lyric_follow::on_show_changed(&st, &handle);
                         }
-                        Event::SlideLive { presentation, slide, .. } => lyric_follow::on_slide_live(&st, &handle, *presentation, *slide),
+                        Event::SlideLive { presentation, slide, .. } => {
+                            lyric_follow::on_slide_live(&st, &handle, *presentation, *slide);
+                            songs::on_slide_live(&st, &handle, *presentation);
+                        }
                         Event::SlideCleared => lyric_follow::on_slide_cleared(&st, &handle),
                         _ => {}
                     }
@@ -88,6 +93,16 @@ pub fn run() {
             midi_link::midi_connect,
             commands::open_show,
             commands::recent_shows,
+            pco::pco_status,
+            pco::pco_sign_in,
+            pco::pco_service_types,
+            pco::pco_plans,
+            pco::pco_plan,
+            songs::import_song_files,
+            songs::import_song_text,
+            songs::write_text_file,
+            songs::ccli_usage,
+            songs::ccli_usage_clear,
             commands::forget_recent_show,
             commands::save_show,
             commands::new_demo_show,

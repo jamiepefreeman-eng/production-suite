@@ -174,6 +174,10 @@ export interface Presentation {
   arrangement: string | null;
   /** Library it is filed in; "" = by kind (Songs / Scripture / Default). */
   library: string;
+  /** Writers ("Chris Tomlin | John Newton"). */
+  authors: string;
+  /** "© 2006 sixsteps Music …" */
+  copyright: string;
 }
 
 export type MediaKind = "image" | "video" | "audio" | "input";
@@ -246,6 +250,8 @@ export interface Show {
   lyric_follow: FollowSettings;
   /** Libraries the operator made; "Default", "Songs", "Scripture" always exist. */
   libraries: string[];
+  ccli: CcliSettings;
+  midi_triggers: MidiTrigger[];
 }
 
 export type Action =
@@ -341,14 +347,15 @@ export type ShowItemKind =
   | { type: "blackout" }
   | { type: "release" }
   | { type: "match_background" };
-export type MidiControlKind = "note" | "cc";
+export type MidiControlKind = "note" | "cc" | "program";
 export interface MidiControl { kind: MidiControlKind; channel: number; number: number }
 export interface ShowItem { id: number; kind: ShowItemKind; label: string; color: string; midi: MidiControl | null }
 export interface ShowPage { items: ShowItem[] }
 export type MidiMessage =
   | { type: "note_on"; channel: number; note: number; velocity: number }
   | { type: "note_off"; channel: number; note: number }
-  | { type: "control_change"; channel: number; controller: number; value: number };
+  | { type: "control_change"; channel: number; controller: number; value: number }
+  | { type: "program_change"; channel: number; program: number };
 export interface MidiStatus { available: string[]; connected: string[]; errors: string[] }
 
 export interface FixtureVisual { id: number; intensity: number; color: Rgb; pan: number; tilt: number; gobo: number }
@@ -425,3 +432,34 @@ export interface ModelProgress { name: string; downloaded: number; total: number
 
 /** A show opened or saved on this computer (Presenter › Services). */
 export interface RecentShow { path: string; name: string; used_at: number; exists: boolean; current: boolean }
+
+// ── CCLI / SongSelect / Planning Center / MIDI triggers
+export type CcliFooter = "first" | "last" | "all" | "off";
+export interface CcliSettings { license: string; footer: CcliFooter }
+export type MidiAction =
+  | { type: "next_slide" }
+  | { type: "previous_slide" }
+  | { type: "go_group"; group: string }
+  | { type: "go_slide_index"; index: number }
+  | { type: "go_service_item"; index: number }
+  | { type: "go_slide"; presentation: number; slide: number }
+  | { type: "trigger"; trigger: SlideTrigger };
+export interface MidiTrigger { id: number; name: string; control: MidiControl | null; number_is_index: boolean; action: MidiAction }
+export interface ImportedSong { path: string; presentation: Presentation | null; error: string | null }
+export interface UsageEntry { at: number; title: string; ccli: string | null; authors: string; copyright: string; show: string }
+export interface PcoStatus { signed_in: boolean; app_id: string }
+export interface PcoServiceType { id: string; name: string }
+export interface PcoPlan { id: string; title: string; dates: string; series: string }
+export type PcoItemKind = "song" | "header" | "item" | "media";
+export interface PcoItem {
+  kind: PcoItemKind;
+  title: string;
+  key: string;
+  ccli: string | null;
+  authors: string;
+  copyright: string;
+  arrangement: string;
+  lyrics: string;
+  sequence: string[];
+}
+export interface PcoPlanImport { title: string; dates: string; items: PcoItem[] }

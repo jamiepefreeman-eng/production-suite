@@ -577,7 +577,7 @@ body.dragging, body.dragging * { cursor: grabbing !important; user-select: none 
 .pp-next-row { display: flex; gap: 8px; align-items: center; }
 .pp-preview.tiny { width: 38%; }
 .pp-rtabs { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.pp-rtab-bar { display: grid; grid-template-columns: repeat(6, 1fr); border-bottom: 1px solid var(--line); }
+.pp-rtab-bar { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--line); }
 .pp-rtab-bar button { border: none; border-radius: 0; background: transparent; display: flex; flex-direction: column; align-items: center; padding: 5px 0; color: var(--muted); font-size: 15px; }
 .pp-rtab-bar button small { font-size: 10px; }
 .pp-rtab-bar button.on { background: var(--blue); color: #fff; }
@@ -791,7 +791,7 @@ body.resizing-y, body.resizing-y * { cursor: row-resize !important; user-select:
 .pp-service-title.on { color: var(--text, #e5e7eb); }
 /* Libraries */
 .pp-lib { display: flex; flex-direction: column; gap: 4px; min-height: 0; }
-.pp-lib-add { flex-basis: 100%; display: flex; }
+.pp-lib-add { flex-basis: 100%; display: grid; grid-template-columns: 1fr 1fr; }
 .pp-lib-add button { flex: 1; font-size: 11px; }
 .pp-lib-tools { gap: 4px; }
 .pp-lib-tools .search { margin: 0; padding: 4px 8px; min-width: 0; }
@@ -810,3 +810,36 @@ body.resizing-y, body.resizing-y * { cursor: row-resize !important; user-select:
 .pp-services li.missing { opacity: 0.5; }
 .pp-svc-icon { width: 12px; font-size: 10px; color: var(--muted); }
 .pp-services li.sel .pp-svc-icon { color: var(--ok); }
+/* CCLI copyright notice on song slides */
+.render-footer { position: absolute; left: 3cqw; right: 3cqw; bottom: 1.6cqh; z-index: 3; font-size: 2.1cqh; line-height: 1.25; color: #ffffffcc;
+  text-shadow: 0 0 0.6cqh #000, 0 0.2cqh 0.6cqh #000; text-align: left; font-weight: 400; text-transform: none; pointer-events: none; }
+/* CCLI panel */
+.ccli-modal { width: min(820px, 94vw); max-height: 88vh; display: flex; flex-direction: column; gap: 8px; }
+.ccli-modal h4 { margin: 8px 0 0; }
+.ccli-table-wrap { flex: 1; min-height: 120px; max-height: 46vh; overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
+.ccli-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ccli-table th { position: sticky; top: 0; background: var(--panel-2); text-align: left; padding: 6px 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.ccli-table td { padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+.ccli-table tr.no-ccli td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }
+/* Presenter › MIDI triggers */
+.pp-midi { display: flex; flex-direction: column; gap: 8px; padding: 10px; }
+.pp-midi-help { background: var(--panel-2); border-radius: 6px; padding: 6px 8px; font-size: 12px; }
+.pp-midi-help summary { cursor: pointer; font-weight: 600; }
+.pp-midi-help ol { margin: 6px 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.pp-midi-add { display: flex; flex-wrap: wrap; gap: 4px; }
+.pp-midi-add button { font-size: 11px; padding: 3px 7px; }
+.pp-midi-row { border: 1px solid var(--line); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+.pp-midi-row.learning { outline: 2px solid #22c55e; }
+.pp-midi-row select.grow { min-width: 0; }
+.pp-midi-params input[type="number"] { width: 64px; }
+.pp-midi-name { min-width: 0; font-size: 12px; }
+/* Planning Center import */
+.pco-modal { width: min(860px, 94vw); max-height: 88vh; display: flex; flex-direction: column; gap: 8px; }
+.pco-signin { display: flex; flex-direction: column; gap: 6px; }
+.pco-signin ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 3px; }
+.pco-cols { display: grid; grid-template-columns: 280px 1fr; gap: 10px; min-height: 260px; max-height: 52vh; }
+.pco-plans { border: 1px solid var(--line); border-radius: 6px; overflow: auto; padding: 4px; }
+.pco-items { border: 1px solid var(--line); border-radius: 6px; overflow: auto; padding: 8px 12px; }
+.pco-items h4 { margin: 0 0 6px; }
+.pco-items ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+.pco-item.header { font-weight: 700; color: #fcd34d; list-style: none; margin-left: -18px; }

@@ -8,13 +8,13 @@ import { startDrag, useDropTarget, wasDragging } from "../../shared/drag";
 import MatchWheel from "../../shared/MatchWheel";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type {
-  MidiControl,
-  MidiMessage,
   Show,
   ShowItem,
   ShowItemKind,
 } from "../../shared/types";
 import { effectSwatch } from "./Effects";
+import { midiControlOf, midiLabel } from "../../shared/midi";
+export { midiControlOf, midiLabel };
 
 const isFader = (k: ShowItemKind) =>
   k.type === "grand_master" || k.type === "group_master";
@@ -66,32 +66,6 @@ function autoLabel(show: Show, k: ShowItemKind): string {
     case "match_background":
       return "Match background";
   }
-}
-
-export function midiControlOf(m: MidiMessage): MidiControl {
-  return m.type === "control_change"
-    ? { kind: "cc", channel: m.channel, number: m.controller }
-    : { kind: "note", channel: m.channel, number: m.note };
-}
-const NOTE_NAMES = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-];
-export function midiLabel(c: MidiControl) {
-  const ch = c.channel === 1 ? "" : ` ch${c.channel}`;
-  return c.kind === "cc"
-    ? `CC ${c.number}${ch}`
-    : `${NOTE_NAMES[c.number % 12]}${Math.floor(c.number / 12) - 1} (${c.number})${ch}`;
 }
 
 export default function ShowPage({ show }: { show: Show }) {

@@ -17,6 +17,8 @@ pub struct Settings {
     pub follow_input: Option<crate::lyric_follow::FollowInput>,
     /// Shows opened or saved on this computer, newest first (Presenter › Services).
     pub recent_shows: Vec<RecentShow>,
+    /// Planning Center Personal Access Token.
+    pub pco: Option<crate::pco::PcoCredentials>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

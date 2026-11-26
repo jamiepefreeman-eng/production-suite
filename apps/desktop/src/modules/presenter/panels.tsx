@@ -1,6 +1,7 @@
 // Media folders + media bin (bottom), and the right-hand tabs:
 // Audio · Props · Timers · Macros · Slide actions.
 
+import MidiTriggersTab from "./MidiTriggers";
 import LyricFollowPanel from "./LyricFollow";
 import MediaSearch from "./MediaSearch";
 import { useEffect, useRef, useState } from "react";
@@ -49,6 +50,11 @@ const kindOf = (path: string): MediaKind | null => {
 async function importMedia(show: Show, intoPlaylist?: number) {
   const paths = await pickMediaFiles();
   if (!paths.length) return;
+  await addMediaPaths(show, paths, intoPlaylist);
+}
+
+/** Add image / video / audio files to the media bin (skips ones already there and other file types). */
+export async function addMediaPaths(show: Show, paths: string[], intoPlaylist?: number) {
   let id = Math.max(0, ...show.media.map((m) => m.id));
   const items: MediaItem[] = [];
   for (const path of paths) {
@@ -360,6 +366,7 @@ export function RightTabs({
     ["macros", "⚡", "Macros"],
     ["slide", "⚙", "Slide"],
     ["follow", "◉", "Follow"],
+    ["midi", "⇄", "MIDI"],
   ];
   return (
     <div className="pp-rtabs">
@@ -377,6 +384,7 @@ export function RightTabs({
         {tab === "timers" && <TimersTab />}
         {tab === "macros" && <MacrosTab show={show} />}
         {tab === "follow" && <LyricFollowPanel />}
+        {tab === "midi" && <MidiTriggersTab show={show} />}
         {tab === "slide" && <SlideActions show={show} selected={selected} onClose={onCloseSlide} />}
       </div>
     </div>

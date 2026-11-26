@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { mediaUrl } from "../../shared/bridge";
 import { useInputStream } from "../../shared/inputs";
+import { sequence } from "./groups";
 import { pushLog } from "../../shared/store";
 import type { Countdown, MediaItem, Prop, Show, Slide, SlideElement, TextAlign, TextStyle, Theme } from "../../shared/types";
 
@@ -181,6 +182,7 @@ export function SlideRender({
   transparent = false,
   style,
   elements,
+  footer,
 }: {
   text: string;
   theme?: Theme;
@@ -188,6 +190,8 @@ export function SlideRender({
   style?: TextStyle | null;
   /** Text boxes, pictures, videos and live feeds on this slide. */
   elements?: RenderElement[];
+  /** Small notice along the bottom (the song's CCLI copyright line). */
+  footer?: string;
   /** Media layer; overrides the theme's background media while set. */
   background?: MediaItem | null;
   kind?: "audience" | "stream";
@@ -239,6 +243,7 @@ export function SlideRender({
           {prop.text && <span>{prop.text}</span>}
         </div>
       ))}
+      {footer && !stream && <div className="render-footer">{footer}</div>}
       {countdown && <CountdownBadge c={countdown} />}
     </div>
   );
@@ -293,4 +298,22 @@ function CountdownBadge({ c }: { c: Countdown }) {
       <CountdownText c={c} />
     </div>
   );
+}
+
+/** The CCLI copyright notice for this slide, if the song shows one here (Show.ccli.footer). */
+export function ccliFooter(show: Show | null, presentationId: number | undefined, slideId: number | undefined): string {
+  if (!show || presentationId == null || slideId == null) return "";
+  const p = show.presentations.find((x) => x.id === presentationId);
+  const where = show.ccli?.footer ?? "last";
+  if (!p || p.kind !== "song" || where === "off") return "";
+  if (!p.ccli && !p.copyright && !p.authors) return "";
+  const seq = sequence(p);
+  const first = seq[0]?.slide.id;
+  const last = seq[seq.length - 1]?.slide.id;
+  if (!(where === "all" || (where === "first" && slideId === first) || (where === "last" && slideId === last))) return "";
+  const parts = [`“${p.title}”${p.authors ? ` — ${p.authors.split("|").map((a) => a.trim()).join(", ")}` : ""}`];
+  if (p.copyright) parts.push(p.copyright);
+  const nums = [p.ccli ? `CCLI Song # ${p.ccli}` : "", show.ccli?.license ? `CCLI License # ${show.ccli.license}` : ""].filter(Boolean).join(" · ");
+  if (nums) parts.push(nums);
+  return parts.join("  ·  ");
 }

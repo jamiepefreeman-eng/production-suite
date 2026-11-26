@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../shared/bridge";
 import { pushLog, useEngine } from "../../shared/store";
 import type { MidiStatus } from "../../shared/types";
-import { midiControlOf, midiLabel } from "./ShowPage";
+import { midiControlOf, midiLabel, midiWhat } from "../../shared/midi";
 
 export default function MidiSetup() {
   const [st, setSt] = useState<MidiStatus | null>(null);
@@ -24,12 +24,7 @@ export default function MidiSetup() {
   useEffect(() => {
     if (!lastMidi) return;
     const m = lastMidi.message;
-    const what =
-      m.type === "control_change"
-        ? `moved to ${m.value}`
-        : m.type === "note_on"
-          ? `pressed (${m.velocity})`
-          : "released";
+    const what = midiWhat(m);
     setHeard((h) =>
       [`${midiLabel(midiControlOf(m))} ${what}`, ...h].slice(0, 12),
     );

@@ -4,6 +4,7 @@
 
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { ask, open as openDialog, save as saveDialog } from "@tauri-apps/plugin-dialog";
 import type * as T from "./types";
 
@@ -20,6 +21,16 @@ export const api = {
   send: (command: T.Command) => call<T.EngineEvent[]>("engine_command", { command }),
   status: () => call<T.EngineStatus>("engine_status"),
   openShow: (path: string) => call<T.Show>("open_show", { path }),
+  importSongFiles: (paths: string[], maxLines?: number) => call<T.ImportedSong[]>("import_song_files", { paths, maxLines: maxLines ?? null }),
+  importSongText: (text: string, title: string, maxLines?: number) => call<T.Presentation>("import_song_text", { text, title, maxLines: maxLines ?? null }),
+  writeTextFile: (path: string, text: string) => call<void>("write_text_file", { path, text }),
+  ccliUsage: () => call<T.UsageEntry[]>("ccli_usage"),
+  ccliUsageClear: (beforeMs: number) => call<number>("ccli_usage_clear", { beforeMs }),
+  pcoStatus: () => call<T.PcoStatus>("pco_status"),
+  pcoSignIn: (appId: string, secret: string) => call<T.PcoServiceType[]>("pco_sign_in", { appId, secret }),
+  pcoServiceTypes: () => call<T.PcoServiceType[]>("pco_service_types"),
+  pcoPlans: (serviceType: string) => call<T.PcoPlan[]>("pco_plans", { serviceType }),
+  pcoPlan: (serviceType: string, plan: string) => call<T.PcoPlanImport>("pco_plan", { serviceType, plan }),
   recentShows: () => call<T.RecentShow[]>("recent_shows"),
   forgetRecentShow: (path: string) => call<void>("forget_recent_show", { path }),
   saveShow: (path?: string) => call<string>("save_show", { path: path ?? null }),
@@ -77,6 +88,36 @@ export async function pickMediaFiles(): Promise<string[]> {
   return Array.isArray(r) ? r : [r];
 }
 
+export const SONG_FILE_EXTENSIONS = ["txt", "cho", "chordpro", "chopro", "crd", "pro"];
+
+/** Pick song files downloaded from SongSelect (lyrics .txt) or ChordPro charts. */
+export async function pickSongFiles(): Promise<string[]> {
+  const r = await openDialog({ multiple: true, filters: [{ name: "Songs (SongSelect, ChordPro)", extensions: SONG_FILE_EXTENSIONS }] });
+  if (!r) return [];
+  return Array.isArray(r) ? r : [r];
+}
+
+/** Files dragged from Finder / Explorer and dropped on this window. Returns an unsubscribe function. */
+export function onFileDrop(cb: (paths: string[]) => void): () => void {
+  if (!inTauri) return () => {};
+  let un: UnlistenFn | null = null;
+  let gone = false;
+  try {
+    void getCurrentWebview()
+      .onDragDropEvent((e) => {
+        if (e.payload.type === "drop" && e.payload.paths.length) cb(e.payload.paths);
+      })
+      .then((u) => (gone ? u() : (un = u)))
+      .catch((e) => console.warn("File drop unavailable:", e));
+  } catch (e) {
+    console.warn("File drop unavailable:", e); // never take the app down over drag and drop
+  }
+  return () => {
+    gone = true;
+    un?.();
+  };
+}
+
 /** Pick a 3D model exported from SketchUp / Blender etc. Returns the absolute path or null. */
 export async function pickModelFile(): Promise<string | null> {
   const r = await openDialog({ filters: [{ name: "3D model", extensions: ["stl", "obj", "dae", "glb", "gltf"] }] });
@@ -90,6 +131,8 @@ export const showFiles = {
     return typeof p === "string" ? p : null;
   },
   save: (defaultName: string) => saveDialog({ defaultPath: defaultName, filters: [{ name: "Show", extensions: ["json"] }] }),
+  /** Save dialog for other files (reports). */
+  saveAs: (defaultName: string, kind: string, extensions: string[]) => saveDialog({ defaultPath: defaultName, filters: [{ name: kind, extensions }] }),
 };
 
 export type ModuleId = "presenter" | "lighting" | "audio" | "visualizer";

@@ -15,10 +15,11 @@ use super::{Presentation, PresentationKind, Slide};
 
 const SECTION_WORDS: &[&str] = &[
     "verse", "chorus", "pre-chorus", "prechorus", "bridge", "tag", "intro", "outro", "ending", "interlude",
-    "refrain", "vamp", "turnaround", "instrumental",
+    "refrain", "vamp", "turnaround", "instrumental", "misc", "coda", "breakdown", "hook", "post-chorus", "postchorus",
+    "channel", "spoken", "rap", "solo",
 ];
 
-fn section_label(line: &str) -> Option<String> {
+pub(crate) fn section_label(line: &str) -> Option<String> {
     let t = line.trim();
     if t.starts_with('[') && t.ends_with(']') && t.len() > 2 {
         return Some(t[1..t.len() - 1].trim().to_string());
@@ -95,6 +96,8 @@ pub fn parse_lyrics(id: u32, title: &str, text: &str, max_lines: usize) -> Prese
         arrangements: vec![],
         arrangement: None,
         library: String::new(),
+        authors: String::new(),
+        copyright: String::new(),
     }
 }
 

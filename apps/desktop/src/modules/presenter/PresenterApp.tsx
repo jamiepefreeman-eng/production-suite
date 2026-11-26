@@ -9,7 +9,7 @@
 // Drag media, props and macros onto slides; drag groups into an arrangement.
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, confirmDialog } from "../../shared/bridge";
+import { SONG_FILE_EXTENSIONS, api, confirmDialog, onFileDrop } from "../../shared/bridge";
 import { startDrag, useDropTarget, wasDragging } from "../../shared/drag";
 import { pushLog, send, updateShow, useEngine } from "../../shared/store";
 import type {
@@ -22,6 +22,7 @@ import type {
 import { groupColor, groupNames, sequence } from "./groups";
 import {
   Bin,
+  addMediaPaths,
   MediaFolders,
   RightTabs,
   triggerLabel,
@@ -37,8 +38,11 @@ import {
   slideBackground,
   slideMedia,
   themeFor,
+  ccliFooter,
 } from "./render";
 import ThemeEditor from "./themes";
+import CcliPanel from "./Ccli";
+import PlanningCenterImport from "./PlanningCenter";
 import { useFollowEnter, useFollowStatus } from "./LyricFollow";
 import SlideDesigner, { setEditAll } from "./SlideDesigner";
 import { PaneColumn, WidthHandle, useLayout, type Pane } from "./layout";
@@ -48,6 +52,7 @@ import {
   ServiceBody,
   ServicesActions,
   ServicesBody,
+  importSongFiles,
   newPresentation,
   serviceName,
   useRecentShows,
@@ -77,12 +82,31 @@ export type Cursor = { p: number; pos: number } | null;
 export default function PresenterApp() {
   const { show, live } = useEngine();
   useFollowEnter();
+  // Files dragged in from Finder / Explorer: songs → Library, pictures / video / audio → media bin.
+  const showRef = useRef(show);
+  showRef.current = show;
+  const libRef = useRef("Default");
+  useEffect(
+    () =>
+      onFileDrop((paths) => {
+        const s = showRef.current;
+        if (!s) return;
+        const ext = (p: string) => p.split(".").pop()?.toLowerCase() ?? "";
+        const songs = paths.filter((p) => SONG_FILE_EXTENSIONS.includes(ext(p)));
+        const media = paths.filter((p) => !SONG_FILE_EXTENSIONS.includes(ext(p)));
+        if (songs.length) void importSongFiles(s, songs, libRef.current);
+        if (media.length) void addMediaPaths(s, media);
+      }),
+    [],
+  );
   const [focus, setFocus] = useState<number | null>(null);
   const [libraryOnly, setLibraryOnly] = useState<number | null>(null);
   const [selSlide, setSelSlide] = useState<SlideRef | null>(null);
   const [mode, setMode] = useState<Mode>("show");
   const [importing, setImporting] = useState(false);
   const [themesOpen, setThemesOpen] = useState(false);
+  const [ccliOpen, setCcliOpen] = useState(false);
+  const [pcoOpen, setPcoOpen] = useState(false);
   const [showBin, setShowBin] = useState(true);
   const [folder, setFolder] = useState<Folder>({ kind: "all" });
   const [thumb, setThumb] = useState(() => readPref("presenter.thumb", 200));
@@ -92,6 +116,7 @@ export default function PresenterApp() {
   const sectionRefs = useRef(new Map<number, HTMLElement>());
   const { layout, update } = useLayout();
   const [activeLib, setActiveLib] = useState("Default");
+  libRef.current = activeLib;
   const [namingPlaylist, setNamingPlaylist] = useState(false);
   const recent = useRecentShows(show ?? ({ name: "" } as Show));
 
@@ -203,6 +228,7 @@ export default function PresenterApp() {
         setMode={setMode}
         canEdit={!!current}
         onThemes={() => setThemesOpen(true)}
+        onCcli={() => setCcliOpen(true)}
         showBin={showBin}
         setShowBin={setShowBin}
         leftHidden={layout.leftHidden}
@@ -242,7 +268,7 @@ export default function PresenterApp() {
                 {
                   id: "services",
                   title: "Services",
-                  actions: <ServicesActions refresh={recent.refresh} />,
+                  actions: <ServicesActions refresh={recent.refresh} onPlanningCenter={() => setPcoOpen(true)} />,
                   body: (
                     <ServicesBody list={recent.list} refresh={recent.refresh} />
                   ),
@@ -457,6 +483,8 @@ export default function PresenterApp() {
           }}
         />
       )}
+      {ccliOpen && <CcliPanel show={show} onClose={() => setCcliOpen(false)} />}
+      {pcoOpen && <PlanningCenterImport show={show} onClose={() => setPcoOpen(false)} onDone={recent.refresh} />}
       {themesOpen && (
         <ThemeEditor
           show={show}
@@ -475,6 +503,7 @@ function Toolbar({
   setMode,
   canEdit,
   onThemes,
+  onCcli,
   showBin,
   setShowBin,
   leftHidden,
@@ -486,6 +515,7 @@ function Toolbar({
   setMode: (m: Mode) => void;
   canEdit: boolean;
   onThemes: () => void;
+  onCcli: () => void;
   showBin: boolean;
   setShowBin: (v: boolean) => void;
   leftHidden: boolean;
@@ -577,6 +607,7 @@ function Toolbar({
         onClick={() => {}}
         title="Scripture lookup is coming — for now use + Scripture in the Library"
       />
+      <Tool icon="©" label="CCLI" onClick={onCcli} title="CCLI licence, song copyright notice and usage report" />
       <span className="grow" />
       <Tool
         icon="▣"
@@ -701,6 +732,7 @@ function LivePanel({
           props={liveProps(show, layers.props)}
           style={live ? liveSlide?.style : null}
           elements={live ? slideElements(show, liveSlide) : []}
+          footer={live ? ccliFooter(show, live.presentation, live.slide) : ""}
         />
       </div>
       <div className="pp-layers">
@@ -737,6 +769,7 @@ function LivePanel({
             transparent
             style={next?.style}
             elements={slideElements(show, next)}
+            footer={ccliFooter(show, liveP?.id, next?.id)}
           />
         </div>
         <div className="muted">
@@ -1227,6 +1260,7 @@ function SlideTile({
           transparent
           style={slide.style}
           elements={slideElements(show, slide)}
+          footer={ccliFooter(show, p.id, slide.id)}
         />
         {slide.triggers.length > 0 && (
           <div className="pp-badges">
@@ -1762,8 +1796,10 @@ function ImportSong({
 
   const add = async () => {
     try {
-      const p = await api.parseLyrics(title || "Untitled", lyrics, lines);
-      p.ccli = ccli || null;
+      // Understands SongSelect "Copy" text (title, CCLI #, writers, ©) and ChordPro as well as plain lyrics.
+      const p = await api.importSongText(lyrics, title, lines);
+      if (title.trim()) p.title = title.trim();
+      if (ccli.trim()) p.ccli = ccli.trim();
       p.theme = theme;
       await updateShow((d) => {
         d.presentations.push(p);
@@ -1822,7 +1858,8 @@ function ImportSong({
         <small>
           Section headers like <code>[Verse 1]</code>, <code>Chorus:</code> or{" "}
           <code>Verse 2</code> become groups; a blank line starts a new slide.
-          Change anything afterwards with <b>Edit</b> or <b>Reflow</b>.
+          Paste straight from <b>SongSelect</b> (title, CCLI #, writers and © are picked up) or a ChordPro chart (chords are
+          removed). Change anything afterwards with <b>Edit</b> or <b>Reflow</b>.
         </small>
         <div className="row end">
           <button onClick={onClose}>Cancel</button>
