@@ -172,6 +172,8 @@ export interface Presentation {
   groups: SlideGroup[];
   arrangements: Arrangement[];
   arrangement: string | null;
+  /** Library it is filed in; "" = by kind (Songs / Scripture / Default). */
+  library: string;
 }
 
 export type MediaKind = "image" | "video" | "audio" | "input";
@@ -242,6 +244,8 @@ export interface Show {
   effects: Effect[];
   show_page: ShowPage;
   lyric_follow: FollowSettings;
+  /** Libraries the operator made; "Default", "Songs", "Scripture" always exist. */
+  libraries: string[];
 }
 
 export type Action =
@@ -418,3 +422,6 @@ export interface FollowStatus {
 }
 export interface SpeechModel { name: string; size_mb: number; note: string; path: string; downloaded: boolean }
 export interface ModelProgress { name: string; downloaded: number; total: number | null }
+
+/** A show opened or saved on this computer (Presenter › Services). */
+export interface RecentShow { path: string; name: string; used_at: number; exists: boolean; current: boolean }

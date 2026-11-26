@@ -54,22 +54,60 @@ pub fn engine_status(state: S<'_>) -> EngineStatus {
 }
 
 #[tauri::command]
-pub fn open_show(state: S<'_>, path: PathBuf) -> Result<Show, String> {
+pub fn open_show(app: tauri::AppHandle, state: S<'_>, path: PathBuf) -> Result<Show, String> {
     let text = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
     let show: Show = serde_json::from_str(&text).map_err(|e| format!("Not a valid show file: {e}"))?;
     state.dispatch(Command::LoadShow { show: show.clone() });
-    *state.show_path.lock().unwrap() = Some(path);
+    *state.show_path.lock().unwrap() = Some(path.clone());
+    remember(&app, &state, &path, &show.name);
     Ok(show)
 }
 
+fn remember(app: &tauri::AppHandle, state: &AppState, path: &std::path::Path, name: &str) {
+    let mut s = state.settings.lock().unwrap();
+    s.remember_show(path, name);
+    let _ = s.save(app);
+}
+
+#[derive(Serialize)]
+pub struct RecentShowInfo {
+    pub path: PathBuf,
+    pub name: String,
+    pub used_at: u64,
+    /// False if the file has been moved or deleted since.
+    pub exists: bool,
+    /// This is the show that's open now.
+    pub current: bool,
+}
+
+/// Shows opened or saved on this computer (Presenter › Services), newest first.
 #[tauri::command]
-pub fn save_show(state: S<'_>, path: Option<PathBuf>) -> Result<PathBuf, String> {
+pub fn recent_shows(state: S<'_>) -> Vec<RecentShowInfo> {
+    let current = state.show_path.lock().unwrap().clone();
+    let list = state.settings.lock().unwrap().recent_shows.clone();
+    list.into_iter()
+        .map(|r| RecentShowInfo { exists: r.path.exists(), current: current.as_ref() == Some(&r.path), path: r.path, name: r.name, used_at: r.used_at })
+        .collect()
+}
+
+/// Take a show off the Services list (the file itself is kept).
+#[tauri::command]
+pub fn forget_recent_show(app: tauri::AppHandle, state: S<'_>, path: PathBuf) -> Result<(), String> {
+    let mut s = state.settings.lock().unwrap();
+    s.recent_shows.retain(|r| r.path != path);
+    s.save(&app)
+}
+
+#[tauri::command]
+pub fn save_show(app: tauri::AppHandle, state: S<'_>, path: Option<PathBuf>) -> Result<PathBuf, String> {
     let path = path
         .or_else(|| state.show_path.lock().unwrap().clone())
         .ok_or("No file chosen")?;
-    let json = serde_json::to_string_pretty(&state.show()).map_err(|e| e.to_string())?;
+    let show = state.show();
+    let json = serde_json::to_string_pretty(&show).map_err(|e| e.to_string())?;
     std::fs::write(&path, json).map_err(|e| e.to_string())?;
     *state.show_path.lock().unwrap() = Some(path.clone());
+    remember(&app, &state, &path, &show.name);
     Ok(path)
 }
 

@@ -367,14 +367,41 @@ pub struct Presentation {
     /// Arrangement in use; `None` = slides in their written order.
     #[cfg_attr(feature = "serde", serde(default))]
     pub arrangement: Option<String>,
+    /// Which library it is filed in; empty = by kind (songs → "Songs", scripture → "Scripture",
+    /// everything else → "Default").
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub library: String,
 }
 
 impl Presentation {
+    /// The library this is shown in.
+    pub fn library_name(&self) -> &str {
+        if !self.library.is_empty() {
+            return &self.library;
+        }
+        match self.kind {
+            PresentationKind::Song => "Songs",
+            PresentationKind::Scripture => "Scripture",
+            _ => "Default",
+        }
+    }
+
     pub fn slide(&self, id: u32) -> Option<&Slide> {
         self.slides.iter().find(|s| s.id == id)
     }
 
     pub fn slide_mut(&mut self, id: u32) -> Option<&mut Slide> {
         self.slides.iter_mut().find(|s| s.id == id)
+    }
+}
+
+#[cfg(test)]
+mod library_tests {
+    #[test]
+    fn library_by_kind_unless_filed() {
+        let mut p = crate::presenter::lyrics::parse_lyrics(1, "Song", "a\nb", 2);
+        assert_eq!(p.library_name(), "Songs");
+        p.library = "Christmas".into();
+        assert_eq!(p.library_name(), "Christmas");
     }
 }

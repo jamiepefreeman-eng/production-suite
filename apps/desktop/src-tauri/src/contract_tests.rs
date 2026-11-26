@@ -89,6 +89,8 @@ fn write_typescript_contract() {
     show.show_page.items[1].label = "Walk-in".into();
     show.show_page.items[1].color = "#ff8800".into();
     show.lyric_follow.mode = suite_core::presenter::follow::FollowMode::Auto;
+    show.libraries = vec!["Christmas".into()];
+    show.presentations[1].library = "Christmas".into();
     show.media_playlists.push(MediaPlaylist { name: "Backgrounds".into(), items: vec![1, 2] });
     show.presentations[1].groups.push(SlideGroup { name: "Vamp".into(), color: "#f97316".into() });
     show.presentations[1].arrangement = Some("Sunday".into());
@@ -311,6 +313,11 @@ fn write_typescript_contract() {
     );
     o.add("modelProgress", "T.ModelProgress", &crate::lyric_follow::Progress { name: "base.en".into(), downloaded: 10, total: Some(100) });
     o.add("modelProgressUnknown", "T.ModelProgress", &crate::lyric_follow::Progress { name: "base.en".into(), downloaded: 10, total: None });
+    o.add(
+        "recentShows",
+        "T.RecentShow[]",
+        &vec![crate::commands::RecentShowInfo { path: "/Shows/Sunday.json".into(), name: "COR".into(), used_at: 1_800_000_000_000, exists: true, current: true }],
+    );
     o.add(
         "midiStatus",
         "T.MidiStatus",

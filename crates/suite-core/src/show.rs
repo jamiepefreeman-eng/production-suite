@@ -137,6 +137,8 @@ pub struct Show {
     pub show_page: ShowPage,
     // Presenter: Lyric Follow (listen to the singer, advance slides)
     pub lyric_follow: crate::presenter::follow::FollowSettings,
+    /// Libraries the operator made (kept even while empty). "Default", "Songs" and "Scripture" always exist.
+    pub libraries: Vec<String>,
 }
 
 /// What a show-page button or fader does.

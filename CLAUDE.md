@@ -210,7 +210,12 @@ dark rounded square (`npx tauri icon <1024px png>`); `public/brand/mark.png` is 
    text / shape / media incl. live inputs, x,y,w,h 0..1) edited in `presenter/SlideDesigner.tsx` (Edit › 🎨);
    AI media search (`presenter/mediaAnalysis.ts` measures colours/brightness/motion into `MediaItem.analysis`,
    `ai_rank_media` asks Claude with structured output, offline keyword ranking fallback; "Use for song" sets
-   the first slide's media cue). Still to do: scripture library, media transport (play/pause/scrub),
+   the first slide's media cue). *v0.12.0:* left column = Library (top; several libraries: `Presentation.library`,
+   "" = by kind → Songs/Scripture/Default, `Show.libraries` for custom ones, drag onto a library to file),
+   Services (`Settings.recent_shows`, `recent_shows`/`forget_recent_show`; clicking one saves the open show first
+   if it has a file, else confirms, then `open_show`), Service (running order), Media folders. Both side columns
+   are `presenter/layout.tsx` PaneColumns: width handles, drag bars between sections, ▾ fold, toolbar ◧/◨ hide;
+   remembered in localStorage `presenter.layout.v2`. Still to do: scripture library, media transport (play/pause/scrub),
    stage display layouts, native NDI (now via NDI Tools "NDI Webcam"), CCLI report.
    Older notes: themes/backgrounds (images + video loops), media playback, scripture library
    (public-domain KJV/WEB bundled; others need licences), arrangements (V1 C V2 C B C), stage display

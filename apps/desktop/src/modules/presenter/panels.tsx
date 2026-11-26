@@ -66,23 +66,32 @@ async function importMedia(show: Show, intoPlaylist?: number) {
 
 // ─────────────────────────────────────────────── Media folders (left bottom)
 
-export function MediaFolders({ show, folder, setFolder }: { show: Show; folder: Folder; setFolder: (f: Folder) => void }) {
-  const [naming, setNaming] = useState(false);
+export function MediaFolders({
+  show,
+  folder,
+  setFolder,
+  bare = false,
+  naming: namingProp,
+  setNaming: setNamingProp,
+}: {
+  show: Show;
+  folder: Folder;
+  setFolder: (f: Folder) => void;
+  /** Inside a resizable pane: no own title bar (the pane has one). */
+  bare?: boolean;
+  naming?: boolean;
+  setNaming?: (v: boolean) => void;
+}) {
+  const [namingLocal, setNamingLocal] = useState(false);
+  const naming = namingProp ?? namingLocal;
+  const setNaming = setNamingProp ?? setNamingLocal;
   const fixed: [Folder["kind"], string, string][] = [
     ["all", "▦", "All media"],
     ["visual", "▣", "Images & video"],
     ["input", "◉", "Video inputs"],
     ["audio", "♪", "Audio"],
   ];
-  return (
-    <div className="pp-section pp-folders">
-      <header>
-        <h3>Media</h3>
-        <span className="grow" />
-        <button className="icon" title="New media playlist" onClick={() => setNaming(true)}>
-          +
-        </button>
-      </header>
+  const list = (
       <ul className="pp-list">
         {fixed.map(([k, icon, label]) => (
           <li key={k} className={folder.kind === k ? "sel" : ""} onClick={() => setFolder({ kind: k } as Folder)}>
@@ -108,6 +117,18 @@ export function MediaFolders({ show, folder, setFolder }: { show: Show; folder: 
           </li>
         )}
       </ul>
+  );
+  if (bare) return list;
+  return (
+    <div className="pp-section pp-folders">
+      <header>
+        <h3>Media</h3>
+        <span className="grow" />
+        <button className="icon" title="New media playlist" onClick={() => setNaming(true)}>
+          +
+        </button>
+      </header>
+      {list}
     </div>
   );
 }

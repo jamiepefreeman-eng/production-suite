@@ -87,6 +87,8 @@ pub fn run() {
             lyric_follow::follow_download_model,
             midi_link::midi_connect,
             commands::open_show,
+            commands::recent_shows,
+            commands::forget_recent_show,
             commands::save_show,
             commands::new_demo_show,
             commands::parse_lyrics,

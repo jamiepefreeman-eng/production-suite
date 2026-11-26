@@ -1548,7 +1548,8 @@ export const show: T.Show = {
       "theme": "Default",
       "groups": [],
       "arrangements": [],
-      "arrangement": null
+      "arrangement": null,
+      "library": ""
     },
     {
       "id": 1,
@@ -1721,7 +1722,8 @@ export const show: T.Show = {
         }
       ],
       "arrangements": [],
-      "arrangement": "Sunday"
+      "arrangement": "Sunday",
+      "library": "Christmas"
     },
     {
       "id": 2,
@@ -1783,7 +1785,8 @@ export const show: T.Show = {
           ]
         }
       ],
-      "arrangement": null
+      "arrangement": null,
+      "library": ""
     },
     {
       "id": 3,
@@ -1818,7 +1821,8 @@ export const show: T.Show = {
       "theme": "Scripture",
       "groups": [],
       "arrangements": [],
-      "arrangement": null
+      "arrangement": null,
+      "library": ""
     }
   ],
   "playlist": [
@@ -2800,7 +2804,10 @@ export const show: T.Show = {
     "min_slide_ms": 1500,
     "manual_hold_ms": 4000,
     "bias_prompt": true
-  }
+  },
+  "libraries": [
+    "Christmas"
+  ]
 };
 
 export const commands: T.Command[] = [
@@ -4563,7 +4570,8 @@ export const commands: T.Command[] = [
           "theme": "Default",
           "groups": [],
           "arrangements": [],
-          "arrangement": null
+          "arrangement": null,
+          "library": ""
         },
         {
           "id": 1,
@@ -4736,7 +4744,8 @@ export const commands: T.Command[] = [
             }
           ],
           "arrangements": [],
-          "arrangement": "Sunday"
+          "arrangement": "Sunday",
+          "library": "Christmas"
         },
         {
           "id": 2,
@@ -4798,7 +4807,8 @@ export const commands: T.Command[] = [
               ]
             }
           ],
-          "arrangement": null
+          "arrangement": null,
+          "library": ""
         },
         {
           "id": 3,
@@ -4833,7 +4843,8 @@ export const commands: T.Command[] = [
           "theme": "Scripture",
           "groups": [],
           "arrangements": [],
-          "arrangement": null
+          "arrangement": null,
+          "library": ""
         }
       ],
       "playlist": [
@@ -5815,7 +5826,10 @@ export const commands: T.Command[] = [
         "min_slide_ms": 1500,
         "manual_hold_ms": 4000,
         "bias_prompt": true
-      }
+      },
+      "libraries": [
+        "Christmas"
+      ]
     }
   },
   {
@@ -7365,7 +7379,8 @@ export const commands: T.Command[] = [
           "theme": "Default",
           "groups": [],
           "arrangements": [],
-          "arrangement": null
+          "arrangement": null,
+          "library": ""
         },
         {
           "id": 1,
@@ -7538,7 +7553,8 @@ export const commands: T.Command[] = [
             }
           ],
           "arrangements": [],
-          "arrangement": "Sunday"
+          "arrangement": "Sunday",
+          "library": "Christmas"
         },
         {
           "id": 2,
@@ -7600,7 +7616,8 @@ export const commands: T.Command[] = [
               ]
             }
           ],
-          "arrangement": null
+          "arrangement": null,
+          "library": ""
         },
         {
           "id": 3,
@@ -7635,7 +7652,8 @@ export const commands: T.Command[] = [
           "theme": "Scripture",
           "groups": [],
           "arrangements": [],
-          "arrangement": null
+          "arrangement": null,
+          "library": ""
         }
       ],
       "playlist": [
@@ -8617,7 +8635,10 @@ export const commands: T.Command[] = [
         "min_slide_ms": 1500,
         "manual_hold_ms": 4000,
         "bias_prompt": true
-      }
+      },
+      "libraries": [
+        "Christmas"
+      ]
     }
   }
 ];
@@ -9322,6 +9343,16 @@ export const modelProgressUnknown: T.ModelProgress = {
   "downloaded": 10,
   "total": null
 };
+
+export const recentShows: T.RecentShow[] = [
+  {
+    "path": "/Shows/Sunday.json",
+    "name": "COR",
+    "used_at": 1800000000000,
+    "exists": true,
+    "current": true
+  }
+];
 
 export const midiStatus: T.MidiStatus = {
   "available": [

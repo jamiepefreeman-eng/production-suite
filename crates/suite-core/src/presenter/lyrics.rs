@@ -94,6 +94,7 @@ pub fn parse_lyrics(id: u32, title: &str, text: &str, max_lines: usize) -> Prese
         groups: vec![],
         arrangements: vec![],
         arrangement: None,
+        library: String::new(),
     }
 }
 

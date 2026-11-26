@@ -15,6 +15,28 @@ pub struct Settings {
     pub midi_inputs: Option<Vec<String>>,
     /// Lyric Follow input on this computer.
     pub follow_input: Option<crate::lyric_follow::FollowInput>,
+    /// Shows opened or saved on this computer, newest first (Presenter › Services).
+    pub recent_shows: Vec<RecentShow>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct RecentShow {
+    pub path: PathBuf,
+    pub name: String,
+    /// Unix ms of the last open / save.
+    pub used_at: u64,
+}
+
+const MAX_RECENT: usize = 30;
+
+impl Settings {
+    /// Put this show at the top of the recent list.
+    pub fn remember_show(&mut self, path: &std::path::Path, name: &str) {
+        self.recent_shows.retain(|r| r.path != path);
+        let used_at = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
+        self.recent_shows.insert(0, RecentShow { path: path.to_path_buf(), name: name.to_string(), used_at });
+        self.recent_shows.truncate(MAX_RECENT);
+    }
 }
 
 fn path(app: &AppHandle) -> Option<PathBuf> {

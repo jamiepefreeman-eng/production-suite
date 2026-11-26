@@ -515,7 +515,7 @@ body.dragging, body.dragging * { cursor: grabbing !important; user-select: none 
 .viz-add-item:hover { background: var(--panel-3); }
 
 /* ── Presenter v0.6 (ProPresenter layout) */
-.pp { display: grid; height: 100%; min-height: 0; grid-template-columns: 250px minmax(0, 1fr) 330px;
+.pp { display: grid; height: 100%; min-height: 0; grid-template-columns: var(--left, 260px) minmax(0, 1fr) var(--right, 340px);
   grid-template-rows: auto minmax(0, 1fr) var(--bin, 230px); grid-template-areas: "tool tool tool" "left center right" "left bin right"; }
 .pp.no-bin { grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "tool tool tool" "left center right"; }
 .pp-toolbar2 { grid-area: tool; display: flex; align-items: center; gap: 2px; padding: 4px 10px; background: #18191d; border-bottom: 1px solid var(--line); }
@@ -762,3 +762,51 @@ button.take.ready { animation: follow-pulse 0.8s ease-in-out infinite alternate;
 @keyframes follow-pulse { from { box-shadow: 0 0 0 0 #f5a52488; } to { box-shadow: 0 0 0 6px #f5a52400; } }
 .pp-slide.follow-next { outline: 2px dashed #8a6a2a; outline-offset: 1px; }
 .pp-slide.follow-ready { outline: 2px solid var(--accent); outline-offset: 1px; animation: follow-pulse 0.8s ease-in-out infinite alternate; }
+
+/* ── Presenter: resizable / foldable side columns (layout.tsx) */
+.pp-left, .pp .pp-right { position: relative; min-width: 0; }
+.pp .pp-right { display: flex; flex-direction: column; }
+.pp-panes { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.pp-pane { position: relative; display: flex; flex-direction: column; min-height: 64px; flex: 1 1 0; overflow: hidden; border-bottom: 1px solid var(--line); }
+.pp-pane.folded { min-height: 0; }
+.pp-pane.folded { flex: 0 0 auto; }
+.pp-pane:last-child { border-bottom: none; }
+.pp-pane-head { display: flex; align-items: center; gap: 4px; padding: 6px 8px 6px 4px; min-height: 30px; flex-wrap: wrap; }
+.pp-pane-head h3 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pp-pane-head .icon { font-size: 11px; padding: 2px 6px; }
+.pp-pane-head .pp-fold { width: 20px; padding: 2px 0; color: var(--muted); }
+.pp-pane-body { flex: 1; min-height: 0; overflow: auto; padding: 0 8px 8px; display: flex; flex-direction: column; }
+.pp-pane-handle { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; cursor: row-resize; z-index: 5; }
+.pp-pane-handle:hover, .resizing-y .pp-pane-handle:active { background: #f59e0b55; }
+.pp-width-handle { position: absolute; top: 0; bottom: 0; width: 7px; cursor: col-resize; z-index: 6; }
+.pp-width-handle.left { right: -4px; }
+.pp-width-handle.right { left: -4px; }
+.pp-width-handle:hover { background: #f59e0b55; }
+body.resizing-x, body.resizing-x * { cursor: col-resize !important; user-select: none; }
+body.resizing-y, body.resizing-y * { cursor: row-resize !important; user-select: none; }
+.pp-live-what { max-width: 55%; font-size: 10px; }
+.pp-right .pp-pane-body .pp-live { padding-top: 0; }
+.pp-right .pp-pane-body .pp-rtabs { flex: 1; min-height: 0; margin: 0 -8px -8px; }
+.pp-service-title { cursor: pointer; }
+.pp-service-title.on { color: var(--text, #e5e7eb); }
+/* Libraries */
+.pp-lib { display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.pp-lib-add { flex-basis: 100%; display: flex; }
+.pp-lib-add button { flex: 1; font-size: 11px; }
+.pp-lib-tools { gap: 4px; }
+.pp-lib-tools .search { margin: 0; padding: 4px 8px; min-width: 0; }
+.pp-lib-tools .icon { white-space: nowrap; font-size: 11px; }
+.pp-lib-name { margin: 2px 0; }
+.pp-lib-group { border-radius: 6px; }
+.pp-lib-group.drop-over { outline: 2px solid var(--ok); }
+.pp-lib-head { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.pp-lib-head:hover { background: var(--panel-2); }
+.pp-lib-head.active { color: #fff; }
+.pp-lib-head .icon { opacity: 0; font-size: 11px; padding: 1px 5px; }
+.pp-lib-head:hover .icon { opacity: 1; }
+.pp-lib-chev { width: 12px; color: var(--muted); font-size: 11px; }
+.pp-lib-icon { width: 14px; text-align: center; color: var(--accent); }
+.pp-lib-group .pp-list { padding-left: 14px; }
+.pp-services li.missing { opacity: 0.5; }
+.pp-svc-icon { width: 12px; font-size: 10px; color: var(--muted); }
+.pp-services li.sel .pp-svc-icon { color: var(--ok); }

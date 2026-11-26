@@ -20,6 +20,8 @@ export const api = {
   send: (command: T.Command) => call<T.EngineEvent[]>("engine_command", { command }),
   status: () => call<T.EngineStatus>("engine_status"),
   openShow: (path: string) => call<T.Show>("open_show", { path }),
+  recentShows: () => call<T.RecentShow[]>("recent_shows"),
+  forgetRecentShow: (path: string) => call<void>("forget_recent_show", { path }),
   saveShow: (path?: string) => call<string>("save_show", { path: path ?? null }),
   newDemoShow: () => call<T.Show>("new_demo_show"),
   parseLyrics: (title: string, text: string, maxLines = 4) =>
