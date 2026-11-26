@@ -88,6 +88,7 @@ fn write_typescript_contract() {
     show.show_page.items[1].midi = Some(MidiControl { kind: MidiControlKind::Cc, channel: 1, number: 7 });
     show.show_page.items[1].label = "Walk-in".into();
     show.show_page.items[1].color = "#ff8800".into();
+    show.lyric_follow.mode = suite_core::presenter::follow::FollowMode::Auto;
     show.media_playlists.push(MediaPlaylist { name: "Backgrounds".into(), items: vec![1, 2] });
     show.presentations[1].groups.push(SlideGroup { name: "Vamp".into(), color: "#f97316".into() });
     show.presentations[1].arrangement = Some("Sunday".into());
@@ -277,6 +278,39 @@ fn write_typescript_contract() {
             blackout: false,
         },
     );
+    let follow_input = crate::lyric_follow::FollowInput { device: "X32".into(), channel: 3, model: "/m/ggml-base.en.bin".into(), gate_db: -45.0 };
+    o.add(
+        "followStatus",
+        "T.FollowStatus",
+        &crate::lyric_follow::FollowStatus {
+            running: true,
+            mode: Some(suite_core::presenter::follow::FollowMode::Assist),
+            input: Some(follow_input.clone()),
+            error: Some("x".into()),
+            level_db: -30.0,
+            voice: true,
+            heard: "amazing grace".into(),
+            confidence: 0.8,
+            live: Some((1, 2)),
+            next: Some((1, 3)),
+            sung_word: Some(4),
+            trigger_word: Some(9),
+            in_previous: false,
+            ready: true,
+            blocked: Some("held".into()),
+            reason: Some("near the end".into()),
+            latency_ms: 900,
+        },
+    );
+    o.add("followStatusIdle", "T.FollowStatus", &crate::lyric_follow::FollowStatus::default());
+    o.add("followInput", "T.FollowInput", &follow_input);
+    o.add(
+        "speechModels",
+        "T.SpeechModel[]",
+        &vec![crate::lyric_follow::ModelInfo { name: "base.en".into(), size_mb: 142, note: "x".into(), path: "/m/ggml-base.en.bin".into(), downloaded: true }],
+    );
+    o.add("modelProgress", "T.ModelProgress", &crate::lyric_follow::Progress { name: "base.en".into(), downloaded: 10, total: Some(100) });
+    o.add("modelProgressUnknown", "T.ModelProgress", &crate::lyric_follow::Progress { name: "base.en".into(), downloaded: 10, total: None });
     o.add(
         "midiStatus",
         "T.MidiStatus",

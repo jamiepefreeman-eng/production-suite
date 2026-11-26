@@ -17,6 +17,7 @@ import { groupColor, groupNames, sequence } from "./groups";
 import { Bin, MediaFolders, RightTabs, triggerLabel, type Folder } from "./panels";
 import { DEFAULT_THEME, SlideRender, newSlide, slideElements, liveProps, mediaById, slideBackground, slideMedia, themeFor } from "./render";
 import ThemeEditor from "./themes";
+import { useFollowEnter, useFollowStatus } from "./LyricFollow";
 import SlideDesigner, { setEditAll } from "./SlideDesigner";
 
 const readPref = (k: string, d: number) => {
@@ -42,6 +43,7 @@ export type Cursor = { p: number; pos: number } | null;
 
 export default function PresenterApp() {
   const { show, live } = useEngine();
+  useFollowEnter();
   const [focus, setFocus] = useState<number | null>(null);
   const [libraryOnly, setLibraryOnly] = useState<number | null>(null);
   const [selSlide, setSelSlide] = useState<SlideRef | null>(null);
@@ -792,6 +794,7 @@ function PresentationSection({
   cursor: Cursor;
   onGo: (c: Cursor) => void;
 }) {
+  const follow = useFollowStatus();
   const theme = themeFor(show, p.id);
   const seq = sequence(p);
   // If we know which repeat is live, light only that one.
@@ -833,6 +836,7 @@ function PresentationSection({
             selected={selected?.p === p.id && selected.s === slide.id}
             onPick={() => onPick({ p: p.id, s: slide.id })}
             onGo={() => onGo({ p: p.id, pos })}
+            follow={follow?.running && follow.next?.[0] === p.id && follow.next?.[1] === slide.id ? (follow.ready ? "ready" : "next") : null}
           />
         ))}
         {p.slides.length === 0 && <div className="muted pp-empty-pres">No slides — press ✎ to add some.</div>}
@@ -853,6 +857,7 @@ function SlideTile({
   selected,
   onPick,
   onGo,
+  follow,
 }: {
   p: Presentation;
   slide: Slide;
@@ -864,6 +869,8 @@ function SlideTile({
   selected: boolean;
   onPick: () => void;
   onGo: () => void;
+  /** Lyric Follow: this is the slide it will go to next ("ready" = it would advance now). */
+  follow?: "next" | "ready" | null;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [over, setOver] = useState(false);
@@ -893,7 +900,7 @@ function SlideTile({
   return (
     <div
       ref={ref}
-      className={`pp-slide ${live ? "live" : ""} ${selected ? "focused" : ""} ${over ? "drop-over" : ""}`}
+      className={`pp-slide ${live ? "live" : ""} ${follow ? `follow-${follow}` : ""} ${selected ? "focused" : ""} ${over ? "drop-over" : ""}`}
       onClick={() => {
         onGo();
         void send({ type: "go_slide", presentation: p.id, slide: slide.id });

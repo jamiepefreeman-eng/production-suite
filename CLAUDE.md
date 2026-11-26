@@ -89,6 +89,26 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 14. CSS must work in WKWebView on older macOS (Safari < 17.4): no vertical `writing-mode` range inputs
    (use the rotated `.vfader-wrap` pattern), check caniuse for newer features.
 
+## Lyric Follow (Presenter › Follow tab)
+
+* Built in a separate Claude session on top of the original upload, merged in v0.10.0.
+* Core logic: `crates/suite-core/src/presenter/follow.rs` (tested). It only decides **when** to go to the
+  next slide — never which. Context is [last 8 words of previous slide][live slide][next slide]; fuzzy
+  Smith-Waterman alignment of the last 10 heard words; cursor only moves forward.
+* "Next" = `Show::play_order()` (running order, each song in its chosen arrangement, repeats included —
+  same as `presenter/groups.ts` `sequence`). A repeated chorus is located with `Show::locate(order, slide,
+  after)`; `FollowRuntime.pos` remembers where we are so the second chorus goes to the bridge, not verse 2.
+* Desktop: `src-tauri/src/lyric_follow.rs` (cpal capture of one channel → 16 kHz ring → every 0.9 s the last
+  6 s through a voice gate → `transcribe.rs` (whisper-rs 0.14, Metal on mac) → follower). Auto advances
+  dispatch `Command::GoSlide`, so slide triggers still fire. `pending_auto` tells an auto advance apart from
+  a manual one in `on_slide_live`. `follow_start` is async + spawn_blocking (opening audio waits).
+* UI: `modules/presenter/LyricFollow.tsx` (panel; `useFollowEnter` = Enter takes the suggestion in Assist);
+  next tile gets `follow-next` / `follow-ready`. Word numbering must match `normalize_word`.
+* Settings in `Show.lyric_follow`; input device/channel/model/gate per computer in `Settings.follow_input`.
+  Models (ggml tiny/base/small .en) download from huggingface.co into the app data folder.
+* Building needs CMake + a C/C++ compiler + libclang (whisper.cpp). Build without it:
+  `--no-default-features --features usb-dmx,audio`.
+
 ## Hardware / protocol facts used
 
 * Art-Net ArtDmx UDP 6454; sACN E1.31 UDP 5568, multicast 239.255.hi.lo.
@@ -132,6 +152,9 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 - [ ] Slide elements (text boxes, pictures, live feeds) aren't drawn on Visualizer screens (slide text formatting is)
 - [ ] MIDI controllers on macOS (CoreMIDI) / Windows (WinMM) — only compiled + unit-tested on Linux (ALSA);
       Windows allows one app per MIDI input, so close other software (Lightkey, DAW) using the controller
+- [ ] Lyric Follow end to end (mic → Whisper → advance): this cloud can't download models (huggingface.co
+      blocked) and has no microphone — only compiled and unit-tested. Tune gate / confidence / words early
+      with a real vocal channel at rehearsal; check latency on the Windows PCs
 - [ ] "Match background" reads pixels through the asset protocol (needs its CORS header = app origin; works in
       Chromium tests) — confirm on macOS/Windows that a video background drives the lights
 

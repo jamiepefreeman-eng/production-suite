@@ -1,6 +1,7 @@
 // Media folders + media bin (bottom), and the right-hand tabs:
 // Audio · Props · Timers · Macros · Slide actions.
 
+import LyricFollowPanel from "./LyricFollow";
 import MediaSearch from "./MediaSearch";
 import { useEffect, useRef, useState } from "react";
 import { confirmDialog, pickMediaFiles } from "../../shared/bridge";
@@ -337,6 +338,7 @@ export function RightTabs({
     ["timers", "◷", "Timers"],
     ["macros", "⚡", "Macros"],
     ["slide", "⚙", "Slide"],
+    ["follow", "◉", "Follow"],
   ];
   return (
     <div className="pp-rtabs">
@@ -353,6 +355,7 @@ export function RightTabs({
         {tab === "props" && <PropsTab show={show} />}
         {tab === "timers" && <TimersTab />}
         {tab === "macros" && <MacrosTab show={show} />}
+        {tab === "follow" && <LyricFollowPanel />}
         {tab === "slide" && <SlideActions show={show} selected={selected} onClose={onCloseSlide} />}
       </div>
     </div>

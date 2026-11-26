@@ -13,6 +13,8 @@ pub struct Settings {
     pub last_show: Option<PathBuf>,
     /// MIDI inputs to listen to; `None` = all of them.
     pub midi_inputs: Option<Vec<String>>,
+    /// Lyric Follow input on this computer.
+    pub follow_input: Option<crate::lyric_follow::FollowInput>,
 }
 
 fn path(app: &AppHandle) -> Option<PathBuf> {

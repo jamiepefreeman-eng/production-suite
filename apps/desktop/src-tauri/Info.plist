@@ -6,6 +6,6 @@
   <key>NSCameraUsageDescription</key>
   <string>Production Suite shows capture cards, cameras and NDI Webcam sources as live video in Presenter and the Visualizer.</string>
   <key>NSMicrophoneUsageDescription</key>
-  <string>Production Suite can use audio from capture devices.</string>
+  <string>Lyric Follow listens to the worship leader so it can advance lyric slides automatically. Audio stays on this computer.</string>
 </dict>
 </plist>

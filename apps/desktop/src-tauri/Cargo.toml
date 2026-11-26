@@ -13,11 +13,13 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [features]
-default = ["usb-dmx", "audio"]
+default = ["usb-dmx", "audio", "lyric-follow"]
 # Enttec DMX USB Pro / Open DMX over a serial port.
 usb-dmx = ["dep:serialport"]
 # Audio device discovery (CoreAudio / WASAPI / ASIO via cpal).
 audio = ["dep:cpal"]
+# Lyric Follow speech-to-text (whisper.cpp, on this computer). Needs CMake + a C++ compiler to build.
+lyric-follow = ["audio", "dep:whisper-rs"]
 
 [dependencies]
 suite-core = { path = "../../../crates/suite-core", features = ["serde"] }
@@ -32,3 +34,8 @@ cpal = { version = "0.15", optional = true }
 socket2 = { version = "0.5", features = ["all"] }
 # MIDI controllers for Lighting's show page (CoreMIDI / WinMM / ALSA).
 midir = "0.10"
+whisper-rs = { version = "0.14", optional = true }
+
+# GPU-accelerated speech-to-text on Macs.
+[target.'cfg(target_os = "macos")'.dependencies]
+whisper-rs = { version = "0.14", optional = true, features = ["metal"] }

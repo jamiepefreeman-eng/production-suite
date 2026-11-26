@@ -241,6 +241,7 @@ export interface Show {
   mixer: MixerConfig | null;
   effects: Effect[];
   show_page: ShowPage;
+  lyric_follow: FollowSettings;
 }
 
 export type Action =
@@ -384,3 +385,36 @@ export interface MediaSummary { id: number; name: string; kind: string; descript
 export interface MediaRanking { picks: { id: number; reason: string }[]; target: string | null }
 export interface SceneResult { engine: "offline" | "llm"; parsed: ParseOutput }
 export interface AiStatus { has_api_key: boolean; model: string }
+
+// ── Lyric Follow (Presenter: listen to the singer, advance slides)
+export type FollowMode = "off" | "assist" | "auto";
+export interface FollowSettings {
+  mode: FollowMode;
+  words_early: number;
+  min_confidence: number;
+  min_slide_ms: number;
+  manual_hold_ms: number;
+  bias_prompt: boolean;
+}
+export interface FollowInput { device: string; channel: number; model: string; gate_db: number }
+export interface FollowStatus {
+  running: boolean;
+  mode: FollowMode | null;
+  input: FollowInput | null;
+  error: string | null;
+  level_db: number;
+  voice: boolean;
+  heard: string;
+  confidence: number;
+  live: [number, number] | null;
+  next: [number, number] | null;
+  sung_word: number | null;
+  trigger_word: number | null;
+  in_previous: boolean;
+  ready: boolean;
+  blocked: string | null;
+  reason: string | null;
+  latency_ms: number;
+}
+export interface SpeechModel { name: string; size_mb: number; note: string; path: string; downloaded: boolean }
+export interface ModelProgress { name: string; downloaded: number; total: number | null }

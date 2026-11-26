@@ -13,10 +13,12 @@ mod commands;
 #[cfg(test)]
 mod contract_tests;
 mod dmx_out;
+mod lyric_follow;
 mod midi_link;
 mod mixer_link;
 mod settings;
 mod state;
+mod transcribe;
 mod usb_dmx;
 mod viz_input;
 mod windows;
@@ -52,8 +54,14 @@ pub fn run() {
                     if let Event::MixerOut { command } = &ev {
                         mixer_link::send(&st, &handle, command);
                     }
-                    if matches!(ev, Event::ShowChanged) {
-                        dmx_out::rebuild_if_needed(&st);
+                    match &ev {
+                        Event::ShowChanged => {
+                            dmx_out::rebuild_if_needed(&st);
+                            lyric_follow::on_show_changed(&st, &handle);
+                        }
+                        Event::SlideLive { presentation, slide, .. } => lyric_follow::on_slide_live(&st, &handle, *presentation, *slide),
+                        Event::SlideCleared => lyric_follow::on_slide_cleared(&st, &handle),
+                        _ => {}
                     }
                     let _ = handle.emit("engine-event", &ev);
                 }
@@ -70,6 +78,13 @@ pub fn run() {
             commands::engine_command,
             commands::engine_status,
             midi_link::midi_status,
+            lyric_follow::follow_start,
+            lyric_follow::follow_stop,
+            lyric_follow::follow_status,
+            lyric_follow::follow_set_gate,
+            lyric_follow::follow_take,
+            lyric_follow::follow_models,
+            lyric_follow::follow_download_model,
             midi_link::midi_connect,
             commands::open_show,
             commands::save_show,

@@ -2792,6 +2792,14 @@ export const show: T.Show = {
         "midi": null
       }
     ]
+  },
+  "lyric_follow": {
+    "mode": "auto",
+    "words_early": 3,
+    "min_confidence": 0.6,
+    "min_slide_ms": 1500,
+    "manual_hold_ms": 4000,
+    "bias_prompt": true
   }
 };
 
@@ -5799,6 +5807,14 @@ export const commands: T.Command[] = [
             "midi": null
           }
         ]
+      },
+      "lyric_follow": {
+        "mode": "auto",
+        "words_early": 3,
+        "min_confidence": 0.6,
+        "min_slide_ms": 1500,
+        "manual_hold_ms": 4000,
+        "bias_prompt": true
       }
     }
   },
@@ -8593,6 +8609,14 @@ export const commands: T.Command[] = [
             "midi": null
           }
         ]
+      },
+      "lyric_follow": {
+        "mode": "auto",
+        "words_early": 3,
+        "min_confidence": 0.6,
+        "min_slide_ms": 1500,
+        "manual_hold_ms": 4000,
+        "bias_prompt": true
       }
     }
   }
@@ -9217,6 +9241,86 @@ export const engineStatus: T.EngineStatus = {
     }
   ],
   "blackout": false
+};
+
+export const followStatus: T.FollowStatus = {
+  "running": true,
+  "mode": "assist",
+  "input": {
+    "device": "X32",
+    "channel": 3,
+    "model": "/m/ggml-base.en.bin",
+    "gate_db": -45.0
+  },
+  "error": "x",
+  "level_db": -30.0,
+  "voice": true,
+  "heard": "amazing grace",
+  "confidence": 0.8,
+  "live": [
+    1,
+    2
+  ],
+  "next": [
+    1,
+    3
+  ],
+  "sung_word": 4,
+  "trigger_word": 9,
+  "in_previous": false,
+  "ready": true,
+  "blocked": "held",
+  "reason": "near the end",
+  "latency_ms": 900
+};
+
+export const followStatusIdle: T.FollowStatus = {
+  "running": false,
+  "mode": null,
+  "input": null,
+  "error": null,
+  "level_db": 0.0,
+  "voice": false,
+  "heard": "",
+  "confidence": 0.0,
+  "live": null,
+  "next": null,
+  "sung_word": null,
+  "trigger_word": null,
+  "in_previous": false,
+  "ready": false,
+  "blocked": null,
+  "reason": null,
+  "latency_ms": 0
+};
+
+export const followInput: T.FollowInput = {
+  "device": "X32",
+  "channel": 3,
+  "model": "/m/ggml-base.en.bin",
+  "gate_db": -45.0
+};
+
+export const speechModels: T.SpeechModel[] = [
+  {
+    "name": "base.en",
+    "size_mb": 142,
+    "note": "x",
+    "path": "/m/ggml-base.en.bin",
+    "downloaded": true
+  }
+];
+
+export const modelProgress: T.ModelProgress = {
+  "name": "base.en",
+  "downloaded": 10,
+  "total": 100
+};
+
+export const modelProgressUnknown: T.ModelProgress = {
+  "name": "base.en",
+  "downloaded": 10,
+  "total": null
 };
 
 export const midiStatus: T.MidiStatus = {

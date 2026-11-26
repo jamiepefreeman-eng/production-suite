@@ -135,6 +135,8 @@ pub struct Show {
     // Lighting show mode
     pub effects: Vec<crate::lighting::effects::Effect>,
     pub show_page: ShowPage,
+    // Presenter: Lyric Follow (listen to the singer, advance slides)
+    pub lyric_follow: crate::presenter::follow::FollowSettings,
 }
 
 /// What a show-page button or fader does.
@@ -226,6 +228,47 @@ impl Show {
         self.cues.iter().find(|c| c.id == id)
     }
 
+    /// Presentations in running order: the service playlist first, then the rest.
+    pub fn running_order(&self) -> Vec<&crate::presenter::Presentation> {
+        let mut v: Vec<&crate::presenter::Presentation> = self.playlist.iter().filter_map(|id| self.presentation(*id)).collect();
+        v.extend(self.presentations.iter().filter(|p| !self.playlist.contains(&p.id)));
+        v
+    }
+
+    /// Every slide in the order it will be played: running order, each song in its chosen
+    /// arrangement (a repeated chorus appears again). Same order as the → key in the Presenter
+    /// (`presenter/groups.ts` `sequence`).
+    pub fn play_order(&self) -> Vec<(u32, u32)> {
+        let mut out = Vec::new();
+        for p in self.running_order() {
+            let arr = p.arrangement.as_ref().and_then(|n| p.arrangements.iter().find(|a| &a.name == n));
+            match arr {
+                Some(a) => {
+                    for g in &a.sequence {
+                        out.extend(p.slides.iter().filter(|s| &s.label == g).map(|s| (p.id, s.id)));
+                    }
+                }
+                None => out.extend(p.slides.iter().map(|s| (p.id, s.id))),
+            }
+        }
+        out
+    }
+
+    /// Where `slide` is in `order`. A repeated slide (chorus) is ambiguous, so `after` (the
+    /// position we were at) picks the next occurrence going forward.
+    pub fn locate(order: &[(u32, u32)], slide: (u32, u32), after: Option<usize>) -> Option<usize> {
+        if let Some(a) = after {
+            if let Some(i) = order.iter().skip(a + 1).position(|x| *x == slide) {
+                return Some(a + 1 + i);
+            }
+        }
+        order.iter().position(|x| *x == slide)
+    }
+
+    pub fn slide_text(&self, presentation: u32, slide: u32) -> Option<&str> {
+        self.presentation(presentation)?.slide(slide).map(|s| s.text.as_str())
+    }
+
     pub fn presentation(&self, id: u32) -> Option<&crate::presenter::Presentation> {
         self.presentations.iter().find(|p| p.id == id)
     }
@@ -279,5 +322,27 @@ impl Show {
         }
         warnings.dedup();
         warnings
+    }
+}
+
+#[cfg(test)]
+mod play_order_tests {
+    use super::Show;
+
+    #[test]
+    fn follows_arrangements_and_finds_repeats() {
+        let mut show = crate::demo::demo_show();
+        let song = show.presentations.iter().position(|p| p.slides.len() >= 2 && p.kind == crate::presenter::PresentationKind::Song).unwrap();
+        let (a, b) = (show.presentations[song].slides[0].label.clone(), show.presentations[song].slides[1].label.clone());
+        let pid = show.presentations[song].id;
+        show.presentations[song].arrangements.push(crate::presenter::Arrangement { name: "Rep".into(), sequence: vec![a.clone(), b.clone(), a.clone()] });
+        show.presentations[song].arrangement = Some("Rep".into());
+        let order = show.play_order();
+        let first = show.presentations[song].slides.iter().find(|s| s.label == a).unwrap().id;
+        let hits: Vec<usize> = order.iter().enumerate().filter(|(_, x)| **x == (pid, first)).map(|(i, _)| i).collect();
+        assert_eq!(hits.len(), 2, "repeat appears twice");
+        // From just after the first occurrence, the next one is the repeat.
+        assert_eq!(Show::locate(&order, (pid, first), Some(hits[0])), Some(hits[1]));
+        assert_eq!(Show::locate(&order, (pid, first), None), Some(hits[0]));
     }
 }

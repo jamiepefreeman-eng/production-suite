@@ -11,6 +11,7 @@
 //! zero dependencies; the desktop app enables the `serde` feature.
 
 pub mod ai;
+pub mod audio;
 pub mod bus;
 pub mod demo;
 pub mod dmx;

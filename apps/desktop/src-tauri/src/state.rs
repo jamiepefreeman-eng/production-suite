@@ -30,6 +30,7 @@ pub struct AppState {
     pub settings: Mutex<Settings>,
     /// MIDI inputs currently open (see midi_link).
     pub midi_connected: Mutex<Vec<String>>,
+    pub follow: Mutex<crate::lyric_follow::FollowRuntime>,
 }
 
 impl AppState {
@@ -46,6 +47,7 @@ impl AppState {
             show_path: Mutex::new(None),
             settings: Mutex::new(settings),
             midi_connected: Mutex::new(Vec::new()),
+            follow: Mutex::new(Default::default()),
         }
     }
 

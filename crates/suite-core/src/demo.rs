@@ -429,6 +429,7 @@ pub fn demo_show() -> Show {
         mixer: None,
         effects: vec![],
         show_page: Default::default(),
+        lyric_follow: Default::default(),
     };
     show.effects = demo_effects();
     show.show_page = crate::show::ShowPage::generate(&show);

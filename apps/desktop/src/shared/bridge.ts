@@ -31,6 +31,13 @@ export const api = {
   mixerConnect: (config: T.MixerConfig) => call<T.MixerStatus>("mixer_connect", { config }),
   mixerDisconnect: () => call<T.MixerStatus>("mixer_disconnect"),
   mixerStatus: () => call<T.MixerStatus>("mixer_status"),
+  followStart: (input: T.FollowInput) => call<T.FollowStatus>("follow_start", { input }),
+  followStop: () => call<T.FollowStatus>("follow_stop"),
+  followStatus: () => call<T.FollowStatus>("follow_status"),
+  followSetGate: (gateDb: number) => call<void>("follow_set_gate", { gateDb }),
+  followTake: () => call<void>("follow_take"),
+  followModels: () => call<T.SpeechModel[]>("follow_models"),
+  followDownloadModel: (name: string) => call<string>("follow_download_model", { name }),
   midiStatus: () => call<T.MidiStatus>("midi_status"),
   /** null = listen to every MIDI input */
   midiConnect: (inputs: string[] | null) => call<T.MidiStatus>("midi_connect", { inputs }),
@@ -87,6 +94,8 @@ export type ModuleId = "presenter" | "lighting" | "audio" | "visualizer";
 
 type Events = {
   "engine-event": T.EngineEvent;
+  "follow-status": T.FollowStatus;
+  "follow-model-progress": T.ModelProgress;
   "visualizer-frame": T.VizFrame;
   "mixer-feedback": T.MixerFeedback[];
   "mixer-error": string;

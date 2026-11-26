@@ -6,6 +6,7 @@ pub mod lyrics;
 pub use lyrics::parse_lyrics;
 
 /// A file in the media bin. Paths are absolute on the computer that added them.
+pub mod follow;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MediaItem {
