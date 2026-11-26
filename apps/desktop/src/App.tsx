@@ -60,7 +60,7 @@ export default function App() {
     <div className="shell">
       <header className="topbar">
         <div className="brand">
-          <span className="logo">PS</span>
+          <img className="logo" src="/brand/mark.png" alt="Freeman Creative" title="Production Suite · Freeman Creative" draggable={false} />
           <span className="show-name" title="Show">{eng.show?.name ?? "—"}</span>
         </div>
 
@@ -106,7 +106,14 @@ export default function App() {
           </div>
         )}
         {eng.error && <div className="banner warn">{eng.error}</div>}
-        <Active />
+        {eng.show ? (
+          <Active />
+        ) : (
+          <div className="splash">
+            <img src="/brand/freeman-creative.png" alt="Freeman Creative — Finding wonder · Revealing Jesus" draggable={false} />
+            <span className="muted">Production Suite · loading the show…</span>
+          </div>
+        )}
       </main>
 
       <footer className="statusline">

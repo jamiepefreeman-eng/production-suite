@@ -109,6 +109,12 @@ Signing needs the owner's Apple Developer account / Windows certificate as repo 
 * Building needs CMake + a C/C++ compiler + libclang (whisper.cpp). Build without it:
   `--no-default-features --features usb-dmx,audio`.
 
+## Branding
+
+Freeman Creative (owner's ministry/brand). App icons in `src-tauri/icons/` are generated from the CF mark on a
+dark rounded square (`npx tauri icon <1024px png>`); `public/brand/mark.png` is the top-left badge and
+`public/brand/freeman-creative.png` the horizontal logo on the loading screen (white text: dark backgrounds only).
+
 ## Hardware / protocol facts used
 
 * Art-Net ArtDmx UDP 6454; sACN E1.31 UDP 5568, multicast 239.255.hi.lo.
